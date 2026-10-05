@@ -101,7 +101,7 @@ export default function MomentCard({
   };
 
   const commentLabel =
-    commentCount == null ? "YÜKLƏNİR..." : commentCount > 0 ? `YORUMLAR (${commentCount})` : "ŞƏRH YAZ";
+    commentCount == null ? "YÜKLƏNİR..." : commentCount > 0 ? `ŞƏRHLƏR (${commentCount})` : "ŞƏRH YAZ";
 
   const uid = currentUser?.uid;
   const liked = uid ? likedBy.includes(uid) : false;
@@ -195,7 +195,7 @@ export default function MomentCard({
             >
               <i className={`fa-heart text-xl ${liked ? "fa-solid text-red-500" : "fa-regular"}`} />
               <span className={`text-[10px] font-light tracking-widest ${liked ? "text-red-500" : "text-gray-400"}`}>
-                {likedBy.length} BEĞENİ
+                {likedBy.length} BƏYƏNMƏ
               </span>
             </button>
             <button

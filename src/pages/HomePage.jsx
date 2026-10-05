@@ -87,16 +87,22 @@ export default function HomePage() {
 
           <div className="flex items-center gap-8">
             <ul className="hidden md:flex gap-10">
-              <a href="#team-section">
-                <li className="text-[10px] uppercase tracking-[0.4em] font-light hover:opacity-50 transition">
+              <li>
+                <a
+                  href="#team-section"
+                  className="text-[10px] uppercase tracking-[0.4em] font-light hover:opacity-50 transition"
+                >
                   {t.nav.staff}
-                </li>
-              </a>
-              <a href="#moments">
-                <li className="text-[10px] uppercase tracking-[0.4em] font-light hover:opacity-50 transition">
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#moments"
+                  className="text-[10px] uppercase tracking-[0.4em] font-light hover:opacity-50 transition"
+                >
                   {t.nav.moments}
-                </li>
-              </a>
+                </a>
+              </li>
             </ul>
 
             <div className="hidden md:block w-[1px] h-4 bg-white/30" />

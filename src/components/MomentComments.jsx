@@ -76,7 +76,7 @@ export default function MomentComments({ videoId, currentUser, onClose, onCountC
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 h-[75vh] rounded-t-2xl md:static md:z-auto md:h-full md:rounded-sm bg-black/98 md:bg-black/95 backdrop-blur-sm border-t md:border border-white/10 flex flex-col">
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
-        <h3 className="text-[10px] font-bold tracking-widest uppercase">YORUMLAR ({comments.length})</h3>
+        <h3 className="text-[10px] font-bold tracking-widest uppercase">ŞƏRHLƏR ({comments.length})</h3>
         <button onClick={onClose} className="text-gray-400 hover:text-white cursor-pointer transition">
           <i className="fa-solid fa-xmark text-base" />
         </button>
