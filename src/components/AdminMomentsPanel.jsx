@@ -5,42 +5,39 @@ import AdminCommentsList from "./AdminCommentsList";
 
 export default function AdminMomentsPanel() {
   const [tab, setTab] = useState("pending"); // "pending" | "approved"
-  const [pendingCount, setPendingCount] = useState(0);
-  const [liveCount, setLiveCount] = useState(0);
-  const [list, setList] = useState([]);
+  // Both lists come from one Firestore read; switching tabs just picks one, so it no
+  // longer re-downloads the whole approved_moments collection every time.
+  const [items, setItems] = useState({ pending: [], approved: [] }); // null on error
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
   const [expandedCommentsId, setExpandedCommentsId] = useState(null);
+
+  const pendingCount = items ? items.pending.length : 0;
+  const liveCount = items ? items.approved.length : 0;
+  const list = items ? items[tab] : null;
 
   const loadMoments = async () => {
     setLoading(true);
     try {
       const allSnapshot = await getDocs(query(collection(db, "approved_moments"), orderBy("createdAt", "desc")));
 
-      let pending = 0;
-      let approved = 0;
-      const pendingList = [];
-      const approvedList = [];
-
+      const pending = [];
+      const approved = [];
       allSnapshot.forEach((docSnap) => {
         const data = docSnap.data();
         const item = { id: docSnap.id, ...data };
 
         if (data.status === "approved" || !data.status) {
-          approved++;
-          approvedList.push(item);
+          approved.push(item);
         } else if (data.status === "pending") {
-          pending++;
-          pendingList.push(item);
+          pending.push(item);
         }
       });
 
-      setPendingCount(pending);
-      setLiveCount(approved);
-      setList(tab === "pending" ? pendingList : approvedList);
+      setItems({ pending, approved });
     } catch (error) {
       console.error("Firestore-dan data oxunarkən xəta:", error);
-      setList(null);
+      setItems(null);
     } finally {
       setLoading(false);
     }
@@ -48,21 +45,20 @@ export default function AdminMomentsPanel() {
 
   useEffect(() => {
     loadMoments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab]);
+  }, []);
 
-  // Removes `id` from the current tab's list and shifts one item between the two badge
-  // counters, without re-fetching the whole `approved_moments` collection from Firestore.
-  const removeFromView = (id, { toApproved } = {}) => {
-    setList((prev) => (prev ? prev.filter((v) => v.id !== id) : prev));
-    if (toApproved) {
-      setPendingCount((c) => c - 1);
-      setLiveCount((c) => c + 1);
-    } else if (tab === "pending") {
-      setPendingCount((c) => c - 1);
-    } else {
-      setLiveCount((c) => c - 1);
-    }
+  // Moves or drops `id` locally after an action, so no re-fetch is needed. Approving
+  // moves the item from pending into the live feed (newest first, matching the query).
+  const removeFromView = (id, { toApproved, approvedItem } = {}) => {
+    setItems((prev) => {
+      if (!prev) return prev;
+      const pending = prev.pending.filter((v) => v.id !== id);
+      let approved = prev.approved.filter((v) => v.id !== id);
+      if (toApproved && approvedItem) {
+        approved = [approvedItem, ...approved].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      }
+      return { pending, approved };
+    });
   };
 
   const handleApprove = async (id) => {
@@ -70,7 +66,8 @@ export default function AdminMomentsPanel() {
     try {
       await updateDoc(doc(db, "approved_moments", id), { status: "approved" });
       alert("Moments video approved and added to the live feed! 🎉");
-      removeFromView(id, { toApproved: true });
+      const approvedItem = items?.pending.find((v) => v.id === id);
+      removeFromView(id, { toApproved: true, approvedItem: approvedItem && { ...approvedItem, status: "approved" } });
     } catch (err) {
       alert("Approve xətası: " + err.message);
     } finally {
