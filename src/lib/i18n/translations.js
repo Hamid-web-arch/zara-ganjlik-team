@@ -1,3 +1,6 @@
+import { commonStrings } from "./strings/common";
+import { staffScheduleStrings } from "./strings/staffSchedule";
+
 export const LANGUAGES = [
   { code: "az", label: "AZ" },
   { code: "en", label: "EN" },
@@ -296,3 +299,15 @@ export const translations = {
     },
   },
 };
+
+// Feature namespaces live in ./strings/*.js so each page copy stays with its code.
+// Every module exports { az, en, ru } and is merged in under its own key.
+const namespaces = {
+  common: commonStrings,
+  staffSchedule: staffScheduleStrings,
+};
+for (const lang of Object.keys(translations)) {
+  for (const [ns, dict] of Object.entries(namespaces)) {
+    translations[lang][ns] = dict[lang];
+  }
+}

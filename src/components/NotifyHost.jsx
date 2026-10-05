@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { NOTIFY_EVENTS } from "../lib/notify";
+import { useLanguage } from "../lib/i18n/languageContext";
 
 const TOAST_DURATION_MS = 4000;
 
 export default function NotifyHost() {
+  const { t } = useLanguage();
   const [toasts, setToasts] = useState([]);
   const [confirmState, setConfirmState] = useState(null); // { message, resolve }
 
@@ -52,7 +54,7 @@ export default function NotifyHost() {
                 onClick={() => answer(false)}
                 className="text-[9px] uppercase tracking-widest border border-white/20 px-5 py-3 hover:bg-white hover:text-black transition"
               >
-                Ləğv et
+                {t.common.cancel}
               </button>
               <button
                 type="button"
@@ -60,7 +62,7 @@ export default function NotifyHost() {
                 onClick={() => answer(true)}
                 className="text-[9px] font-bold uppercase tracking-widest bg-white text-black px-5 py-3 hover:bg-gray-200 transition"
               >
-                Təsdiq et
+                {t.common.confirm}
               </button>
             </div>
           </div>
