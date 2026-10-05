@@ -2,6 +2,7 @@ import { useState } from "react";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "../lib/config";
+import { validateVideoFile } from "../lib/fileValidation";
 
 export default function UploadMomentModal({ open, onClose, onUploaded }) {
   const [file, setFile] = useState(null);
@@ -14,6 +15,11 @@ export default function UploadMomentModal({ open, onClose, onUploaded }) {
     e.preventDefault();
     if (!file) {
       alert("Zəhmət olmasa video seçin!");
+      return;
+    }
+    const validationError = validateVideoFile(file);
+    if (validationError) {
+      alert(validationError);
       return;
     }
 

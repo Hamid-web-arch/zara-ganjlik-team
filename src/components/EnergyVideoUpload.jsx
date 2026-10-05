@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "../lib/config";
+import { validateVideoFile } from "../lib/fileValidation";
 
 export default function EnergyVideoUpload() {
   const [previewUrl, setPreviewUrl] = useState("");
@@ -24,6 +25,12 @@ export default function EnergyVideoUpload() {
   const handleFileChange = (e) => {
     const selected = e.target.files[0];
     if (!selected) return;
+    const validationError = validateVideoFile(selected);
+    if (validationError) {
+      alert(validationError);
+      e.target.value = "";
+      return;
+    }
     setFile(selected);
     setPreviewUrl(URL.createObjectURL(selected));
   };

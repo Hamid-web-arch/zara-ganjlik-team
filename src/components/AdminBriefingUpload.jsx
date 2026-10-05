@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "../lib/config";
+import { validateVideoFile } from "../lib/fileValidation";
 
 export default function AdminBriefingUpload() {
   const [title, setTitle] = useState("");
@@ -36,6 +37,11 @@ export default function AdminBriefingUpload() {
     }
     if (!title.trim()) {
       alert("Başlıq daxil edin.");
+      return;
+    }
+    const validationError = validateVideoFile(file);
+    if (validationError) {
+      alert(validationError);
       return;
     }
 

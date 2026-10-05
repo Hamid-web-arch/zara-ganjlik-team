@@ -4,6 +4,7 @@ import { sendPasswordResetEmail, signOut } from "firebase/auth";
 import { doc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 import { IMGBB_API_KEY } from "../lib/config";
+import { validateImageFile } from "../lib/fileValidation";
 import { useAuthGuard } from "../hooks/useAuthGuard";
 import StaffSchedule from "../components/StaffSchedule";
 
@@ -28,6 +29,12 @@ export default function StaffProfilePage() {
 
     if (!collectionName || !profile) {
       alert("Sistem hələ hazır deyil, bir az gözləyin...");
+      return;
+    }
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      alert(validationError);
+      e.target.value = "";
       return;
     }
 

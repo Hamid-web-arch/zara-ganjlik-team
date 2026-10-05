@@ -4,6 +4,7 @@ import { signOut } from "firebase/auth";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 import { IMGBB_API_KEY } from "../lib/config";
+import { validateImageFile } from "../lib/fileValidation";
 import { useAuthGuard } from "../hooks/useAuthGuard";
 import MemberSection from "../components/MemberSection";
 import AdminMomentsPanel from "../components/AdminMomentsPanel";
@@ -39,6 +40,12 @@ function HeroSettingsSection() {
   const handleFileChange = (e) => {
     const selected = e.target.files[0];
     if (!selected) return;
+    const validationError = validateImageFile(selected);
+    if (validationError) {
+      alert(validationError);
+      e.target.value = "";
+      return;
+    }
     setFile(selected);
     const reader = new FileReader();
     reader.onload = (ev) => setPreviewUrl(ev.target.result);
