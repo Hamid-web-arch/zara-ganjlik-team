@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getCountFromServer, getDocs, query, where } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useAuthGuard } from "../hooks/useAuthGuard";
 import MomentCard from "../components/MomentCard";
@@ -30,27 +30,17 @@ export default function MomentsPage() {
       list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
       setVideos(list);
 
-      // Firestore "in" only accepts up to 30 values per query, so batch video ids into
-      // chunks instead of issuing one comments query per video (was O(videos) reads/queries).
-      const ids = list.map((video) => video.id);
-      const chunks = [];
-      for (let i = 0; i < ids.length; i += 30) chunks.push(ids.slice(i, i + 30));
-
-      const counts = {};
-      await Promise.all(
-        chunks.map(async (chunk) => {
-          const commentsSnap = await getDocs(query(collection(db, "comments"), where("videoId", "in", chunk)));
-          commentsSnap.forEach((docSnap) => {
-            const videoId = docSnap.data().videoId;
-            counts[videoId] = (counts[videoId] || 0) + 1;
-          });
+      // Count aggregations return only a number, so this never downloads comment documents
+      // (the previous version read every comment on every page load just to count them).
+      const entries = await Promise.all(
+        list.map(async (video) => {
+          const countSnap = await getCountFromServer(
+            query(collection(db, "comments"), where("videoId", "==", video.id))
+          );
+          return [video.id, countSnap.data().count];
         })
       );
-      // Videos with zero comments never appear in the query results above — default them in.
-      list.forEach((video) => {
-        if (!(video.id in counts)) counts[video.id] = 0;
-      });
-      setCommentCounts(counts);
+      setCommentCounts(Object.fromEntries(entries));
     } catch (error) {
       console.error("Moments məlumatları çəkilərkən xəta:", error);
     } finally {
