@@ -52,7 +52,7 @@ export default function NotifyHost() {
               <button
                 type="button"
                 onClick={() => answer(false)}
-                className="text-[9px] uppercase tracking-widest border border-white/20 px-5 py-3 hover:bg-white hover:text-black transition"
+                className="text-[9px] uppercase tracking-widest text-white border border-white/20 px-5 py-3 hover:bg-white hover:text-black transition"
               >
                 {t.common.cancel}
               </button>
