@@ -52,14 +52,16 @@ service cloud.firestore {
         request.resource.data.status == 'pending' &&
         (!('likedBy' in request.resource.data) || request.resource.data.likedBy.size() == 0);
 
+      // resource.data.get(..., []) — older moments were created before likedBy existed,
+      // and reading the missing field directly makes the whole rule evaluate to false.
       allow update: if isAdmin() || (
         request.auth != null &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likedBy']) &&
-        request.resource.data.likedBy.toSet()
-          .difference(resource.data.likedBy.toSet())
+        request.resource.data.get('likedBy', []).toSet()
+          .difference(resource.data.get('likedBy', []).toSet())
           .difference([request.auth.uid].toSet()).size() == 0 &&
-        resource.data.likedBy.toSet()
-          .difference(request.resource.data.likedBy.toSet())
+        resource.data.get('likedBy', []).toSet()
+          .difference(request.resource.data.get('likedBy', []).toSet())
           .difference([request.auth.uid].toSet()).size() == 0
       );
 

@@ -49,7 +49,10 @@ export function useAuthGuard({ requireAdmin = false, onError } = {}) {
         // (e.g. AdminPage, which doesn't pass onError) would be stuck on an
         // "Authenticating..." screen with no way out.
         setState({ loading: false, authorized: false, profile: null, collectionName: null });
-        onError?.(error);
+        // Callers without their own onError (e.g. AdminPage) would otherwise sit on the
+        // "Authenticating..." screen forever — send them back to sign-in instead.
+        if (onError) onError(error);
+        else navigate("/auth");
       }
     });
 
