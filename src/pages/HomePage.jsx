@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import TeamSwiper from "../components/TeamSwiper";
-import { useLanguage } from "../lib/i18n/LanguageContext";
+import { useLanguage } from "../lib/i18n/languageContext";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 
 const DEFAULT_HERO_IMAGE = "https://images.unsplash.com/photo-1441986300917-64674bd600d8";

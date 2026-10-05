@@ -1,9 +1,8 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DEFAULT_LANGUAGE, LANGUAGES, translations } from "./translations";
+import { LanguageContext } from "./languageContext";
 
 const STORAGE_KEY = "gnc_lang";
-
-const LanguageContext = createContext(null);
 
 function getInitialLanguage() {
   if (typeof window === "undefined") return DEFAULT_LANGUAGE;
@@ -31,10 +30,4 @@ export function LanguageProvider({ children }) {
   );
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
-}
-
-export function useLanguage() {
-  const ctx = useContext(LanguageContext);
-  if (!ctx) throw new Error("useLanguage must be used within a LanguageProvider");
-  return ctx;
 }
