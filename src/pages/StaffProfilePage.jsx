@@ -8,12 +8,15 @@ import { uploadToCloudinary } from "../lib/adminApi";
 import { validateImageFile } from "../lib/fileValidation";
 import { useAuthGuard } from "../hooks/useAuthGuard";
 import StaffSchedule from "../components/StaffSchedule";
+import { useLanguage } from "../lib/i18n/languageContext";
 
 const DEFAULT_AVATAR =
   "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
 
 export default function StaffProfilePage() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
+  const s = t.staffProfile;
   const { profile: authProfile, collectionName } = useAuthGuard();
   const [profile, setProfile] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -29,7 +32,7 @@ export default function StaffProfilePage() {
     if (!file) return;
 
     if (!collectionName || !profile) {
-      notify("Sistem hələ hazır deyil, bir az gözləyin...");
+      notify(s.notify.notReady);
       return;
     }
     const validationError = validateImageFile(file);
@@ -39,18 +42,18 @@ export default function StaffProfilePage() {
       return;
     }
 
-    // No "uploading, please wait" alert here: notify() is blocking, so firing it before
-    // the fetch call only delayed the upload until the user dismissed the dialog.
+    // No "uploading, please wait" notice here: the upload starts immediately and the
+    // input is disabled while it runs.
     setUploading(true);
 
     try {
       const imageUrl = await uploadToCloudinary(file, "avatar");
       await updateDoc(doc(db, collectionName, profile.uid), { image: imageUrl });
       setProfile((prev) => ({ ...prev, image: imageUrl }));
-      notify("Şəkil uğurla yeniləndi!");
+      notify(s.notify.imageUpdated);
     } catch (error) {
       console.error("Xəta detalları:", error);
-      notify("Şəkil yüklənmədi. Konsola (F12) baxın.");
+      notify(s.notify.imageFailed);
     } finally {
       setUploading(false);
     }
@@ -61,10 +64,10 @@ export default function StaffProfilePage() {
     if (!user) return;
     try {
       await sendPasswordResetEmail(auth, user.email);
-      notify("Şifrəni dəyişmək üçün email ünvanınıza link göndərildi.");
+      notify(s.notify.resetSent);
     } catch (error) {
       console.error("Şifrə sıfırlama xətası:", error);
-      notify("Link göndərilmədi. Bir az sonra yenidən cəhd edin.");
+      notify(s.notify.resetFailed);
     }
   };
 
@@ -74,7 +77,7 @@ export default function StaffProfilePage() {
       navigate("/auth");
     } catch (error) {
       console.error("Çıxış zamanı xəta:", error);
-      notify("Çıxış edilərkən xəta baş verdi.");
+      notify(s.notify.logoutFailed);
     }
   };
 
@@ -82,20 +85,20 @@ export default function StaffProfilePage() {
     <div className="bg-black text-white min-h-screen">
       <div className="max-w-4xl mx-auto p-8 pt-20">
         <div className="flex items-center justify-between mb-12">
-          <h1 className="font-fashion text-4xl text-white tracking-tighter">MY PROFILE</h1>
+          <h1 className="font-fashion text-4xl text-white tracking-tighter">{s.myProfile}</h1>
           <div className="flex gap-4">
             <div>
               <Link
                 to="/"
                 className="text-[9px] uppercase tracking-[0.3em] border border-white/20 px-6 py-3 hover:bg-white hover:text-black transition inline-block"
               >
-                Back to Home
+                {s.backHome}
               </Link>
               <button
                 onClick={handleLogout}
                 className="text-[9px] uppercase tracking-[0.3em] border border-white/20 px-6 py-3 hover:bg-white hover:text-black transition"
               >
-                LOGOUT
+                {s.logout}
               </button>
             </div>
           </div>
@@ -107,35 +110,39 @@ export default function StaffProfilePage() {
               <img
                 src={profile?.image || DEFAULT_AVATAR}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                alt="Profile"
+                alt={s.myProfile}
               />
             </div>
             <label className="absolute bottom-0 right-0 bg-white text-black p-2 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition">
               <input type="file" onChange={handleUpload} disabled={uploading} className="hidden" />
-              <span className="text-[8px] font-bold">EDIT</span>
+              <span className="text-[8px] font-bold">{s.edit}</span>
             </label>
           </div>
 
           <div className="flex-1 w-full space-y-8">
             <div className="grid grid-cols-2 gap-8">
               <div>
-                <label className="text-[8px] uppercase tracking-[0.2em] text-white/40">Full Name</label>
-                <p className="text-sm tracking-widest mt-1">{profile ? profile.name || "N/A" : "Loading..."}</p>
-              </div>
-              <div>
-                <label className="text-[8px] uppercase tracking-[0.2em] text-white/40">Role</label>
-                <p className="text-sm tracking-widest mt-1 uppercase">
-                  {profile ? profile.role || "N/A" : "Loading..."}
+                <label className="text-[8px] uppercase tracking-[0.2em] text-white/40">{s.fullName}</label>
+                <p className="text-sm tracking-widest mt-1">
+                  {profile ? profile.name || "N/A" : t.common.loading}
                 </p>
               </div>
               <div>
-                <label className="text-[8px] uppercase tracking-[0.2em] text-white/40">ID Code</label>
-                <p className="text-sm tracking-widest mt-1">{profile ? profile.idCode || "-" : "Loading..."}</p>
+                <label className="text-[8px] uppercase tracking-[0.2em] text-white/40">{s.role}</label>
+                <p className="text-sm tracking-widest mt-1 uppercase">
+                  {profile ? profile.role || "N/A" : t.common.loading}
+                </p>
               </div>
               <div>
-                <label className="text-[8px] uppercase tracking-[0.2em] text-white/40">Email</label>
+                <label className="text-[8px] uppercase tracking-[0.2em] text-white/40">{s.idCode}</label>
                 <p className="text-sm tracking-widest mt-1">
-                  {profile ? profile.email || profile.authEmail : "Loading..."}
+                  {profile ? profile.idCode || "-" : t.common.loading}
+                </p>
+              </div>
+              <div>
+                <label className="text-[8px] uppercase tracking-[0.2em] text-white/40">{s.email}</label>
+                <p className="text-sm tracking-widest mt-1">
+                  {profile ? profile.email || profile.authEmail : t.common.loading}
                 </p>
               </div>
             </div>
@@ -145,12 +152,12 @@ export default function StaffProfilePage() {
         {profile && <StaffSchedule employeeName={profile.name} />}
 
         <div className="mt-12 p-8 border border-white/5 bg-white/5 rounded-sm">
-          <h2 className="text-[10px] uppercase tracking-[0.3em] mb-6">Security Settings</h2>
+          <h2 className="text-[10px] uppercase tracking-[0.3em] mb-6">{s.security}</h2>
           <button
             onClick={handleResetPassword}
             className="text-[9px] uppercase tracking-[0.3em] border border-white/20 px-6 py-3 hover:bg-white hover:text-black transition"
           >
-            Reset Password
+            {s.resetPassword}
           </button>
         </div>
       </div>

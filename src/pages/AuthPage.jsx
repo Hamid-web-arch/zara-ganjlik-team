@@ -11,40 +11,26 @@ import {
 } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
+import { useLanguage } from "../lib/i18n/languageContext";
 
-const ROLE_COPY = {
-  admin: {
-    formTitle: "MANAGER ACCESS",
-    formSubtitle: "Admin credentials required",
-    emailPlaceholder: "MANAGER EMAIL",
-    leftTitle: (
-      <>Manager <br /> <span className="text-stroke italic font-fashion lowercase font-light">vault</span> <br /> Access</>
-    ),
-    leftDesc: "Rəqəmsal idarəetmə panelinə daxil olmaq üçün menecer məlumatlarını daxil edin.",
-    pulseClass: "w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse",
-    statusText: "RESTRICTED AREA",
-  },
-  staff: {
-    formTitle: "STAFF PORTAL",
-    formSubtitle: "Employee access keys required",
-    emailPlaceholder: "STAFF EMAIL",
-    leftTitle: (
-      <>Staff <br /> <span className="text-stroke italic font-fashion lowercase font-light">network</span> <br /> Stream</>
-    ),
-    leftDesc: "Zara daxili Moments platformasına qoşulmaq və profilinizi idarə etmək üçün işçi girişini tamamlayın.",
-    pulseClass: "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse",
-    statusText: "STAFF AREA",
-  },
+// Colour is not language-specific, so it stays out of the translation tables.
+const ROLE_PULSE = {
+  admin: "w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse",
+  staff: "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse",
 };
 
-const DEFAULT_LEFT_TITLE = (
-  <>SYSTEM <br /> <span className="text-stroke italic font-fashion lowercase font-light">vault</span> <br /> ACCESS</>
-);
-const DEFAULT_LEFT_DESC =
-  "Rəqəmsal idarəetmə və daxili sosial şəbəkə şəbəkəsinə keçid etmək üçün müvafiq giriş növünü seçin.";
+function renderTitle([first, accent, last]) {
+  return (
+    <>
+      {first} <br /> <span className="text-stroke italic font-fashion lowercase font-light">{accent}</span> <br /> {last}
+    </>
+  );
+}
 
 export default function AuthPage() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
+  const s = t.authPage;
   const [role, setRole] = useState(null); // null | "admin" | "staff"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -68,7 +54,7 @@ export default function AuthPage() {
 
         if (!userData) {
           await signOut(auth);
-          notify("İstifadəçi məlumatları tapılmadı.");
+          notify(s.notify.noUserData);
           return;
         }
 
@@ -82,19 +68,20 @@ export default function AuthPage() {
           // manager access — only "user" used to be checked, so an unexpected value
           // left the form stuck with no feedback.
           await signOut(auth);
-          notify("Sizin admin panelinə giriş icazəniz yoxdur!");
+          notify(s.notify.noAdminAccess);
         } else {
           navigate("/staff-profile");
         }
       } catch (error) {
         console.error("Auth Xətası:", error);
         await signOut(auth);
-        notify("Giriş zamanı xəta baş verdi. Yenidən cəhd edin.");
+        notify(s.notify.loginError);
       }
     });
 
     return () => unsubscribe();
-  }, [navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigate, s]);
 
   const handleSelectRole = (nextRole) => setRole(nextRole);
   const handleBack = () => setRole(null);
@@ -103,7 +90,7 @@ export default function AuthPage() {
     e.preventDefault();
     const selectedRole = roleRef.current;
     if (!selectedRole) {
-      notify("Zəhmət olmasa giriş növünü seçin.");
+      notify(s.notify.selectRole);
       return;
     }
 
@@ -114,27 +101,27 @@ export default function AuthPage() {
       // Redirect happens via onAuthStateChanged
     } catch (error) {
       console.error("Giriş xətası:", error);
-      notify("Giriş rədd edildi: Məlumatlar yanlışdır.");
+      notify(s.notify.wrongCreds);
     }
   };
 
   const handleSendReset = async () => {
     const value = resetEmail.trim();
     if (!value) {
-      notify("Email daxil edin.");
+      notify(s.notify.enterEmail);
       return;
     }
     try {
       await sendPasswordResetEmail(auth, value);
-      notify("Link göndərildi.");
+      notify(s.notify.linkSent);
       setResetOpen(false);
     } catch (error) {
       console.error("Şifrə sıfırlama xətası:", error);
-      notify("Xəta: Email tapılmadı.");
+      notify(s.notify.emailNotFound);
     }
   };
 
-  const copy = role ? ROLE_COPY[role] : null;
+  const copy = role ? s.roles[role] : null;
 
   return (
     <div className="antialiased text-white min-h-screen relative overflow-x-hidden">
@@ -156,20 +143,20 @@ export default function AuthPage() {
         <div className="w-full max-w-[1000px] grid grid-cols-1 md:grid-cols-2 glass overflow-hidden rounded-sm min-h-[500px] md:min-h-[600px]">
           <div className="hidden md:flex flex-col justify-between p-10 lg:p-16 border-r border-white/10 bg-black/20">
             <div className="space-y-4">
-              <span className="text-[9px] uppercase tracking-[0.8em] text-white/30">Portal Status: Secure</span>
+              <span className="text-[9px] uppercase tracking-[0.8em] text-white/30">{s.portalSecure}</span>
               <h2 className="text-5xl lg:text-7xl font-black uppercase tracking-tighter leading-none">
-                {copy ? copy.leftTitle : DEFAULT_LEFT_TITLE}
+                {copy ? renderTitle(copy.title) : renderTitle(s.defaultTitle)}
               </h2>
             </div>
 
             <div className="space-y-6">
               <p className="text-[10px] text-white/50 leading-relaxed uppercase tracking-widest max-w-[250px]">
-                {copy ? copy.leftDesc : DEFAULT_LEFT_DESC}
+                {copy ? copy.desc : s.defaultDesc}
               </p>
               <div className="flex items-center gap-3">
-                <div className={copy ? copy.pulseClass : "w-1.5 h-1.5 rounded-full bg-gray-400 animate-pulse"} />
+                <div className={copy ? ROLE_PULSE[role] : "w-1.5 h-1.5 rounded-full bg-gray-400 animate-pulse"} />
                 <span className="text-[8px] uppercase tracking-widest text-white/30 font-mono">
-                  {copy ? copy.statusText : "GATEWAY AREA"}
+                  {copy ? copy.status : s.defaultStatus}
                 </span>
               </div>
             </div>
@@ -179,10 +166,8 @@ export default function AuthPage() {
             {!role ? (
               <div className="space-y-10 md:space-y-12 transition-all duration-300">
                 <div className="space-y-2 text-center md:text-left">
-                  <h3 className="font-sync text-2xl md:text-3xl font-bold tracking-tighter">SELECT TYPE</h3>
-                  <p className="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/40">
-                    Giriş növünü müəyyən edin
-                  </p>
+                  <h3 className="font-sync text-2xl md:text-3xl font-bold tracking-tighter">{s.selectType}</h3>
+                  <p className="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/40">{s.selectTypeSub}</p>
                 </div>
 
                 <div className="space-y-4 pt-4">
@@ -192,7 +177,7 @@ export default function AuthPage() {
                     className="group relative w-full overflow-hidden border border-white/10 py-4 text-[10px] uppercase tracking-[0.5em] transition-all hover:border-white"
                   >
                     <span className="relative z-10 transition-colors duration-500 group-hover:text-black">
-                      MANAGER / ADMIN
+                      {s.managerBtn}
                     </span>
                     <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
                   </button>
@@ -203,7 +188,7 @@ export default function AuthPage() {
                     className="group relative w-full overflow-hidden border border-white/10 py-4 text-[10px] uppercase tracking-[0.5em] transition-all hover:border-white"
                   >
                     <span className="relative z-10 transition-colors duration-500 group-hover:text-black">
-                      STAFF / MEMBER
+                      {s.staffBtn}
                     </span>
                     <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
                   </button>
@@ -216,20 +201,18 @@ export default function AuthPage() {
                   onClick={handleBack}
                   className="text-[8px] uppercase tracking-[0.4em] text-white/40 hover:text-white transition flex items-center gap-2 absolute top-6 right-8"
                 >
-                  ← SEÇİMƏ QAYIT
+                  {s.backToSelect}
                 </button>
 
                 <div className="space-y-2 text-center md:text-left pt-4">
                   <h3 className="font-sync text-2xl md:text-3xl font-bold tracking-tighter">{copy.formTitle}</h3>
-                  <p className="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/40">
-                    {copy.formSubtitle}
-                  </p>
+                  <p className="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/40">{copy.formSub}</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
                   <input
                     type="email"
-                    placeholder={copy.emailPlaceholder}
+                    placeholder={copy.emailPh}
                     required
                     autoComplete="off"
                     value={email}
@@ -239,7 +222,7 @@ export default function AuthPage() {
 
                   <input
                     type="password"
-                    placeholder="PASSWORD"
+                    placeholder={s.password}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -251,7 +234,7 @@ export default function AuthPage() {
                     className="group relative w-full overflow-hidden border border-white/20 py-4 md:py-5 text-[9px] md:text-[10px] uppercase tracking-[0.6em] transition-all hover:border-white active:scale-[0.98]"
                   >
                     <span className="relative z-10 transition-colors duration-500 group-hover:text-black">
-                      Verify & Enter
+                      {s.submit}
                     </span>
                     <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
                   </button>
@@ -263,7 +246,7 @@ export default function AuthPage() {
                     onClick={() => setResetOpen(true)}
                     className="text-[8px] uppercase tracking-[0.3em] text-white/20 hover:text-white transition-all"
                   >
-                    Forgot password?
+                    {s.forgot}
                   </button>
                 </div>
               </div>
@@ -276,7 +259,7 @@ export default function AuthPage() {
             to="/"
             className="text-[9px] uppercase tracking-[0.5em] text-white/30 hover:text-white transition-all duration-300"
           >
-            [ Exit System ]
+            {s.exit}
           </Link>
         </div>
       </main>
@@ -292,12 +275,12 @@ export default function AuthPage() {
               ✕
             </button>
             <div className="space-y-2">
-              <h3 className="font-sync text-xl font-bold tracking-tighter">RESET ACCESS</h3>
-              <p className="text-[9px] uppercase tracking-[0.4em] text-white/40">Enter manager email for link</p>
+              <h3 className="font-sync text-xl font-bold tracking-tighter">{s.resetTitle}</h3>
+              <p className="text-[9px] uppercase tracking-[0.4em] text-white/40">{s.resetSub}</p>
             </div>
             <input
               type="email"
-              placeholder="EMAIL ADDRESS"
+              placeholder={s.resetEmailPh}
               value={resetEmail}
               onChange={(e) => setResetEmail(e.target.value)}
               className="w-full bg-transparent border-b border-white/10 py-4 text-[10px] tracking-[0.3em] outline-none focus:border-white transition-all"
@@ -307,7 +290,7 @@ export default function AuthPage() {
               onClick={handleSendReset}
               className="w-full border border-white/20 py-4 text-[9px] uppercase tracking-[0.5em] hover:bg-white hover:text-black transition-all"
             >
-              Send Reset Link
+              {s.sendReset}
             </button>
           </div>
         </div>
