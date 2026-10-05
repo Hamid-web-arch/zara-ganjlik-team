@@ -30,6 +30,14 @@ export default function MomentCard({
   const [likedBy, setLikedBy] = useState(video.likedBy || []);
   const [liking, setLiking] = useState(false);
 
+  // useState's initial value only runs on mount, so a re-fetched `video` prop (e.g. after
+  // another user likes it, or the feed reloads) never reached this state on its own.
+  // Skipped while a like/unlike is in flight so it can't stomp the optimistic update below.
+  useEffect(() => {
+    if (!liking) setLikedBy(video.likedBy || []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [video.likedBy]);
+
   useEffect(() => {
     const container = containerRef.current;
     const card = cardRef.current;
