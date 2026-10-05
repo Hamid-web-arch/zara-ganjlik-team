@@ -8,7 +8,15 @@ import { cert, getApps, initializeApp } from "firebase-admin/app";
 function normalizePrivateKey(raw) {
   let key = (raw || "").trim();
   if (key.startsWith('"') && key.endsWith('"')) key = key.slice(1, -1);
-  return key.replace(/\\n/g, "\n").trim();
+  key = key.replace(/\\n/g, "\n");
+
+  // If the line breaks were lost (the value arrives as one line, or with spaces where
+  // newlines were), rebuild the PEM: keep only the base64 body and re-wrap it at 64 chars.
+  const match = key.match(/-----BEGIN ([A-Z ]+)-----([\s\S]*?)-----END \1-----/);
+  if (!match) return key;
+  const body = match[2].replace(/\s+/g, "");
+  const wrapped = body.match(/.{1,64}/g).join("\n");
+  return `-----BEGIN ${match[1]}-----\n${wrapped}\n-----END ${match[1]}-----\n`;
 }
 
 /**
