@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@100;300;500;600;900&display=swap');
+@import "tailwindcss";
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #000;
+}
+
+.font-sync {
+  font-family: 'Syncopate', sans-serif;
+}
+
+.font-fashion {
+  font-family: 'Georgia', serif;
+}
+
+@keyframes slow-zoom {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(1.1);
+  }
+}
+
+.bg-animate {
+  animation: slow-zoom 20s infinite alternate ease-in-out;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.text-stroke {
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+  color: transparent;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.4s ease;
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.img-zara {
+  filter: grayscale(100%);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.group:hover .img-zara {
+  filter: grayscale(0%);
+  transform: scale(1.05);
+}
+
+.zara-container {
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  height: 100vh;
+  scrollbar-width: none;
+}
+
+.zara-container::-webkit-scrollbar {
+  display: none;
+}
+
+.zara-card {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  height: 100vh;
+}
+
+.text-outline {
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.5);
+  color: transparent;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.text-outline:hover {
+  -webkit-text-stroke: 1px #fff;
+  color: #fff;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-entrance {
+  animation: fadeInUp 1.5s ease forwards;
+}
+
+@keyframes infiniteZoom {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-infinite-zoom {
+  animation: infiniteZoom 20s ease-in-out infinite;
+  will-change: transform;
+}
+
+.moment-card:hover .moment-info {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.moment-info {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.5s ease;
+}
+
+.crewSwiper {
+  padding-right: 50px !important;
+  padding-left: 2px !important;
+}
+
+.staffSwiper {
+  overflow: visible !important;
+  padding-bottom: 50px !important;
+}
+
+.swiper-wrapper {
+  align-items: stretch !important;
+}
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px black inset !important;
+  -webkit-text-fill-color: white !important;
+}

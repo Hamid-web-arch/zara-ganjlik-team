@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null && (
+        (exists(/databases/$(database)/documents/staff/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/staff/$(request.auth.uid)).data.accessLevel == 'admin') ||
+        (exists(/databases/$(database)/documents/crew/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/crew/$(request.auth.uid)).data.accessLevel == 'admin')
+      );
+    }
+
+    // Siyahıların hər kəs tərəfindən oxunmasına icazə ver
+    match /staff/{document=**} { allow read: if true; allow write: if request.auth != null; }
+    match /crew/{document=**} { allow read: if true; allow write: if request.auth != null; }
+
+    // Digər xüsusi bölmələr
+    match /settings/{document=**} { allow read: if true; allow write: if request.auth != null; }
+
+    // Moments: staff-daxili funksiyadır, yalnız login olmuş istifadəçilər görə bilər
+    match /approved_moments/{document=**} { allow read, write: if request.auth != null; }
+    match /comments/{document=**} { allow read, write: if request.auth != null; }
+
+    // Briefings: rəsmi videolar — hər login olmuş istifadəçi oxuya bilər, yalnız admin yükləyə/silə bilər
+    match /briefings/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    // Qalan hər şey (məs. work_schedule) üçün: oxumaq login tələb edir, yazmaq yalnız admin
+    match /{document=**} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+  }
+}

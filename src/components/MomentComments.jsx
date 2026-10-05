@@ -1,0 +1,173 @@
+import { useEffect, useRef, useState } from "react";
+import { addDoc, collection, onSnapshot, query, where } from "firebase/firestore";
+import { db } from "../lib/firebase";
+
+const DEFAULT_AVATAR =
+  "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
+
+function formatCommentDate(timestamp) {
+  if (!timestamp) return "";
+  const date = new Date(timestamp);
+  return (
+    date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) +
+    " - " +
+    date.toLocaleDateString([], { month: "short", day: "numeric" })
+  );
+}
+
+export default function MomentComments({ videoId, currentUser, onClose, onCountChange }) {
+  const [comments, setComments] = useState([]);
+  const [input, setInput] = useState("");
+  const [replyTo, setReplyTo] = useState(null);
+  const [sending, setSending] = useState(false);
+  const listRef = useRef(null);
+
+  useEffect(() => {
+    const q = query(collection(db, "comments"), where("videoId", "==", videoId));
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const all = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+        all.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+        setComments(all);
+        onCountChange?.(videoId, snapshot.size);
+      },
+      (error) => console.error("Şərhlər canlı yüklənərkən xəta:", error)
+    );
+    return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [videoId]);
+
+  useEffect(() => {
+    if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
+  }, [comments]);
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+    const text = input.trim();
+    if (!text) return;
+
+    setSending(true);
+    try {
+      await addDoc(collection(db, "comments"), {
+        videoId,
+        parentId: replyTo?.id || null,
+        text,
+        authorUid: currentUser?.uid || null,
+        authorName: currentUser?.name || "Staff Member",
+        authorImage: currentUser?.image || null,
+        createdAt: Date.now(),
+      });
+      setInput("");
+      setReplyTo(null);
+    } catch (err) {
+      console.error("Şərh göndərilərkən xəta:", err);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const mainComments = comments.filter((c) => !c.parentId);
+  const repliesByParent = comments.reduce((acc, c) => {
+    if (c.parentId) (acc[c.parentId] ||= []).push(c);
+    return acc;
+  }, {});
+
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-50 h-[75vh] rounded-t-2xl md:static md:z-auto md:h-full md:rounded-sm bg-black/98 md:bg-black/95 backdrop-blur-sm border-t md:border border-white/10 flex flex-col">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
+        <h3 className="text-[10px] font-bold tracking-widest uppercase">YORUMLAR ({comments.length})</h3>
+        <button onClick={onClose} className="text-gray-400 hover:text-white cursor-pointer transition">
+          <i className="fa-solid fa-xmark text-base" />
+        </button>
+      </div>
+
+      <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+        {comments.length === 0 && (
+          <p className="text-[9px] tracking-widest font-light text-gray-400 uppercase text-center mt-6">
+            Hələ şərh yazılmayıb. İlk sən yaz!
+          </p>
+        )}
+
+        {mainComments.map((comment) => (
+          <div key={comment.id} className="border-b border-white/5 pb-3 flex flex-col gap-1 group">
+            <div className="flex items-center justify-between text-[9px] tracking-widest font-bold">
+              <div className="flex items-center gap-2 min-w-0">
+                <img
+                  src={comment.authorImage || DEFAULT_AVATAR}
+                  alt=""
+                  className="w-5 h-5 rounded-full object-cover border border-white/10 shrink-0"
+                />
+                <span className="text-white/70 capitalize truncate">{comment.authorName || "Staff Member"}</span>
+              </div>
+              <span className="text-gray-400 font-mono text-[8px] shrink-0">
+                {formatCommentDate(comment.createdAt)}
+              </span>
+            </div>
+            <p className="text-[11px] font-light tracking-wide text-white break-words">{comment.text}</p>
+
+            <div className="flex justify-end opacity-60 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={() => setReplyTo({ id: comment.id, author: comment.authorName || "Staff" })}
+                className="text-[8px] tracking-widest font-bold text-gray-400 hover:text-white transition cursor-pointer flex items-center gap-1 uppercase"
+              >
+                <i className="fa-solid fa-reply text-[7px]" /> Cavab Yaz
+              </button>
+            </div>
+
+            {(repliesByParent[comment.id] || []).map((reply) => (
+              <div
+                key={reply.id}
+                className="ml-5 pl-2 border-l-2 border-white/10 mt-1 flex flex-col gap-0.5 bg-white/5 p-2 rounded"
+              >
+                <div className="flex items-center justify-between text-[8px] tracking-widest font-bold">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <img
+                      src={reply.authorImage || DEFAULT_AVATAR}
+                      alt=""
+                      className="w-4 h-4 rounded-full object-cover border border-white/10 shrink-0"
+                    />
+                    <span className="text-gray-400 capitalize truncate">↩️ {reply.authorName || "Staff"}</span>
+                  </div>
+                  <span className="text-gray-400 font-mono text-[7px] shrink-0">
+                    {formatCommentDate(reply.createdAt)}
+                  </span>
+                </div>
+                <p className="text-[10px] font-light tracking-wide text-white/70 break-words">{reply.text}</p>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      {replyTo && (
+        <div className="bg-zinc-900 px-4 py-2 text-[9px] tracking-widest text-gray-400 flex items-center justify-between border-t border-white/5 shrink-0">
+          <span className="uppercase">
+            <strong className="capitalize">{replyTo.author}</strong> vasitəsilə cavablandırılır...
+          </span>
+          <button onClick={() => setReplyTo(null)} className="text-red-500 hover:text-red-300 font-bold ml-2 uppercase">
+            LƏĞV ET
+          </button>
+        </div>
+      )}
+
+      <form onSubmit={handleSend} className="p-3 border-t border-white/10 flex items-center gap-2 shrink-0">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder={replyTo ? "CAVAB YAZ..." : "Rəy bildir..."}
+          autoComplete="off"
+          className="flex-1 bg-zinc-900 border border-white/10 rounded px-3 py-2 text-xs font-light tracking-wide text-white placeholder-gray-500 focus:outline-none focus:border-white/10"
+        />
+        <button
+          type="submit"
+          disabled={sending || !input.trim()}
+          className="bg-white text-black text-[9px] tracking-widest font-bold px-4 py-2.5 rounded transition hover:bg-gray-50 uppercase disabled:opacity-40"
+        >
+          GÖNDƏR
+        </button>
+      </form>
+    </div>
+  );
+}
