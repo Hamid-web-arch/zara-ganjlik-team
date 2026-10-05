@@ -70,11 +70,16 @@ export default function MemberSection({ collectionName, heading, entityName }) {
     try {
       if (editId) {
         const existing = members.find((m) => m.id === editId);
+        // email/password are intentionally left out of an edit: changing them here would
+        // only update the Firestore profile doc, not the Firebase Auth account, leaving
+        // the member unable to log in with the email shown on their profile. Changing
+        // Auth email/password for another user requires the Admin SDK (a backend), which
+        // this project doesn't have — so those fields stay admin-console-only for edits.
         const data = {
           name: form.name,
           role: form.role,
           idCode: form.idCode,
-          email: form.email,
+          email: existing?.email || form.email,
           accessLevel: form.accessLevel,
           image: existing?.image || DEFAULT_AVATAR,
           updatedAt: serverTimestamp(),
@@ -161,18 +166,22 @@ export default function MemberSection({ collectionName, heading, entityName }) {
         />
         <input
           type="email"
-          placeholder="EMAIL"
+          placeholder={editId ? "EMAIL (DƏYİŞDİRİLƏ BİLMƏZ)" : "EMAIL"}
           required
+          disabled={!!editId}
+          title={editId ? "Login e-poçtunu dəyişmək üçün Firebase konsolundan istifadə edin" : undefined}
           value={form.email}
           onChange={handleChange("email")}
-          className="bg-transparent border-b border-white/10 py-3 text-[10px] tracking-[0.2em] outline-none focus:border-white text-white uppercase"
+          className="bg-transparent border-b border-white/10 py-3 text-[10px] tracking-[0.2em] outline-none focus:border-white text-white uppercase disabled:opacity-40 disabled:cursor-not-allowed"
         />
         <input
           type="password"
-          placeholder="PASSWORD"
+          placeholder={editId ? "PASSWORD (DƏYİŞDİRİLƏ BİLMƏZ)" : "PASSWORD"}
+          disabled={!!editId}
+          title={editId ? "Şifrəni dəyişmək üçün Firebase konsolundan istifadə edin" : undefined}
           value={form.password}
           onChange={handleChange("password")}
-          className="bg-transparent border-b border-white/10 py-3 text-[10px] tracking-[0.2em] outline-none focus:border-white text-white"
+          className="bg-transparent border-b border-white/10 py-3 text-[10px] tracking-[0.2em] outline-none focus:border-white text-white disabled:opacity-40 disabled:cursor-not-allowed"
         />
         <div className="relative border-b border-white/10 focus-within:border-white">
           <select
