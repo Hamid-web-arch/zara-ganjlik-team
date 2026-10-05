@@ -76,17 +76,19 @@ export default function AuthPage() {
 
         if (userAccessLevel === "admin") {
           navigate(selectedRole === "admin" ? "/admin" : "/staff-profile");
-        } else if (userAccessLevel === "user") {
-          if (selectedRole === "admin") {
-            await signOut(auth);
-            alert("Sizin admin panelinə giriş icazəniz yoxdur!");
-          } else {
-            navigate("/staff-profile");
-          }
+        } else if (selectedRole === "admin") {
+          // Any non-admin accessLevel (including unset/misspelled values) is denied
+          // manager access — only "user" used to be checked, so an unexpected value
+          // left the form stuck with no feedback.
+          await signOut(auth);
+          alert("Sizin admin panelinə giriş icazəniz yoxdur!");
+        } else {
+          navigate("/staff-profile");
         }
       } catch (error) {
         console.error("Auth Xətası:", error);
         await signOut(auth);
+        alert("Giriş zamanı xəta baş verdi. Yenidən cəhd edin.");
       }
     });
 

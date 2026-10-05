@@ -45,6 +45,10 @@ export function useAuthGuard({ requireAdmin = false, onError } = {}) {
         });
       } catch (error) {
         console.error("Auth Guard Xətası:", error);
+        // Without this, a Firestore error left `loading: true` forever — the caller
+        // (e.g. AdminPage, which doesn't pass onError) would be stuck on an
+        // "Authenticating..." screen with no way out.
+        setState({ loading: false, authorized: false, profile: null, collectionName: null });
         onError?.(error);
       }
     });
