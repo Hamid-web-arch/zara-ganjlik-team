@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "../lib/config";
+import { uploadToCloudinary } from "../lib/adminApi";
 import { validateVideoFile } from "../lib/fileValidation";
 
 export default function AdminBriefingUpload() {
@@ -47,24 +47,12 @@ export default function AdminBriefingUpload() {
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`, {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-
-      if (!data.secure_url) {
-        throw new Error(data.error?.message || "Cloudinary yükləməsi uğursuz oldu.");
-      }
+      const url = await uploadToCloudinary(file, "briefing");
 
       await addDoc(collection(db, "briefings"), {
         title: title.trim(),
         description: description.trim(),
-        url: data.secure_url,
+        url,
         createdAt: Date.now(),
       });
 

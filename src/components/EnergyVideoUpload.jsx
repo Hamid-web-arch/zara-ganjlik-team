@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "../lib/config";
+import { uploadToCloudinary } from "../lib/adminApi";
 import { validateVideoFile } from "../lib/fileValidation";
 
 export default function EnergyVideoUpload() {
@@ -44,23 +44,14 @@ export default function EnergyVideoUpload() {
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-
-      const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`, {
-        method: "POST",
-        body: formData,
-      });
-      const data = await resp.json();
-      if (!data.secure_url) throw new Error(data.error?.message || "Yükləmə uğursuz oldu");
+      const url = await uploadToCloudinary(file, "energy");
 
       await setDoc(doc(db, "settings", "energyVideo"), {
-        videoUrl: data.secure_url,
+        videoUrl: url,
         updatedAt: serverTimestamp(),
       });
 
-      setPreviewUrl(data.secure_url);
+      setPreviewUrl(url);
       setFile(null);
       alert("Video uğurla yeniləndi!");
     } catch (error) {

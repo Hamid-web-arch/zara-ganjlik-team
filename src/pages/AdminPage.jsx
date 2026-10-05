@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
-import { IMGBB_API_KEY } from "../lib/config";
+import { uploadToCloudinary } from "../lib/adminApi";
 import { validateImageFile } from "../lib/fileValidation";
 import { useAuthGuard } from "../hooks/useAuthGuard";
 import MemberSection from "../components/MemberSection";
@@ -60,14 +60,7 @@ function HeroSettingsSection() {
       let finalImageUrl = imageUrl;
 
       if (file) {
-        const formData = new FormData();
-        formData.append("image", file);
-        const resp = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-          method: "POST",
-          body: formData,
-        });
-        const imgData = await resp.json();
-        if (imgData.success) finalImageUrl = imgData.data.url;
+        finalImageUrl = await uploadToCloudinary(file, "hero");
       }
 
       await setDoc(doc(db, "settings", "hero"), {

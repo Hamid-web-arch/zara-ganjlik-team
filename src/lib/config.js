@@ -1,3 +1,0 @@
-export const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY;
-export const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-export const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
   collection,
-  deleteDoc,
   doc,
   getDoc,
   onSnapshot,
@@ -12,6 +11,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { createAuthAccountWithoutSignIn, db } from "../lib/firebase";
+import { deleteMember } from "../lib/adminApi";
 
 const DEFAULT_AVATAR =
   "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
@@ -54,10 +54,12 @@ export default function MemberSection({ collectionName, heading, entityName }) {
   const handleDelete = async (id) => {
     if (!confirm(`Bu ${entityName.toLowerCase()} üzvünü silmək istəyirsiniz?`)) return;
     try {
-      await deleteDoc(doc(db, collectionName, id));
-      alert(
-        `${entityName} bazadan silindi. QEYD: İstifadəçinin giriş icazəsini (Auth) Firebase konsolundan da əllə silməyi unutmayın.`
-      );
+      const result = await deleteMember(collectionName, id);
+      if (result.warning) {
+        alert(result.warning);
+      } else {
+        alert(`${entityName} profili və giriş hesabı silindi.`);
+      }
     } catch (error) {
       alert("Silinmə xətası: " + error.message);
     }

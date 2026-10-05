@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { sendPasswordResetEmail, signOut } from "firebase/auth";
 import { doc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
-import { IMGBB_API_KEY } from "../lib/config";
+import { uploadToCloudinary } from "../lib/adminApi";
 import { validateImageFile } from "../lib/fileValidation";
 import { useAuthGuard } from "../hooks/useAuthGuard";
 import StaffSchedule from "../components/StaffSchedule";
@@ -42,24 +42,11 @@ export default function StaffProfilePage() {
     // the fetch call only delayed the upload until the user dismissed the dialog.
     setUploading(true);
 
-    const formData = new FormData();
-    formData.append("image", file);
-
     try {
-      const resp = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-        method: "POST",
-        body: formData,
-      });
-      const result = await resp.json();
-
-      if (result.success) {
-        const imageUrl = result.data.url;
-        await updateDoc(doc(db, collectionName, profile.uid), { image: imageUrl });
-        setProfile((prev) => ({ ...prev, image: imageUrl }));
-        alert("Şəkil uğurla yeniləndi!");
-      } else {
-        alert("ImgBB xətası: " + (result.error ? result.error.message : "Naməlum xəta"));
-      }
+      const imageUrl = await uploadToCloudinary(file, "avatar");
+      await updateDoc(doc(db, collectionName, profile.uid), { image: imageUrl });
+      setProfile((prev) => ({ ...prev, image: imageUrl }));
+      alert("Şəkil uğurla yeniləndi!");
     } catch (error) {
       console.error("Xəta detalları:", error);
       alert("Şəkil yüklənmədi. Konsola (F12) baxın.");

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "../lib/config";
+import { uploadToCloudinary } from "../lib/adminApi";
 import { validateVideoFile } from "../lib/fileValidation";
 
 export default function UploadMomentModal({ open, onClose, onUploaded }) {
@@ -25,18 +25,10 @@ export default function UploadMomentModal({ open, onClose, onUploaded }) {
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`, {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
+      const url = await uploadToCloudinary(file, "moment");
 
       await addDoc(collection(db, "approved_moments"), {
-        url: data.secure_url,
+        url,
         caption: caption.trim() || "Zara Ganjlik Moment",
         status: "pending",
         createdAt: Date.now(),
