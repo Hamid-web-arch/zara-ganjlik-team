@@ -1,3 +1,4 @@
+import { notify } from "../lib/notify";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
@@ -42,7 +43,7 @@ function HeroSettingsSection() {
     if (!selected) return;
     const validationError = validateImageFile(selected);
     if (validationError) {
-      alert(validationError);
+      notify(validationError);
       e.target.value = "";
       return;
     }
@@ -71,10 +72,10 @@ function HeroSettingsSection() {
 
       setImageUrl(finalImageUrl);
       setFile(null);
-      alert("Ana səhifə uğurla yeniləndi!");
+      notify("Ana səhifə uğurla yeniləndi!");
     } catch (err) {
       console.error("Hero update xətası:", err);
-      alert("Yenilənmə alınmadı.");
+      notify("Yenilənmə alınmadı.");
     } finally {
       setSaving(false);
     }

@@ -1,3 +1,4 @@
+import { notify, confirmAsync } from "../lib/notify";
 import { useEffect, useState } from "react";
 import { collection, deleteDoc, doc, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../lib/firebase";
@@ -20,7 +21,7 @@ export default function AdminCommentsList({ videoId }) {
   }, [videoId]);
 
   const handleDelete = async (comment) => {
-    if (!confirm("Bu şərhi silmək istəyirsiniz?")) return;
+    if (!await confirmAsync("Bu şərhi silmək istəyirsiniz?")) return;
     setDeletingId(comment.id);
     try {
       const replies = comments.filter((c) => c.parentId === comment.id);
@@ -29,7 +30,7 @@ export default function AdminCommentsList({ videoId }) {
         ...replies.map((reply) => deleteDoc(doc(db, "comments", reply.id))),
       ]);
     } catch (err) {
-      alert("Silinmə xətası: " + err.message);
+      notify("Silinmə xətası: " + err.message);
     } finally {
       setDeletingId(null);
     }

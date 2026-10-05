@@ -1,3 +1,4 @@
+import { notify, confirmAsync } from "../lib/notify";
 import { useEffect, useState } from "react";
 import { collection, deleteDoc, doc, getDocs, orderBy, query, updateDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
@@ -65,38 +66,38 @@ export default function AdminMomentsPanel() {
     setBusyId(id);
     try {
       await updateDoc(doc(db, "approved_moments", id), { status: "approved" });
-      alert("Moments video approved and added to the live feed! 🎉");
+      notify("Moments video approved and added to the live feed! 🎉");
       const approvedItem = items?.pending.find((v) => v.id === id);
       removeFromView(id, { toApproved: true, approvedItem: approvedItem && { ...approvedItem, status: "approved" } });
     } catch (err) {
-      alert("Approve xətası: " + err.message);
+      notify("Approve xətası: " + err.message);
     } finally {
       setBusyId(null);
     }
   };
 
   const handleReject = async (id) => {
-    if (!confirm("Are you sure you want to reject this video proposal?")) return;
+    if (!await confirmAsync("Are you sure you want to reject this video proposal?")) return;
     setBusyId(id);
     try {
       await deleteDoc(doc(db, "approved_moments", id));
       removeFromView(id);
     } catch (err) {
-      alert("Reject xətası: " + err.message);
+      notify("Reject xətası: " + err.message);
     } finally {
       setBusyId(null);
     }
   };
 
   const handleRemove = async (id) => {
-    if (!confirm("🚨 Diqqət! Bu video Moments platformasından tamamilə silinəcək. Əminsiniz?")) return;
+    if (!await confirmAsync("🚨 Diqqət! Bu video Moments platformasından tamamilə silinəcək. Əminsiniz?")) return;
     setBusyId(id);
     try {
       await deleteDoc(doc(db, "approved_moments", id));
-      alert("Video successfully removed from the live feed. 🗑️");
+      notify("Video successfully removed from the live feed. 🗑️");
       removeFromView(id);
     } catch (err) {
-      alert("Silmə xətası: " + err.message);
+      notify("Silmə xətası: " + err.message);
     } finally {
       setBusyId(null);
     }

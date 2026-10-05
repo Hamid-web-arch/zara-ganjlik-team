@@ -1,3 +1,4 @@
+import { notify } from "../lib/notify";
 import { useState } from "react";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "../lib/firebase";
@@ -14,12 +15,12 @@ export default function UploadMomentModal({ open, onClose, onUploaded }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
-      alert("Zəhmət olmasa video seçin!");
+      notify("Zəhmət olmasa video seçin!");
       return;
     }
     const validationError = validateVideoFile(file);
     if (validationError) {
-      alert(validationError);
+      notify(validationError);
       return;
     }
 
@@ -34,13 +35,13 @@ export default function UploadMomentModal({ open, onClose, onUploaded }) {
         createdAt: Date.now(),
       });
 
-      alert("Müraciətiniz uğurla göndərildi! Menecer təsdiqlədikdən sonra canlı yayında görünəcək. 🛡️");
+      notify("Müraciətiniz uğurla göndərildi! Menecer təsdiqlədikdən sonra canlı yayında görünəcək. 🛡️");
       setFile(null);
       setCaption("");
       onUploaded?.();
       onClose();
     } catch (err) {
-      alert("Xəta baş verdi: " + err.message);
+      notify("Xəta baş verdi: " + err.message);
     } finally {
       setUploading(false);
     }

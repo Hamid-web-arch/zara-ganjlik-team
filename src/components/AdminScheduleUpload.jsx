@@ -1,3 +1,4 @@
+import { notify } from "../lib/notify";
 import { useEffect, useState } from "react";
 import { collection, doc, getDoc, getDocs, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
@@ -26,7 +27,7 @@ export default function AdminScheduleUpload() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
-      alert("Zəhmət olmasa Excel faylı seçin.");
+      notify("Zəhmət olmasa Excel faylı seçin.");
       return;
     }
 
@@ -71,10 +72,10 @@ export default function AdminScheduleUpload() {
       if (undetailedCount > 0) {
         message += `\n\nDiqqət: ${undetailedCount} işçidə bəzi günlər üçün (adətən Bazar) yalnız cəmi saat var, saat-saat bölgü Excel-də doldurulmayıb.`;
       }
-      alert(message);
+      notify(message);
     } catch (error) {
       console.error("Qrafik yüklənərkən xəta:", error);
-      alert("Xəta baş verdi: " + error.message);
+      notify("Xəta baş verdi: " + error.message);
     } finally {
       setUploading(false);
     }

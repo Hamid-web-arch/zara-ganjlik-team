@@ -1,3 +1,4 @@
+import { notify, confirmAsync } from "../lib/notify";
 import { useEffect, useRef, useState } from "react";
 import {
   collection,
@@ -52,16 +53,16 @@ export default function MemberSection({ collectionName, heading, entityName }) {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm(`Bu ${entityName.toLowerCase()} üzvünü silmək istəyirsiniz?`)) return;
+    if (!await confirmAsync(`Bu ${entityName.toLowerCase()} üzvünü silmək istəyirsiniz?`)) return;
     try {
       const result = await deleteMember(collectionName, id);
       if (result.warning) {
-        alert(result.warning);
+        notify(result.warning);
       } else {
-        alert(`${entityName} profili və giriş hesabı silindi.`);
+        notify(`${entityName} profili və giriş hesabı silindi.`);
       }
     } catch (error) {
-      alert("Silinmə xətası: " + error.message);
+      notify("Silinmə xətası: " + error.message);
     }
   };
 
@@ -87,10 +88,10 @@ export default function MemberSection({ collectionName, heading, entityName }) {
           updatedAt: serverTimestamp(),
         };
         await updateDoc(doc(db, collectionName, editId), data);
-        alert(`${entityName} məlumatları uğurla yeniləndi!`);
+        notify(`${entityName} məlumatları uğurla yeniləndi!`);
       } else {
         if (!form.password) {
-          alert(`Yeni ${entityName.toLowerCase()} üçün şifrə tələb olunur!`);
+          notify(`Yeni ${entityName.toLowerCase()} üçün şifrə tələb olunur!`);
           setSaving(false);
           return;
         }
@@ -112,7 +113,7 @@ export default function MemberSection({ collectionName, heading, entityName }) {
           await setDoc(doc(db, collectionName, uid), data);
         } catch (profileError) {
           console.error("Profil yaradılarkən xəta:", profileError);
-          alert(
+          notify(
             `Diqqət: Giriş hesabı yaradıldı (UID: ${uid}), lakin profil bazaya yazıla bilmədi: ${profileError.message}\n\n` +
               `Firebase konsolundan bu UID-li istifadəçini əl ilə silin, sonra yenidən cəhd edin.`
           );
@@ -120,14 +121,14 @@ export default function MemberSection({ collectionName, heading, entityName }) {
           return;
         }
 
-        alert(`${entityName} üzvü uğurla əlavə olundu!`);
+        notify(`${entityName} üzvü uğurla əlavə olundu!`);
       }
 
       setForm(EMPTY_FORM);
       setEditId(null);
     } catch (error) {
       console.error("Firebase xətası:", error);
-      alert("Xəta baş verdi: " + error.message);
+      notify("Xəta baş verdi: " + error.message);
     } finally {
       setSaving(false);
     }

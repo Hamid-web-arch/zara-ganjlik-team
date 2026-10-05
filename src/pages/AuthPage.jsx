@@ -1,3 +1,4 @@
+import { notify } from "../lib/notify";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -67,7 +68,7 @@ export default function AuthPage() {
 
         if (!userData) {
           await signOut(auth);
-          alert("İstifadəçi məlumatları tapılmadı.");
+          notify("İstifadəçi məlumatları tapılmadı.");
           return;
         }
 
@@ -81,14 +82,14 @@ export default function AuthPage() {
           // manager access — only "user" used to be checked, so an unexpected value
           // left the form stuck with no feedback.
           await signOut(auth);
-          alert("Sizin admin panelinə giriş icazəniz yoxdur!");
+          notify("Sizin admin panelinə giriş icazəniz yoxdur!");
         } else {
           navigate("/staff-profile");
         }
       } catch (error) {
         console.error("Auth Xətası:", error);
         await signOut(auth);
-        alert("Giriş zamanı xəta baş verdi. Yenidən cəhd edin.");
+        notify("Giriş zamanı xəta baş verdi. Yenidən cəhd edin.");
       }
     });
 
@@ -102,7 +103,7 @@ export default function AuthPage() {
     e.preventDefault();
     const selectedRole = roleRef.current;
     if (!selectedRole) {
-      alert("Zəhmət olmasa giriş növünü seçin.");
+      notify("Zəhmət olmasa giriş növünü seçin.");
       return;
     }
 
@@ -113,23 +114,23 @@ export default function AuthPage() {
       // Redirect happens via onAuthStateChanged
     } catch (error) {
       console.error("Giriş xətası:", error);
-      alert("Giriş rədd edildi: Məlumatlar yanlışdır.");
+      notify("Giriş rədd edildi: Məlumatlar yanlışdır.");
     }
   };
 
   const handleSendReset = async () => {
     const value = resetEmail.trim();
     if (!value) {
-      alert("Email daxil edin.");
+      notify("Email daxil edin.");
       return;
     }
     try {
       await sendPasswordResetEmail(auth, value);
-      alert("Link göndərildi.");
+      notify("Link göndərildi.");
       setResetOpen(false);
     } catch (error) {
       console.error("Şifrə sıfırlama xətası:", error);
-      alert("Xəta: Email tapılmadı.");
+      notify("Xəta: Email tapılmadı.");
     }
   };
 

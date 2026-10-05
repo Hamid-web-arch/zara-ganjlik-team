@@ -1,3 +1,4 @@
+import { notify } from "../lib/notify";
 import { useEffect, useState } from "react";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
@@ -27,7 +28,7 @@ export default function EnergyVideoUpload() {
     if (!selected) return;
     const validationError = validateVideoFile(selected);
     if (validationError) {
-      alert(validationError);
+      notify(validationError);
       e.target.value = "";
       return;
     }
@@ -38,7 +39,7 @@ export default function EnergyVideoUpload() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
-      alert("Zəhmət olmasa video seçin.");
+      notify("Zəhmət olmasa video seçin.");
       return;
     }
 
@@ -53,10 +54,10 @@ export default function EnergyVideoUpload() {
 
       setPreviewUrl(url);
       setFile(null);
-      alert("Video uğurla yeniləndi!");
+      notify("Video uğurla yeniləndi!");
     } catch (error) {
       console.error("Video yüklənərkən xəta:", error);
-      alert("Xəta baş verdi: " + error.message);
+      notify("Xəta baş verdi: " + error.message);
     } finally {
       setUploading(false);
     }

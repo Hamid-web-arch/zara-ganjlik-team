@@ -1,3 +1,4 @@
+import { notify } from "../lib/notify";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { sendPasswordResetEmail, signOut } from "firebase/auth";
@@ -28,17 +29,17 @@ export default function StaffProfilePage() {
     if (!file) return;
 
     if (!collectionName || !profile) {
-      alert("Sistem hələ hazır deyil, bir az gözləyin...");
+      notify("Sistem hələ hazır deyil, bir az gözləyin...");
       return;
     }
     const validationError = validateImageFile(file);
     if (validationError) {
-      alert(validationError);
+      notify(validationError);
       e.target.value = "";
       return;
     }
 
-    // No "uploading, please wait" alert here: alert() is blocking, so firing it before
+    // No "uploading, please wait" alert here: notify() is blocking, so firing it before
     // the fetch call only delayed the upload until the user dismissed the dialog.
     setUploading(true);
 
@@ -46,10 +47,10 @@ export default function StaffProfilePage() {
       const imageUrl = await uploadToCloudinary(file, "avatar");
       await updateDoc(doc(db, collectionName, profile.uid), { image: imageUrl });
       setProfile((prev) => ({ ...prev, image: imageUrl }));
-      alert("Şəkil uğurla yeniləndi!");
+      notify("Şəkil uğurla yeniləndi!");
     } catch (error) {
       console.error("Xəta detalları:", error);
-      alert("Şəkil yüklənmədi. Konsola (F12) baxın.");
+      notify("Şəkil yüklənmədi. Konsola (F12) baxın.");
     } finally {
       setUploading(false);
     }
@@ -60,10 +61,10 @@ export default function StaffProfilePage() {
     if (!user) return;
     try {
       await sendPasswordResetEmail(auth, user.email);
-      alert("Şifrəni dəyişmək üçün email ünvanınıza link göndərildi.");
+      notify("Şifrəni dəyişmək üçün email ünvanınıza link göndərildi.");
     } catch (error) {
       console.error("Şifrə sıfırlama xətası:", error);
-      alert("Link göndərilmədi. Bir az sonra yenidən cəhd edin.");
+      notify("Link göndərilmədi. Bir az sonra yenidən cəhd edin.");
     }
   };
 
@@ -73,7 +74,7 @@ export default function StaffProfilePage() {
       navigate("/auth");
     } catch (error) {
       console.error("Çıxış zamanı xəta:", error);
-      alert("Çıxış edilərkən xəta baş verdi.");
+      notify("Çıxış edilərkən xəta baş verdi.");
     }
   };
 

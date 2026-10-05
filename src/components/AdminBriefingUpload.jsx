@@ -1,3 +1,4 @@
+import { notify, confirmAsync } from "../lib/notify";
 import { useEffect, useState } from "react";
 import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "../lib/firebase";
@@ -32,16 +33,16 @@ export default function AdminBriefingUpload() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
-      alert("Zəhmət olmasa video seçin.");
+      notify("Zəhmət olmasa video seçin.");
       return;
     }
     if (!title.trim()) {
-      alert("Başlıq daxil edin.");
+      notify("Başlıq daxil edin.");
       return;
     }
     const validationError = validateVideoFile(file);
     if (validationError) {
-      alert(validationError);
+      notify(validationError);
       return;
     }
 
@@ -59,24 +60,24 @@ export default function AdminBriefingUpload() {
       setTitle("");
       setDescription("");
       setFile(null);
-      alert("Breefing uğurla əlavə olundu!");
+      notify("Breefing uğurla əlavə olundu!");
       await loadBriefings();
     } catch (error) {
       console.error("Breefing yüklənərkən xəta:", error);
-      alert("Xəta baş verdi: " + error.message);
+      notify("Xəta baş verdi: " + error.message);
     } finally {
       setUploading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Bu breefingi silmək istəyirsiniz?")) return;
+    if (!await confirmAsync("Bu breefingi silmək istəyirsiniz?")) return;
     setDeletingId(id);
     try {
       await deleteDoc(doc(db, "briefings", id));
       setBriefings((prev) => prev.filter((b) => b.id !== id));
     } catch (error) {
-      alert("Silinmə xətası: " + error.message);
+      notify("Silinmə xətası: " + error.message);
     } finally {
       setDeletingId(null);
     }
