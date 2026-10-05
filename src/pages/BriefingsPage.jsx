@@ -3,9 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useAuthGuard } from "../hooks/useAuthGuard";
+import { useLanguage } from "../lib/i18n/languageContext";
 
 export default function BriefingsPage() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const { authorized } = useAuthGuard({ onError: () => navigate("/auth") });
   const [briefings, setBriefings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,7 +30,7 @@ export default function BriefingsPage() {
   if (!authorized) {
     return (
       <div className="fixed inset-0 bg-black flex justify-center items-center z-[9999]">
-        <p className="text-[10px] tracking-[0.5em] uppercase text-white animate-pulse">Authenticating...</p>
+        <p className="text-[10px] tracking-[0.5em] uppercase text-white animate-pulse">{t.common.authenticating}</p>
       </div>
     );
   }
@@ -38,29 +40,25 @@ export default function BriefingsPage() {
       <div className="max-w-6xl mx-auto p-6 md:p-12">
         <div className="flex items-center justify-between mb-10 md:mb-12">
           <div>
-            <h1 className="font-sync text-lg md:text-2xl font-bold tracking-tighter uppercase">Briefings</h1>
-            <p className="text-[9px] uppercase tracking-[0.4em] text-white/40 mt-1">
-              Rəsmi elanlar, iclaslar və tədbirlər
-            </p>
+            <h1 className="font-sync text-lg md:text-2xl font-bold tracking-tighter uppercase">{t.briefings.title}</h1>
+            <p className="text-[9px] uppercase tracking-[0.4em] text-white/40 mt-1">{t.briefings.subtitle}</p>
           </div>
           <Link
             to="/"
             className="text-[9px] uppercase tracking-widest border border-white/10 px-4 py-2 hover:bg-white hover:text-black transition shrink-0"
           >
-            Back
+            {t.common.back}
           </Link>
         </div>
 
         {loading && (
           <p className="text-center text-white/40 text-[10px] uppercase tracking-widest py-20 animate-pulse">
-            Yüklənir...
+            {t.common.loading}
           </p>
         )}
 
         {!loading && briefings.length === 0 && (
-          <p className="text-center text-white/20 text-[10px] uppercase tracking-widest py-20">
-            Hələ breefing əlavə olunmayıb.
-          </p>
+          <p className="text-center text-white/20 text-[10px] uppercase tracking-widest py-20">{t.briefings.empty}</p>
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">

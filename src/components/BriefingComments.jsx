@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { addDoc, collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { useLanguage } from "../lib/i18n/languageContext";
 
 const DEFAULT_AVATAR =
   "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
@@ -16,6 +17,8 @@ function formatCommentDate(timestamp) {
 }
 
 export default function BriefingComments({ videoId, currentUser }) {
+  const { t } = useLanguage();
+  const s = t.comments;
   const [comments, setComments] = useState([]);
   const [input, setInput] = useState("");
   const [replyTo, setReplyTo] = useState(null);
@@ -30,9 +33,10 @@ export default function BriefingComments({ videoId, currentUser }) {
         all.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
         setComments(all);
       },
-      (error) => console.error("Şərhlər canlı yüklənərkən xəta:", error)
+      (error) => console.error(s.errLoad, error)
     );
     return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId]);
 
   const handleSend = async (e) => {
@@ -54,7 +58,7 @@ export default function BriefingComments({ videoId, currentUser }) {
       setInput("");
       setReplyTo(null);
     } catch (err) {
-      console.error("Şərh göndərilərkən xəta:", err);
+      console.error(s.errSend, err);
     } finally {
       setSending(false);
     }
@@ -68,14 +72,16 @@ export default function BriefingComments({ videoId, currentUser }) {
 
   return (
     <div className="space-y-6">
-      <h3 className="text-[10px] font-bold tracking-widest uppercase text-white/60">Şərhlər ({comments.length})</h3>
+      <h3 className="text-[10px] font-bold tracking-widest uppercase text-white/60">
+        {s.title} ({comments.length})
+      </h3>
 
       <form onSubmit={handleSend} className="flex flex-col sm:flex-row gap-2">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={replyTo ? "CAVAB YAZ..." : "Rəy bildir..."}
+          placeholder={replyTo ? s.replyPlaceholder : s.placeholder}
           autoComplete="off"
           className="flex-1 bg-white/5 border border-white/10 rounded px-3 py-2.5 text-xs font-light tracking-wide text-white placeholder-white/30 focus:outline-none focus:border-white/30"
         />
@@ -84,26 +90,24 @@ export default function BriefingComments({ videoId, currentUser }) {
           disabled={sending || !input.trim()}
           className="bg-white text-black text-[9px] tracking-widest font-bold px-4 py-2.5 rounded transition hover:bg-zinc-200 uppercase disabled:opacity-40 shrink-0"
         >
-          Göndər
+          {s.send}
         </button>
       </form>
 
       {replyTo && (
         <div className="bg-white/5 px-4 py-2 text-[9px] tracking-widest text-white/50 flex items-center justify-between rounded">
           <span className="uppercase">
-            <strong className="capitalize text-white/80">{replyTo.author}</strong> vasitəsilə cavablandırılır...
+            <strong className="capitalize text-white/80">{replyTo.author}</strong> {s.replyingTo}
           </span>
           <button onClick={() => setReplyTo(null)} className="text-red-400 hover:text-red-300 font-bold ml-2 uppercase">
-            LƏĞV ET
+            {s.cancelReply}
           </button>
         </div>
       )}
 
       <div className="space-y-4">
         {comments.length === 0 && (
-          <p className="text-[9px] tracking-widest font-light text-white/30 uppercase text-center py-6">
-            Hələ şərh yazılmayıb. İlk sən yaz!
-          </p>
+          <p className="text-[9px] tracking-widest font-light text-white/30 uppercase text-center py-6">{s.empty}</p>
         )}
 
         {mainComments.map((comment) => (
@@ -128,7 +132,7 @@ export default function BriefingComments({ videoId, currentUser }) {
                 onClick={() => setReplyTo({ id: comment.id, author: comment.authorName || "Staff" })}
                 className="text-[8px] tracking-widest font-bold text-white/40 hover:text-white transition flex items-center gap-1 uppercase"
               >
-                <i className="fa-solid fa-reply text-[7px]" /> Cavab Yaz
+                <i className="fa-solid fa-reply text-[7px]" /> {s.reply}
               </button>
             </div>
 
