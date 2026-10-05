@@ -31,7 +31,8 @@ export default function StaffProfilePage() {
       return;
     }
 
-    alert("Şəkil yüklənir, zəhmət olmasa gözləyin...");
+    // No "uploading, please wait" alert here: alert() is blocking, so firing it before
+    // the fetch call only delayed the upload until the user dismissed the dialog.
     setUploading(true);
 
     const formData = new FormData();
@@ -63,8 +64,13 @@ export default function StaffProfilePage() {
   const handleResetPassword = async () => {
     const user = auth.currentUser;
     if (!user) return;
-    await sendPasswordResetEmail(auth, user.email);
-    alert("Şifrəni dəyişmək üçün email ünvanınıza link göndərildi.");
+    try {
+      await sendPasswordResetEmail(auth, user.email);
+      alert("Şifrəni dəyişmək üçün email ünvanınıza link göndərildi.");
+    } catch (error) {
+      console.error("Şifrə sıfırlama xətası:", error);
+      alert("Link göndərilmədi. Bir az sonra yenidən cəhd edin.");
+    }
   };
 
   const handleLogout = async () => {
