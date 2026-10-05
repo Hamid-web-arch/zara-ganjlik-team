@@ -2,6 +2,7 @@ import { commonStrings } from "./strings/common";
 import { staffScheduleStrings } from "./strings/staffSchedule";
 import { briefingsStrings } from "./strings/briefings";
 import { commentsStrings } from "./strings/comments";
+import { momentsStrings } from "./strings/moments";
 
 export const LANGUAGES = [
   { code: "az", label: "AZ" },
@@ -309,6 +310,7 @@ const namespaces = {
   staffSchedule: staffScheduleStrings,
   briefings: briefingsStrings,
   comments: commentsStrings,
+  momentsPage: momentsStrings,
 };
 for (const lang of Object.keys(translations)) {
   for (const [ns, dict] of Object.entries(namespaces)) {

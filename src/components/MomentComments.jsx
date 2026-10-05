@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { addDoc, collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { useLanguage } from "../lib/i18n/languageContext";
 
 const DEFAULT_AVATAR =
   "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
@@ -16,6 +17,8 @@ function formatCommentDate(timestamp) {
 }
 
 export default function MomentComments({ videoId, currentUser, onClose, onCountChange }) {
+  const { t } = useLanguage();
+  const s = t.comments;
   const [comments, setComments] = useState([]);
   const [input, setInput] = useState("");
   const [replyTo, setReplyTo] = useState(null);
@@ -32,7 +35,7 @@ export default function MomentComments({ videoId, currentUser, onClose, onCountC
         setComments(all);
         onCountChange?.(videoId, snapshot.size);
       },
-      (error) => console.error("Şərhlər canlı yüklənərkən xəta:", error)
+      (error) => console.error(s.errLoad, error)
     );
     return () => unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -61,7 +64,7 @@ export default function MomentComments({ videoId, currentUser, onClose, onCountC
       setInput("");
       setReplyTo(null);
     } catch (err) {
-      console.error("Şərh göndərilərkən xəta:", err);
+      console.error(s.errSend, err);
     } finally {
       setSending(false);
     }
@@ -76,7 +79,9 @@ export default function MomentComments({ videoId, currentUser, onClose, onCountC
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 h-[75vh] rounded-t-2xl md:static md:z-auto md:h-full md:rounded-sm bg-black/98 md:bg-black/95 backdrop-blur-sm border-t md:border border-white/10 flex flex-col">
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
-        <h3 className="text-[10px] font-bold tracking-widest uppercase">ŞƏRHLƏR ({comments.length})</h3>
+        <h3 className="text-[10px] font-bold tracking-widest uppercase">
+          {s.title} ({comments.length})
+        </h3>
         <button onClick={onClose} className="text-gray-400 hover:text-white cursor-pointer transition">
           <i className="fa-solid fa-xmark text-base" />
         </button>
@@ -84,9 +89,7 @@ export default function MomentComments({ videoId, currentUser, onClose, onCountC
 
       <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
         {comments.length === 0 && (
-          <p className="text-[9px] tracking-widest font-light text-gray-400 uppercase text-center mt-6">
-            Hələ şərh yazılmayıb. İlk sən yaz!
-          </p>
+          <p className="text-[9px] tracking-widest font-light text-gray-400 uppercase text-center mt-6">{s.empty}</p>
         )}
 
         {mainComments.map((comment) => (
@@ -111,7 +114,7 @@ export default function MomentComments({ videoId, currentUser, onClose, onCountC
                 onClick={() => setReplyTo({ id: comment.id, author: comment.authorName || "Staff" })}
                 className="text-[8px] tracking-widest font-bold text-gray-400 hover:text-white transition cursor-pointer flex items-center gap-1 uppercase"
               >
-                <i className="fa-solid fa-reply text-[7px]" /> Cavab Yaz
+                <i className="fa-solid fa-reply text-[7px]" /> {s.reply}
               </button>
             </div>
 
@@ -143,10 +146,10 @@ export default function MomentComments({ videoId, currentUser, onClose, onCountC
       {replyTo && (
         <div className="bg-zinc-900 px-4 py-2 text-[9px] tracking-widest text-gray-400 flex items-center justify-between border-t border-white/5 shrink-0">
           <span className="uppercase">
-            <strong className="capitalize">{replyTo.author}</strong> vasitəsilə cavablandırılır...
+            <strong className="capitalize">{replyTo.author}</strong> {s.replyingTo}
           </span>
           <button onClick={() => setReplyTo(null)} className="text-red-500 hover:text-red-300 font-bold ml-2 uppercase">
-            LƏĞV ET
+            {s.cancelReply}
           </button>
         </div>
       )}
@@ -156,7 +159,7 @@ export default function MomentComments({ videoId, currentUser, onClose, onCountC
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={replyTo ? "CAVAB YAZ..." : "Rəy bildir..."}
+          placeholder={replyTo ? s.replyPlaceholder : s.placeholder}
           autoComplete="off"
           className="flex-1 bg-zinc-900 border border-white/10 rounded px-3 py-2 text-xs font-light tracking-wide text-white placeholder-gray-500 focus:outline-none focus:border-white/10"
         />
@@ -165,7 +168,7 @@ export default function MomentComments({ videoId, currentUser, onClose, onCountC
           disabled={sending || !input.trim()}
           className="bg-white text-black text-[9px] tracking-widest font-bold px-4 py-2.5 rounded transition hover:bg-gray-50 uppercase disabled:opacity-40"
         >
-          GÖNDƏR
+          {s.send}
         </button>
       </form>
     </div>

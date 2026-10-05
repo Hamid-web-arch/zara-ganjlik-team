@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import MomentComments from "./MomentComments";
+import { useLanguage } from "../lib/i18n/languageContext";
 
 function formatTime(seconds) {
   if (Number.isNaN(seconds)) return "00:00";
@@ -18,6 +19,8 @@ export default function MomentCard({
   commentCount,
   onCommentCountChange,
 }) {
+  const { t } = useLanguage();
+  const s = t.momentsPage;
   const videoRef = useRef(null);
   const cardRef = useRef(null);
   const [playing, setPlaying] = useState(false);
@@ -101,7 +104,7 @@ export default function MomentCard({
   };
 
   const commentLabel =
-    commentCount == null ? "YÜKLƏNİR..." : commentCount > 0 ? `ŞƏRHLƏR (${commentCount})` : "ŞƏRH YAZ";
+    commentCount == null ? s.commentsLoading : commentCount > 0 ? s.comments.replace("{n}", commentCount) : s.writeComment;
 
   const uid = currentUser?.uid;
   const liked = uid ? likedBy.includes(uid) : false;
@@ -195,7 +198,7 @@ export default function MomentCard({
             >
               <i className={`fa-heart text-xl ${liked ? "fa-solid text-red-500" : "fa-regular"}`} />
               <span className={`text-[10px] font-light tracking-widest ${liked ? "text-red-500" : "text-gray-400"}`}>
-                {likedBy.length} BƏYƏNMƏ
+                {likedBy.length} {s.likes}
               </span>
             </button>
             <button

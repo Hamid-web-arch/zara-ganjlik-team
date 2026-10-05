@@ -5,12 +5,15 @@ import { db } from "../lib/firebase";
 import { useAuthGuard } from "../hooks/useAuthGuard";
 import MomentCard from "../components/MomentCard";
 import UploadMomentModal from "../components/UploadMomentModal";
+import { useLanguage } from "../lib/i18n/languageContext";
 
 const DEFAULT_AVATAR =
   "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
 
 export default function MomentsPage() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
+  const s = t.momentsPage;
   const containerRef = useRef(null);
   const hasInteractedRef = useRef(false);
   const { authorized, profile } = useAuthGuard({ onError: () => navigate("/auth") });
@@ -59,7 +62,7 @@ export default function MomentsPage() {
   if (!authorized) {
     return (
       <div className="fixed inset-0 bg-black flex justify-center items-center z-[9999]">
-        <p className="text-[10px] tracking-[0.5em] uppercase text-white animate-pulse">Authenticating...</p>
+        <p className="text-[10px] tracking-[0.5em] uppercase text-white animate-pulse">{t.common.authenticating}</p>
       </div>
     );
   }
@@ -70,7 +73,7 @@ export default function MomentsPage() {
         <div className="flex items-baseline gap-2">
           <h1 className="text-2xl md:text-3xl font-black tracking-[-0.15em] text-white">ZARA</h1>
           <span className="text-[10px] md:text-xs font-light tracking-[0.2em] uppercase opacity-70 text-white">
-            STAFF MOMENTS
+            {s.staffMoments}
           </span>
         </div>
         <div className="flex items-center gap-6 text-white">
@@ -78,14 +81,14 @@ export default function MomentsPage() {
             onClick={() => setUploadOpen(true)}
             className="hover:opacity-60 transition-opacity text-[10px] uppercase tracking-widest font-bold flex items-center gap-2 cursor-pointer"
           >
-            <span>YENİ AN PAYLAŞ</span>
+            <span>{s.newMoment}</span>
             <i className="fa-solid fa-plus" />
           </button>
           <button
             onClick={() => navigate("/")}
             className="hover:opacity-60 transition-opacity text-[10px] uppercase tracking-widest font-bold flex items-center gap-2 cursor-pointer"
           >
-            <span>GERİ</span>
+            <span>{s.back}</span>
             <i className="fa-solid fa-arrow-left" />
           </button>
         </div>
@@ -94,15 +97,13 @@ export default function MomentsPage() {
       <div ref={containerRef} className="zara-container w-full h-full bg-black">
         {loading && (
           <div className="zara-card w-full h-full flex items-center justify-center bg-black text-white">
-            <p className="text-[10px] tracking-widest font-light text-gray-400 uppercase animate-pulse">
-              YÜKLƏNİR...
-            </p>
+            <p className="text-[10px] tracking-widest font-light text-gray-400 uppercase animate-pulse">{s.loading}</p>
           </div>
         )}
 
         {!loading && videos.length === 0 && (
           <div className="zara-card w-full h-full flex items-center justify-center bg-black text-white">
-            <p className="text-[10px] tracking-widest font-light text-gray-400 uppercase">No moments shared yet.</p>
+            <p className="text-[10px] tracking-widest font-light text-gray-400 uppercase">{s.empty}</p>
           </div>
         )}
 

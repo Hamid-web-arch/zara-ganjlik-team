@@ -1,11 +1,14 @@
-import { notify } from "../lib/notify";
 import { useState } from "react";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { uploadToCloudinary } from "../lib/adminApi";
 import { validateVideoFile } from "../lib/fileValidation";
+import { notify } from "../lib/notify";
+import { useLanguage } from "../lib/i18n/languageContext";
 
 export default function UploadMomentModal({ open, onClose, onUploaded }) {
+  const { t } = useLanguage();
+  const s = t.momentsPage;
   const [file, setFile] = useState(null);
   const [caption, setCaption] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -15,7 +18,7 @@ export default function UploadMomentModal({ open, onClose, onUploaded }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
-      notify("Zəhmət olmasa video seçin!");
+      notify(s.selectVideo);
       return;
     }
     const validationError = validateVideoFile(file);
@@ -35,13 +38,13 @@ export default function UploadMomentModal({ open, onClose, onUploaded }) {
         createdAt: Date.now(),
       });
 
-      notify("Müraciətiniz uğurla göndərildi! Menecer təsdiqlədikdən sonra canlı yayında görünəcək. 🛡️");
+      notify(s.success);
       setFile(null);
       setCaption("");
       onUploaded?.();
       onClose();
     } catch (err) {
-      notify("Xəta baş verdi: " + err.message);
+      notify(s.error + err.message);
     } finally {
       setUploading(false);
     }
@@ -61,10 +64,8 @@ export default function UploadMomentModal({ open, onClose, onUploaded }) {
         </button>
 
         <div className="mb-6 select-none">
-          <h3 className="text-sm font-black tracking-widest uppercase text-black">YENİ AN PAYLAŞ</h3>
-          <p className="text-[9px] text-gray-400 font-light tracking-wide mt-0.5 uppercase">
-            ZARA GANJLIK MALL STAFF PORTAL
-          </p>
+          <h3 className="text-sm font-black tracking-widest uppercase text-black">{s.uploadTitle}</h3>
+          <p className="text-[9px] text-gray-400 font-light tracking-wide mt-0.5 uppercase">{s.uploadSubtitle}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -79,8 +80,8 @@ export default function UploadMomentModal({ open, onClose, onUploaded }) {
             {!file ? (
               <div className="text-center flex flex-col items-center gap-1 pointer-events-none">
                 <i className="fa-solid fa-cloud-arrow-up text-gray-400 text-lg group-hover:text-black transition-colors" />
-                <p className="text-[10px] font-bold tracking-widest uppercase text-black">VİDEO SEÇİN</p>
-                <p className="text-[9px] text-gray-400 font-light">MP4 format, max 50MB</p>
+                <p className="text-[10px] font-bold tracking-widest uppercase text-black">{s.chooseVideo}</p>
+                <p className="text-[9px] text-gray-400 font-light">{s.format}</p>
               </div>
             ) : (
               <div className="text-center p-2 pointer-events-none">
@@ -91,15 +92,13 @@ export default function UploadMomentModal({ open, onClose, onUploaded }) {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[9px] font-bold tracking-widest uppercase text-gray-400">
-              BU ANIN HEKAYƏSİ NƏDİR?
-            </label>
+            <label className="text-[9px] font-bold tracking-widest uppercase text-gray-400">{s.storyLabel}</label>
             <textarea
               rows={3}
               required
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
-              placeholder="Gənclik Mall komandası ilə keçən o maraqlı günü təsvir et..."
+              placeholder={s.captionPlaceholder}
               className="w-full text-xs p-3 bg-white border border-gray-400/25 text-black outline-none resize-none font-light focus:border-black transition-colors rounded-sm"
             />
           </div>
@@ -109,7 +108,7 @@ export default function UploadMomentModal({ open, onClose, onUploaded }) {
             disabled={uploading}
             className="w-full bg-black text-white text-[10px] font-bold tracking-widest py-4 uppercase hover:bg-zinc-900 transition-colors cursor-pointer disabled:opacity-40"
           >
-            {uploading ? "UPLOADING TO BULUD..." : "YÜKLƏ VƏ TƏSDİQƏ GÖNDƏR"}
+            {uploading ? s.uploading : s.submit}
           </button>
         </form>
       </div>
