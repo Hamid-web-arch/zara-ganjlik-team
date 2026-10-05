@@ -1,6 +1,17 @@
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 
 /**
+ * Accepts the private key in the shapes it commonly ends up in after being pasted into
+ * Vercel's env UI: wrapped in quotes, with literal "\n" sequences instead of newlines,
+ * or with surrounding whitespace. Anything else is passed through unchanged.
+ */
+function normalizePrivateKey(raw) {
+  let key = (raw || "").trim();
+  if (key.startsWith('"') && key.endsWith('"')) key = key.slice(1, -1);
+  return key.replace(/\\n/g, "\n").trim();
+}
+
+/**
  * Vercel may reuse a warm serverless instance across invocations, so this guards
  * against calling initializeApp() more than once (which throws) by reusing the
  * existing app if one is already set up.
@@ -17,9 +28,7 @@ export function getAdminApp() {
     credential: cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      // Vercel's env var UI may store literal "\n" sequences instead of real newlines
-      // depending on how the value was pasted — normalize either form.
-      privateKey: (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, "\n"),
+      privateKey: normalizePrivateKey(process.env.FIREBASE_PRIVATE_KEY),
     }),
   });
 }
