@@ -5,6 +5,7 @@ import { commentsStrings } from "./strings/comments";
 import { momentsStrings } from "./strings/moments";
 import { authStrings } from "./strings/auth";
 import { staffProfileStrings } from "./strings/staffProfile";
+import { adminPanelStrings } from "./strings/adminPanel";
 
 export const LANGUAGES = [
   { code: "az", label: "AZ" },
@@ -315,6 +316,7 @@ const namespaces = {
   momentsPage: momentsStrings,
   authPage: authStrings,
   staffProfile: staffProfileStrings,
+  adminPanel: adminPanelStrings,
 };
 for (const lang of Object.keys(translations)) {
   for (const [ns, dict] of Object.entries(namespaces)) {

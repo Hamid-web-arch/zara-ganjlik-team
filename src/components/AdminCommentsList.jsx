@@ -2,11 +2,14 @@ import { notify, confirmAsync } from "../lib/notify";
 import { useEffect, useState } from "react";
 import { collection, deleteDoc, doc, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { useLanguage } from "../lib/i18n/languageContext";
 
 const DEFAULT_AVATAR =
   "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
 
 export default function AdminCommentsList({ videoId }) {
+  const { t } = useLanguage();
+  const s = t.adminPanel.comments;
   const [comments, setComments] = useState([]);
   const [deletingId, setDeletingId] = useState(null);
 
@@ -21,7 +24,7 @@ export default function AdminCommentsList({ videoId }) {
   }, [videoId]);
 
   const handleDelete = async (comment) => {
-    if (!await confirmAsync("Bu şərhi silmək istəyirsiniz?")) return;
+    if (!(await confirmAsync(s.confirm))) return;
     setDeletingId(comment.id);
     try {
       const replies = comments.filter((c) => c.parentId === comment.id);
@@ -30,7 +33,7 @@ export default function AdminCommentsList({ videoId }) {
         ...replies.map((reply) => deleteDoc(doc(db, "comments", reply.id))),
       ]);
     } catch (err) {
-      notify("Silinmə xətası: " + err.message);
+      notify(s.deleteError + err.message);
     } finally {
       setDeletingId(null);
     }
@@ -43,7 +46,7 @@ export default function AdminCommentsList({ videoId }) {
   }, {});
 
   if (comments.length === 0) {
-    return <p className="text-[9px] text-white/30 uppercase tracking-widest py-3 text-center">Şərh yoxdur.</p>;
+    return <p className="text-[9px] text-white/30 uppercase tracking-widest py-3 text-center">{s.none}</p>;
   }
 
   return (
@@ -67,7 +70,7 @@ export default function AdminCommentsList({ videoId }) {
             <button
               disabled={deletingId === comment.id}
               onClick={() => handleDelete(comment)}
-              title="Şərhi sil"
+              title={s.deleteComment}
               className="text-red-500 hover:text-red-500 text-[10px] shrink-0 disabled:opacity-40 cursor-pointer"
             >
               <i className="fa-solid fa-trash" />
@@ -92,7 +95,7 @@ export default function AdminCommentsList({ videoId }) {
               <button
                 disabled={deletingId === reply.id}
                 onClick={() => handleDelete(reply)}
-                title="Cavabı sil"
+                title={s.deleteReply}
                 className="text-red-500 hover:text-red-500 text-[9px] shrink-0 disabled:opacity-40 cursor-pointer"
               >
                 <i className="fa-solid fa-trash" />

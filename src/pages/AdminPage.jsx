@@ -12,8 +12,11 @@ import AdminMomentsPanel from "../components/AdminMomentsPanel";
 import AdminScheduleUpload from "../components/AdminScheduleUpload";
 import EnergyVideoUpload from "../components/EnergyVideoUpload";
 import AdminBriefingUpload from "../components/AdminBriefingUpload";
+import { useLanguage } from "../lib/i18n/languageContext";
 
 function HeroSettingsSection() {
+  const { t } = useLanguage();
+  const s = t.adminPanel.hero;
   const [title, setTitle] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [previewUrl, setPreviewUrl] = useState("");
@@ -72,10 +75,10 @@ function HeroSettingsSection() {
 
       setImageUrl(finalImageUrl);
       setFile(null);
-      notify("Ana səhifə uğurla yeniləndi!");
+      notify(s.saved);
     } catch (err) {
       console.error("Hero update xətası:", err);
-      notify("Yenilənmə alınmadı.");
+      notify(s.failed);
     } finally {
       setSaving(false);
     }
@@ -84,17 +87,17 @@ function HeroSettingsSection() {
   return (
     <div className="mt-16">
       <div className="max-w-6xl mx-auto mb-8">
-        <h2 className="text-[20px] uppercase tracking-widest text-white font-bold">Hero Section Ayarları</h2>
+        <h2 className="text-[20px] uppercase tracking-widest text-white font-bold">{s.title}</h2>
       </div>
 
       <div className="glass p-8 rounded-sm mb-8">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-4">
-              <label className="text-[9px] uppercase tracking-widest text-white/30 block">Başlıq Yazısı</label>
+              <label className="text-[9px] uppercase tracking-widest text-white/30 block">{s.titleLabel}</label>
               <input
                 type="text"
-                placeholder="Məsələn: GANDJLIK 6615"
+                placeholder={s.titlePh}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full bg-transparent border-b border-white/10 py-3 text-[10px] tracking-widest outline-none focus:border-white transition-all text-white"
@@ -102,7 +105,7 @@ function HeroSettingsSection() {
             </div>
 
             <div className="space-y-4">
-              <label className="text-[9px] uppercase tracking-widest text-white/30 block">Arxa Fon Şəkli</label>
+              <label className="text-[9px] uppercase tracking-widest text-white/30 block">{s.bgLabel}</label>
               <div className="flex items-center gap-4">
                 <input
                   type="file"
@@ -124,7 +127,7 @@ function HeroSettingsSection() {
             disabled={saving}
             className="bg-white text-black px-12 py-4 text-[9px] font-bold uppercase tracking-widest hover:bg-gray-50 transition disabled:opacity-40"
           >
-            {saving ? "UPDATING..." : "Yadda Saxla və Yenilə"}
+            {saving ? s.saving : s.save}
           </button>
         </form>
       </div>
@@ -134,6 +137,8 @@ function HeroSettingsSection() {
 
 export default function AdminPage() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
+  const s = t.adminPanel;
   const { authorized } = useAuthGuard({ requireAdmin: true });
 
   const handleLogout = async () => {
@@ -148,7 +153,9 @@ export default function AdminPage() {
   if (!authorized) {
     return (
       <div className="fixed inset-0 bg-black flex justify-center items-center z-[9999]">
-        <p className="font-sync text-[10px] tracking-[0.5em] uppercase text-white animate-pulse">Authenticating...</p>
+        <p className="font-sync text-[10px] tracking-[0.5em] uppercase text-white animate-pulse">
+          {t.common.authenticating}
+        </p>
       </div>
     );
   }
@@ -160,20 +167,20 @@ export default function AdminPage() {
           <h1 className="font-sync text-xl tracking-tighter uppercase">
             GNC. <span className="text-white/20">Admin</span>
           </h1>
-          <p className="text-[9px] uppercase tracking-[0.4em] text-white/40 mt-1">Management Console</p>
+          <p className="text-[9px] uppercase tracking-[0.4em] text-white/40 mt-1">{s.console}</p>
         </div>
         <div>
           <Link
             to="/"
             className="text-[9px] uppercase tracking-widest border border-white/10 px-4 py-2 hover:bg-white hover:text-black transition mr-2 inline-block"
           >
-            Back
+            {s.back}
           </Link>
           <button
             onClick={handleLogout}
             className="text-[9px] uppercase tracking-widest border border-white/10 px-4 py-2 hover:bg-white hover:text-black transition"
           >
-            Logout
+            {s.logout}
           </button>
         </div>
       </header>
@@ -186,8 +193,8 @@ export default function AdminPage() {
         <AdminBriefingUpload />
 
         <div className="space-y-12">
-          <MemberSection collectionName="crew" heading="MANAGE CREW" entityName="Crew" />
-          <MemberSection collectionName="staff" heading="MANAGE STAFF" entityName="Staff" />
+          <MemberSection collectionName="crew" heading={s.members.manageCrew} entityName="Crew" />
+          <MemberSection collectionName="staff" heading={s.members.manageStaff} entityName="Staff" />
         </div>
       </main>
     </div>

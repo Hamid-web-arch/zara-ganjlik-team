@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { createAuthAccountWithoutSignIn, db } from "../lib/firebase";
 import { deleteMember } from "../lib/adminApi";
+import { useLanguage } from "../lib/i18n/languageContext";
 
 const DEFAULT_AVATAR =
   "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
@@ -20,6 +21,8 @@ const DEFAULT_AVATAR =
 const EMPTY_FORM = { name: "", role: "", idCode: "", email: "", password: "", accessLevel: "user" };
 
 export default function MemberSection({ collectionName, heading, entityName }) {
+  const { t } = useLanguage();
+  const s = t.adminPanel.members;
   const [members, setMembers] = useState([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [editId, setEditId] = useState(null);
@@ -53,16 +56,16 @@ export default function MemberSection({ collectionName, heading, entityName }) {
   };
 
   const handleDelete = async (id) => {
-    if (!await confirmAsync(`Bu ${entityName.toLowerCase()} üzvünü silmək istəyirsiniz?`)) return;
+    if (!(await confirmAsync(s.confirmDelete.replace("{entity}", entityName.toLowerCase())))) return;
     try {
       const result = await deleteMember(collectionName, id);
       if (result.warning) {
         notify(result.warning);
       } else {
-        notify(`${entityName} profili və giriş hesabı silindi.`);
+        notify(s.deleted.replace("{entity}", entityName));
       }
     } catch (error) {
-      notify("Silinmə xətası: " + error.message);
+      notify(s.deleteError + error.message);
     }
   };
 
@@ -88,10 +91,10 @@ export default function MemberSection({ collectionName, heading, entityName }) {
           updatedAt: serverTimestamp(),
         };
         await updateDoc(doc(db, collectionName, editId), data);
-        notify(`${entityName} məlumatları uğurla yeniləndi!`);
+        notify(s.updated.replace("{entity}", entityName));
       } else {
         if (!form.password) {
-          notify(`Yeni ${entityName.toLowerCase()} üçün şifrə tələb olunur!`);
+          notify(s.passwordRequired.replace("{entity}", entityName.toLowerCase()));
           setSaving(false);
           return;
         }
@@ -113,26 +116,26 @@ export default function MemberSection({ collectionName, heading, entityName }) {
           await setDoc(doc(db, collectionName, uid), data);
         } catch (profileError) {
           console.error("Profil yaradılarkən xəta:", profileError);
-          notify(
-            `Diqqət: Giriş hesabı yaradıldı (UID: ${uid}), lakin profil bazaya yazıla bilmədi: ${profileError.message}\n\n` +
-              `Firebase konsolundan bu UID-li istifadəçini əl ilə silin, sonra yenidən cəhd edin.`
-          );
+          notify(s.partialCreate.replace("{uid}", uid).replace("{msg}", profileError.message));
           setSaving(false);
           return;
         }
 
-        notify(`${entityName} üzvü uğurla əlavə olundu!`);
+        notify(s.added.replace("{entity}", entityName));
       }
 
       setForm(EMPTY_FORM);
       setEditId(null);
     } catch (error) {
       console.error("Firebase xətası:", error);
-      notify("Xəta baş verdi: " + error.message);
+      notify(s.saveError + error.message);
     } finally {
       setSaving(false);
     }
   };
+
+  const inputClass =
+    "bg-transparent border-b border-white/10 py-3 text-[10px] tracking-[0.2em] outline-none focus:border-white text-white uppercase";
 
   return (
     <section className="glass p-4 md:p-8 rounded-sm">
@@ -143,45 +146,24 @@ export default function MemberSection({ collectionName, heading, entityName }) {
         onSubmit={handleSubmit}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-10"
       >
-        <input
-          type="text"
-          placeholder="NAME"
-          required
-          value={form.name}
-          onChange={handleChange("name")}
-          className="bg-transparent border-b border-white/10 py-3 text-[10px] tracking-[0.2em] outline-none focus:border-white text-white uppercase"
-        />
-        <input
-          type="text"
-          placeholder="ROLE"
-          required
-          value={form.role}
-          onChange={handleChange("role")}
-          className="bg-transparent border-b border-white/10 py-3 text-[10px] tracking-[0.2em] outline-none focus:border-white text-white uppercase"
-        />
-        <input
-          type="text"
-          placeholder="ID CODE"
-          required
-          value={form.idCode}
-          onChange={handleChange("idCode")}
-          className="bg-transparent border-b border-white/10 py-3 text-[10px] tracking-[0.2em] outline-none focus:border-white text-white uppercase"
-        />
+        <input type="text" placeholder={s.name} required value={form.name} onChange={handleChange("name")} className={inputClass} />
+        <input type="text" placeholder={s.role} required value={form.role} onChange={handleChange("role")} className={inputClass} />
+        <input type="text" placeholder={s.idCode} required value={form.idCode} onChange={handleChange("idCode")} className={inputClass} />
         <input
           type="email"
-          placeholder={editId ? "EMAIL (DƏYİŞDİRİLƏ BİLMƏZ)" : "EMAIL"}
+          placeholder={editId ? s.emailLocked : s.email}
           required
           disabled={!!editId}
-          title={editId ? "Login e-poçtunu dəyişmək üçün Firebase konsolundan istifadə edin" : undefined}
+          title={editId ? s.emailTitle : undefined}
           value={form.email}
           onChange={handleChange("email")}
-          className="bg-transparent border-b border-white/10 py-3 text-[10px] tracking-[0.2em] outline-none focus:border-white text-white uppercase disabled:opacity-40 disabled:cursor-not-allowed"
+          className={`${inputClass} disabled:opacity-40 disabled:cursor-not-allowed`}
         />
         <input
           type="password"
-          placeholder={editId ? "PASSWORD (DƏYİŞDİRİLƏ BİLMƏZ)" : "PASSWORD"}
+          placeholder={editId ? s.passwordLocked : s.password}
           disabled={!!editId}
-          title={editId ? "Şifrəni dəyişmək üçün Firebase konsolundan istifadə edin" : undefined}
+          title={editId ? s.passwordTitle : undefined}
           value={form.password}
           onChange={handleChange("password")}
           className="bg-transparent border-b border-white/10 py-3 text-[10px] tracking-[0.2em] outline-none focus:border-white text-white disabled:opacity-40 disabled:cursor-not-allowed"
@@ -194,10 +176,10 @@ export default function MemberSection({ collectionName, heading, entityName }) {
             className="w-full bg-transparent py-3 text-[10px] tracking-[0.2em] text-white/50 outline-none appearance-none cursor-pointer uppercase font-light"
           >
             <option value="user" className="bg-zinc-900 text-white">
-              User (Staff)
+              {s.userOption}
             </option>
             <option value="admin" className="bg-zinc-900 text-white">
-              Admin (Full Access)
+              {s.adminOption}
             </option>
           </select>
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-white/30 text-[8px]">
@@ -210,7 +192,11 @@ export default function MemberSection({ collectionName, heading, entityName }) {
           disabled={saving}
           className="border border-white/20 py-3 text-[9px] uppercase tracking-[0.4em] hover:bg-white hover:text-black transition-all md:col-span-2 lg:col-span-6 mt-2 disabled:opacity-40"
         >
-          {saving ? "SAVING..." : editId ? `UPDATE ${entityName.toUpperCase()}` : `Add ${entityName}`}
+          {saving
+            ? s.saving
+            : editId
+            ? s.update.replace("{entity}", entityName.toUpperCase())
+            : s.add.replace("{entity}", entityName)}
         </button>
       </form>
 
@@ -231,20 +217,20 @@ export default function MemberSection({ collectionName, heading, entityName }) {
             </div>
             <div className="grid grid-cols-2 gap-2 text-[9px] text-white/40">
               <div>
-                <span className="block text-[8px] uppercase tracking-widest text-white/20">ID</span>
+                <span className="block text-[8px] uppercase tracking-widest text-white/20">{s.id}</span>
                 {m.idCode || "-"}
               </div>
               <div className="min-w-0">
-                <span className="block text-[8px] uppercase tracking-widest text-white/20">Email</span>
+                <span className="block text-[8px] uppercase tracking-widest text-white/20">{s.email}</span>
                 <span className="truncate block">{m.email || "-"}</span>
               </div>
             </div>
             <div className="flex justify-end gap-4 pt-2 border-t border-white/5">
               <button onClick={() => handleEdit(m.id)} className="text-[9px] text-blue-500">
-                [ EDIT ]
+                {s.edit}
               </button>
               <button onClick={() => handleDelete(m.id)} className="text-[9px] text-red-500">
-                [ REMOVE ]
+                {s.remove}
               </button>
             </div>
           </div>
@@ -256,11 +242,11 @@ export default function MemberSection({ collectionName, heading, entityName }) {
         <table className="w-full text-left" style={{ tableLayout: "fixed", borderCollapse: "collapse" }}>
           <thead className="sticky top-0 bg-zinc-900">
             <tr className="border-b border-white/10 text-[8px] uppercase tracking-[0.4em] text-white/30">
-              <th className="pb-4 w-[25%]">Member</th>
-              <th className="pb-4 w-[20%]">Role</th>
-              <th className="pb-4 w-[15%]">ID</th>
-              <th className="pb-4 w-[25%]">Email</th>
-              <th className="pb-4 w-[15%] text-right pr-6">Actions</th>
+              <th className="pb-4 w-[25%]">{s.member}</th>
+              <th className="pb-4 w-[20%]">{s.role}</th>
+              <th className="pb-4 w-[15%]">{s.id}</th>
+              <th className="pb-4 w-[25%]">{s.email}</th>
+              <th className="pb-4 w-[15%] text-right pr-6">{s.actions}</th>
             </tr>
           </thead>
           <tbody>
@@ -278,10 +264,10 @@ export default function MemberSection({ collectionName, heading, entityName }) {
                 <td className="py-4 text-[9px] text-white/40">{m.email || "-"}</td>
                 <td className="py-4 text-right space-x-2 pr-6">
                   <button onClick={() => handleEdit(m.id)} className="text-[8px] text-blue-500">
-                    [ EDIT ]
+                    {s.edit}
                   </button>
                   <button onClick={() => handleDelete(m.id)} className="text-[8px] text-red-500">
-                    [ REMOVE ]
+                    {s.remove}
                   </button>
                 </td>
               </tr>

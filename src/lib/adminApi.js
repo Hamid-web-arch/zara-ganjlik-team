@@ -1,8 +1,9 @@
+import { errorMessage } from "./i18n/messages";
 import { auth } from "./firebase";
 
 async function callApi(path, body) {
   const idToken = await auth.currentUser?.getIdToken();
-  if (!idToken) throw new Error("Giriş tələb olunur.");
+  if (!idToken) throw new Error(errorMessage("notSignedIn"));
 
   const resp = await fetch(path, {
     method: "POST",
@@ -10,7 +11,7 @@ async function callApi(path, body) {
     body: JSON.stringify({ idToken, ...body }),
   });
   const data = await resp.json().catch(() => ({}));
-  if (!resp.ok) throw new Error(data.error || "Sorğu uğursuz oldu.");
+  if (!resp.ok) throw new Error(data.error || errorMessage("requestFailed"));
   return data;
 }
 
@@ -38,7 +39,7 @@ export async function uploadToCloudinary(file, uploadType) {
     body: formData,
   });
   const data = await resp.json();
-  if (!data.secure_url) throw new Error(data.error?.message || "Yükləmə uğursuz oldu.");
+  if (!data.secure_url) throw new Error(data.error?.message || errorMessage("uploadFailed"));
   return data.secure_url;
 }
 
