@@ -1,64 +1,28 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../lib/firebase";
+import { useAuth } from "../lib/authContext";
 
 /**
- * Resolves the signed-in user's staff/crew profile doc and redirects to /auth when
- * signed out. With `requireAdmin`, also redirects to /staff-profile when there is no
- * profile doc or its accessLevel isn't "admin" (matches AdminPage's original guard —
- * a missing profile is treated the same as "not admin").
- *
- * Without `requireAdmin`, any authenticated user is authorized even with no profile
- * doc (matches MomentsPage's original guard, which only requires being signed in).
+ * Same external contract as before the Firebase removal: { loading, authorized, profile,
+ * collectionName }, redirecting to /auth when signed out and (with requireAdmin) to
+ * /staff-profile when signed in but not an admin. profile.kind ("staff" | "crew") is
+ * exposed as collectionName to match how callers already used it.
  */
-export function useAuthGuard({ requireAdmin = false, onError } = {}) {
+export function useAuthGuard({ requireAdmin = false } = {}) {
   const navigate = useNavigate();
-  const [state, setState] = useState({ loading: true, authorized: false, profile: null, collectionName: null });
+  const { loading, profile } = useAuth();
+  const authorized = !loading && !!profile && (!requireAdmin || profile.accessLevel === "admin");
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        navigate("/auth");
-        return;
-      }
+    if (loading) return;
+    if (!profile) navigate("/auth");
+    else if (requireAdmin && profile.accessLevel !== "admin") navigate("/staff-profile");
+  }, [loading, profile, requireAdmin, navigate]);
 
-      try {
-        const [staffSnap, crewSnap] = await Promise.all([
-          getDoc(doc(db, "staff", user.uid)),
-          getDoc(doc(db, "crew", user.uid)),
-        ]);
-        const collectionName = staffSnap.exists() ? "staff" : crewSnap.exists() ? "crew" : null;
-        const data = staffSnap.exists() ? staffSnap.data() : crewSnap.exists() ? crewSnap.data() : null;
-
-        if (requireAdmin && data?.accessLevel !== "admin") {
-          navigate("/staff-profile");
-          return;
-        }
-
-        setState({
-          loading: false,
-          authorized: true,
-          profile: data ? { ...data, uid: user.uid, authEmail: user.email } : null,
-          collectionName,
-        });
-      } catch (error) {
-        console.error("Auth Guard Xətası:", error);
-        // Without this, a Firestore error left `loading: true` forever — the caller
-        // (e.g. AdminPage, which doesn't pass onError) would be stuck on an
-        // "Authenticating..." screen with no way out.
-        setState({ loading: false, authorized: false, profile: null, collectionName: null });
-        // Callers without their own onError (e.g. AdminPage) would otherwise sit on the
-        // "Authenticating..." screen forever — send them back to sign-in instead.
-        if (onError) onError(error);
-        else navigate("/auth");
-      }
-    });
-
-    return () => unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigate, requireAdmin]);
-
-  return state;
+  return {
+    loading,
+    authorized,
+    profile: authorized ? profile : null,
+    collectionName: authorized ? profile.kind : null,
+  };
 }

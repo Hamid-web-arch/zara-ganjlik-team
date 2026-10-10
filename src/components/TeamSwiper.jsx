@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode, Mousewheel, Navigation } from "swiper/modules";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { listMembers } from "../lib/api";
 import "swiper/css";
 
 const BREAKPOINTS = {
@@ -16,11 +15,9 @@ export default function TeamSwiper({ collectionName, swiperClass, prevClass, nex
   const [members, setMembers] = useState([]);
 
   useEffect(() => {
-    const q = query(collection(db, collectionName), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setMembers(snapshot.docs.map((docSnap) => docSnap.data()));
-    });
-    return () => unsubscribe();
+    listMembers(collectionName)
+      .then(setMembers)
+      .catch((error) => console.error("Komanda siyahısı yüklənərkən xəta:", error));
   }, [collectionName]);
 
   return (

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { getSettings } from "../lib/api";
 import TeamSwiper from "../components/TeamSwiper";
 import { useLanguage } from "../lib/i18n/languageContext";
 import LanguageSwitcher from "../components/LanguageSwitcher";
@@ -26,22 +25,20 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(doc(db, "settings", "hero"), (snapshot) => {
-      if (!snapshot.exists()) return;
-      const data = snapshot.data();
-      if (data.title) setHeroTitle(data.title);
-      if (data.image) setHeroImage(data.image);
-    });
-    return () => unsubscribe();
+    getSettings("hero")
+      .then((data) => {
+        if (data?.title) setHeroTitle(data.title);
+        if (data?.image) setHeroImage(data.image);
+      })
+      .catch((error) => console.error("Hero ayarları yüklənərkən xəta:", error));
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(doc(db, "settings", "energyVideo"), (snapshot) => {
-      if (!snapshot.exists()) return;
-      const data = snapshot.data();
-      if (data.videoUrl) setEnergyVideo(data.videoUrl);
-    });
-    return () => unsubscribe();
+    getSettings("energy")
+      .then((data) => {
+        if (data?.videoUrl) setEnergyVideo(data.videoUrl);
+      })
+      .catch((error) => console.error("Video ayarları yüklənərkən xəta:", error));
   }, []);
 
   useEffect(() => {
