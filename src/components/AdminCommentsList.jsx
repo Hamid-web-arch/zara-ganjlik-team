@@ -1,7 +1,6 @@
 import { notify, confirmAsync } from "../lib/notify";
 import { useEffect, useState } from "react";
-import { collection, deleteDoc, doc, onSnapshot, query, where } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { listComments, deleteComment } from "../lib/api";
 import { useLanguage } from "../lib/i18n/languageContext";
 
 const DEFAULT_AVATAR =
@@ -13,25 +12,23 @@ export default function AdminCommentsList({ videoId }) {
   const [comments, setComments] = useState([]);
   const [deletingId, setDeletingId] = useState(null);
 
+  const loadComments = () =>
+    listComments(videoId)
+      .then(setComments)
+      .catch((error) => console.error("Şərhlər yüklənərkən xəta:", error));
+
   useEffect(() => {
-    const q = query(collection(db, "comments"), where("videoId", "==", videoId));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const all = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-      all.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-      setComments(all);
-    });
-    return () => unsubscribe();
+    loadComments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId]);
 
   const handleDelete = async (comment) => {
     if (!(await confirmAsync(s.confirm))) return;
     setDeletingId(comment.id);
     try {
-      const replies = comments.filter((c) => c.parentId === comment.id);
-      await Promise.all([
-        deleteDoc(doc(db, "comments", comment.id)),
-        ...replies.map((reply) => deleteDoc(doc(db, "comments", reply.id))),
-      ]);
+      // Replies cascade automatically on the server (comments.parent_id FK).
+      await deleteComment(comment.id);
+      await loadComments();
     } catch (err) {
       notify(s.deleteError + err.message);
     } finally {

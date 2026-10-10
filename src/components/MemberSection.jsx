@@ -1,18 +1,6 @@
 import { notify, confirmAsync } from "../lib/notify";
 import { useEffect, useRef, useState } from "react";
-import {
-  collection,
-  doc,
-  getDoc,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-  setDoc,
-  updateDoc,
-} from "firebase/firestore";
-import { createAuthAccountWithoutSignIn, db } from "../lib/firebase";
-import { deleteMember } from "../lib/adminApi";
+import { listMembers, createMember, updateMember, deleteMember as deleteMemberApi } from "../lib/api";
 import { useLanguage } from "../lib/i18n/languageContext";
 
 const DEFAULT_AVATAR =
@@ -29,27 +17,28 @@ export default function MemberSection({ collectionName, heading, entityName }) {
   const [saving, setSaving] = useState(false);
   const formRef = useRef(null);
 
+  const loadMembers = () =>
+    listMembers(collectionName)
+      .then(setMembers)
+      .catch((error) => console.error("Üzvlər yüklənərkən xəta:", error));
+
   useEffect(() => {
-    const q = query(collection(db, collectionName), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setMembers(snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
-    });
-    return () => unsubscribe();
+    loadMembers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collectionName]);
 
   const handleChange = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
-  const handleEdit = async (id) => {
-    const docSnap = await getDoc(doc(db, collectionName, id));
-    if (!docSnap.exists()) return;
-    const d = docSnap.data();
+  const handleEdit = (id) => {
+    const member = members.find((m) => m.id === id);
+    if (!member) return;
     setForm({
-      name: d.name || "",
-      role: d.role || "",
-      idCode: d.idCode || "",
-      email: d.email || "",
+      name: member.name || "",
+      role: member.role || "",
+      idCode: member.idCode || "",
+      email: member.email || "",
       password: "",
-      accessLevel: d.accessLevel || "user",
+      accessLevel: member.accessLevel || "user",
     });
     setEditId(id);
     formRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -58,12 +47,9 @@ export default function MemberSection({ collectionName, heading, entityName }) {
   const handleDelete = async (id) => {
     if (!(await confirmAsync(s.confirmDelete.replace("{entity}", entityName.toLowerCase())))) return;
     try {
-      const result = await deleteMember(collectionName, id);
-      if (result.warning) {
-        notify(result.warning);
-      } else {
-        notify(s.deleted.replace("{entity}", entityName));
-      }
+      await deleteMemberApi(collectionName, id);
+      notify(s.deleted.replace("{entity}", entityName));
+      await loadMembers();
     } catch (error) {
       notify(s.deleteError + error.message);
     }
@@ -75,22 +61,15 @@ export default function MemberSection({ collectionName, heading, entityName }) {
 
     try {
       if (editId) {
-        const existing = members.find((m) => m.id === editId);
-        // email/password are intentionally left out of an edit: changing them here would
-        // only update the Firestore profile doc, not the Firebase Auth account, leaving
-        // the member unable to log in with the email shown on their profile. Changing
-        // Auth email/password for another user requires the Admin SDK (a backend), which
-        // this project doesn't have — so those fields stay admin-console-only for edits.
-        const data = {
+        // email/password are intentionally left out of an edit: the API only accepts
+        // them on create. Changing another member's login email/password is an admin-
+        // console (database) action, not something exposed here.
+        await updateMember(collectionName, editId, {
           name: form.name,
           role: form.role,
           idCode: form.idCode,
-          email: existing?.email || form.email,
           accessLevel: form.accessLevel,
-          image: existing?.image || DEFAULT_AVATAR,
-          updatedAt: serverTimestamp(),
-        };
-        await updateDoc(doc(db, collectionName, editId), data);
+        });
         notify(s.updated.replace("{entity}", entityName));
       } else {
         if (!form.password) {
@@ -98,36 +77,22 @@ export default function MemberSection({ collectionName, heading, entityName }) {
           setSaving(false);
           return;
         }
-
-        const uid = await createAuthAccountWithoutSignIn(form.email, form.password);
-
-        const data = {
+        await createMember(collectionName, {
           name: form.name,
           role: form.role,
           idCode: form.idCode,
           email: form.email,
+          password: form.password,
           accessLevel: form.accessLevel,
-          image: DEFAULT_AVATAR,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        };
-
-        try {
-          await setDoc(doc(db, collectionName, uid), data);
-        } catch (profileError) {
-          console.error("Profil yaradılarkən xəta:", profileError);
-          notify(s.partialCreate.replace("{uid}", uid).replace("{msg}", profileError.message));
-          setSaving(false);
-          return;
-        }
-
+        });
         notify(s.added.replace("{entity}", entityName));
       }
 
       setForm(EMPTY_FORM);
       setEditId(null);
+      await loadMembers();
     } catch (error) {
-      console.error("Firebase xətası:", error);
+      console.error("Üzv saxlanarkən xəta:", error);
       notify(s.saveError + error.message);
     } finally {
       setSaving(false);

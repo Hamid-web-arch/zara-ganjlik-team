@@ -1,7 +1,6 @@
 import { notify, confirmAsync } from "../lib/notify";
 import { useEffect, useState } from "react";
-import { collection, deleteDoc, doc, getDocs, orderBy, query, updateDoc } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { listAllMoments, approveMoment, deleteMoment } from "../lib/api";
 import AdminCommentsList from "./AdminCommentsList";
 import { useLanguage } from "../lib/i18n/languageContext";
 
@@ -23,24 +22,9 @@ export default function AdminMomentsPanel() {
   const loadMoments = async () => {
     setLoading(true);
     try {
-      const allSnapshot = await getDocs(query(collection(db, "approved_moments"), orderBy("createdAt", "desc")));
-
-      const pending = [];
-      const approved = [];
-      allSnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        const item = { id: docSnap.id, ...data };
-
-        if (data.status === "approved" || !data.status) {
-          approved.push(item);
-        } else if (data.status === "pending") {
-          pending.push(item);
-        }
-      });
-
-      setItems({ pending, approved });
+      setItems(await listAllMoments());
     } catch (error) {
-      console.error("Firestore-dan data oxunarkən xəta:", error);
+      console.error("Data oxunarkən xəta:", error);
       setItems(null);
     } finally {
       setLoading(false);
@@ -68,7 +52,7 @@ export default function AdminMomentsPanel() {
   const handleApprove = async (id) => {
     setBusyId(id);
     try {
-      await updateDoc(doc(db, "approved_moments", id), { status: "approved" });
+      await approveMoment(id);
       notify(s.approved);
       const approvedItem = items?.pending.find((v) => v.id === id);
       removeFromView(id, { toApproved: true, approvedItem: approvedItem && { ...approvedItem, status: "approved" } });
@@ -83,7 +67,7 @@ export default function AdminMomentsPanel() {
     if (!(await confirmAsync(s.rejectConfirm))) return;
     setBusyId(id);
     try {
-      await deleteDoc(doc(db, "approved_moments", id));
+      await deleteMoment(id);
       removeFromView(id);
     } catch (err) {
       notify(s.rejectError + err.message);
@@ -96,7 +80,7 @@ export default function AdminMomentsPanel() {
     if (!(await confirmAsync(s.removeConfirm))) return;
     setBusyId(id);
     try {
-      await deleteDoc(doc(db, "approved_moments", id));
+      await deleteMoment(id);
       notify(s.removed);
       removeFromView(id);
     } catch (err) {
