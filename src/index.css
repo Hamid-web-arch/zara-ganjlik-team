@@ -155,3 +155,10 @@ input:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 30px black inset !important;
   -webkit-text-fill-color: white !important;
 }
+
+/* The admin panel is light-themed, so its inputs need the opposite override —
+   higher specificity than the rule above wins regardless of source order. */
+.admin-light input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+  -webkit-text-fill-color: #18181b !important;
+}

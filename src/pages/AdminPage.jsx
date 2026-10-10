@@ -171,7 +171,7 @@ export default function AdminPage() {
   const active = SECTIONS.find((item) => item.id === section) || SECTIONS[0];
 
   return (
-    <div className="min-h-screen bg-white text-zinc-900 flex flex-col md:flex-row">
+    <div className="admin-light min-h-screen bg-white text-zinc-900 flex flex-col md:flex-row">
       <aside className="md:w-64 md:shrink-0 md:flex md:flex-col md:h-screen md:sticky md:top-0 border-b md:border-b-0 md:border-r border-zinc-200 bg-zinc-50">
         <div className="p-6 border-b border-zinc-200 flex items-start justify-between gap-4">
           <div>
