@@ -74,36 +74,34 @@ function HeroSettingsSection() {
   };
 
   return (
-    <div className="mt-16">
-      <div className="max-w-6xl mx-auto mb-8">
-        <h2 className="text-[20px] uppercase tracking-widest text-white font-bold">{s.title}</h2>
-      </div>
+    <div>
+      <h2 className="text-[20px] uppercase tracking-widest text-zinc-900 font-bold mb-8">{s.title}</h2>
 
-      <div className="glass p-8 rounded-sm mb-8">
+      <div className="bg-white border border-zinc-200 p-6 md:p-8 rounded-sm">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-4">
-              <label className="text-[9px] uppercase tracking-widest text-white/30 block">{s.titleLabel}</label>
+              <label className="text-[9px] uppercase tracking-widest text-zinc-400 block">{s.titleLabel}</label>
               <input
                 type="text"
                 placeholder={s.titlePh}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-transparent border-b border-white/10 py-3 text-[10px] tracking-widest outline-none focus:border-white transition-all text-white"
+                className="w-full bg-transparent border-b border-zinc-200 py-3 text-[10px] tracking-widest outline-none focus:border-zinc-900 transition-all text-zinc-900"
               />
             </div>
 
             <div className="space-y-4">
-              <label className="text-[9px] uppercase tracking-widest text-white/30 block">{s.bgLabel}</label>
+              <label className="text-[9px] uppercase tracking-widest text-zinc-400 block">{s.bgLabel}</label>
               <div className="flex items-center gap-4">
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleFileChange}
-                  className="flex-1 bg-white/5 border border-white/5 py-3 px-4 text-[9px] outline-none cursor-pointer"
+                  className="flex-1 bg-zinc-50 border border-zinc-200 py-3 px-4 text-[9px] outline-none cursor-pointer text-zinc-700"
                 />
                 {previewUrl && (
-                  <div className="w-20 h-20 border border-white/10 rounded overflow-hidden">
+                  <div className="w-20 h-20 border border-zinc-200 rounded overflow-hidden">
                     <img src={previewUrl} className="w-full h-full object-cover" alt="" />
                   </div>
                 )}
@@ -114,7 +112,7 @@ function HeroSettingsSection() {
           <button
             type="submit"
             disabled={saving}
-            className="bg-white text-black px-12 py-4 text-[9px] font-bold uppercase tracking-widest hover:bg-gray-50 transition disabled:opacity-40"
+            className="bg-zinc-900 text-white px-12 py-4 text-[9px] font-bold uppercase tracking-widest hover:bg-zinc-700 transition disabled:opacity-40"
           >
             {saving ? s.saving : s.save}
           </button>
@@ -130,6 +128,7 @@ export default function AdminPage() {
   const s = t.adminPanel;
   const { authorized } = useAuthGuard({ requireAdmin: true });
   const { logout } = useAuth();
+  const [section, setSection] = useState("hero");
 
   const handleLogout = async () => {
     try {
@@ -150,43 +149,71 @@ export default function AdminPage() {
     );
   }
 
+  // One list drives both the sidebar and which section renders — add a resource here and
+  // it shows up in the nav for free, no separate routing/layout to keep in sync.
+  const SECTIONS = [
+    { id: "hero", label: s.hero.title, render: () => <HeroSettingsSection /> },
+    { id: "energy", label: s.energy.title, render: () => <EnergyVideoUpload /> },
+    { id: "schedule", label: s.schedule.title, render: () => <AdminScheduleUpload /> },
+    { id: "moments", label: s.moments.title, render: () => <AdminMomentsPanel /> },
+    { id: "briefings", label: s.briefings.title, render: () => <AdminBriefingUpload /> },
+    {
+      id: "crew",
+      label: s.members.manageCrew,
+      render: () => <MemberSection collectionName="crew" heading={s.members.manageCrew} entityName="Crew" />,
+    },
+    {
+      id: "staff",
+      label: s.members.manageStaff,
+      render: () => <MemberSection collectionName="staff" heading={s.members.manageStaff} entityName="Staff" />,
+    },
+  ];
+  const active = SECTIONS.find((item) => item.id === section) || SECTIONS[0];
+
   return (
-    <div className="min-h-screen bg-black text-white p-6 md:p-12">
-      <header className="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-12">
-        <div>
-          <h1 className="font-sync text-xl tracking-tighter uppercase">
-            GNC. <span className="text-white/20">Admin</span>
+    <div className="min-h-screen bg-white text-zinc-900 flex flex-col md:flex-row">
+      <aside className="md:w-64 md:shrink-0 md:flex md:flex-col md:h-screen md:sticky md:top-0 border-b md:border-b-0 md:border-r border-zinc-200 bg-zinc-50">
+        <div className="p-6 border-b border-zinc-200">
+          <h1 className="font-sync text-lg tracking-tighter uppercase text-zinc-900">
+            GNC. <span className="text-zinc-400">Admin</span>
           </h1>
-          <p className="text-[9px] uppercase tracking-[0.4em] text-white/40 mt-1">{s.console}</p>
+          <p className="text-[9px] uppercase tracking-[0.3em] text-zinc-400 mt-1">{s.console}</p>
         </div>
-        <div>
+
+        <nav className="flex md:flex-col overflow-x-auto md:overflow-y-auto md:flex-1">
+          {SECTIONS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setSection(item.id)}
+              className={`text-left whitespace-nowrap px-6 py-4 text-[10px] uppercase tracking-[0.2em] border-b border-zinc-100 transition shrink-0 ${
+                item.id === active.id
+                  ? "bg-zinc-900 text-white"
+                  : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="p-4 flex gap-2 border-t border-zinc-200">
           <Link
             to="/"
-            className="text-[9px] uppercase tracking-widest border border-white/10 px-4 py-2 hover:bg-white hover:text-black transition mr-2 inline-block"
+            className="flex-1 text-center text-[9px] uppercase tracking-widest border border-zinc-200 px-4 py-3 hover:bg-zinc-900 hover:text-white transition"
           >
             {s.back}
           </Link>
           <button
             onClick={handleLogout}
-            className="text-[9px] uppercase tracking-widest border border-white/10 px-4 py-2 hover:bg-white hover:text-black transition"
+            className="flex-1 text-[9px] uppercase tracking-widest border border-zinc-200 px-4 py-3 hover:bg-zinc-900 hover:text-white transition"
           >
             {s.logout}
           </button>
         </div>
-      </header>
+      </aside>
 
-      <main className="max-w-6xl mx-auto">
-        <HeroSettingsSection />
-        <EnergyVideoUpload />
-        <AdminScheduleUpload />
-        <AdminMomentsPanel />
-        <AdminBriefingUpload />
-
-        <div className="space-y-12">
-          <MemberSection collectionName="crew" heading={s.members.manageCrew} entityName="Crew" />
-          <MemberSection collectionName="staff" heading={s.members.manageStaff} entityName="Staff" />
-        </div>
-      </main>
+      <main className="flex-1 min-w-0 p-6 md:p-10">{active.render()}</main>
     </div>
   );
 }

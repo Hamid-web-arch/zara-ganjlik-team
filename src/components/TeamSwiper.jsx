@@ -4,6 +4,9 @@ import { FreeMode, Mousewheel, Navigation } from "swiper/modules";
 import { listMembers } from "../lib/api";
 import "swiper/css";
 
+const DEFAULT_AVATAR =
+  "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
+
 const BREAKPOINTS = {
   480: { slidesPerView: 2.2, spaceBetween: 20 },
   768: { slidesPerView: 3.2, spaceBetween: 24 },
@@ -38,7 +41,7 @@ export default function TeamSwiper({ collectionName, swiperClass, prevClass, nex
           <SwiperSlide key={index} className="group cursor-pointer !flex !flex-col !items-center !justify-center !text-center !h-auto">
             <div className="rounded-full overflow-hidden bg-white/5 mb-4 border border-white/5 relative select-none w-40 h-40 min-w-40 min-h-40 flex items-center justify-center">
               <img
-                src={member.image}
+                src={member.image || DEFAULT_AVATAR}
                 alt={member.name || ""}
                 loading="lazy"
                 decoding="async"

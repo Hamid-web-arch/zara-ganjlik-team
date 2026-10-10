@@ -121,11 +121,11 @@ export default function MemberSection({ collectionName, heading, entityName }) {
   };
 
   const inputClass =
-    "bg-transparent border-b border-white/10 py-3 text-[10px] tracking-[0.2em] outline-none focus:border-white text-white uppercase";
+    "bg-transparent border-b border-zinc-200 py-3 text-[10px] tracking-[0.2em] outline-none focus:border-zinc-900 text-zinc-900 placeholder:text-zinc-400";
 
   return (
-    <section className="glass p-4 md:p-8 rounded-sm">
-      <h2 className="font-sync text-xl font-bold tracking-tighter mb-8 text-white">{heading}</h2>
+    <section className="bg-white border border-zinc-200 p-4 md:p-8 rounded-sm">
+      <h2 className="font-sync text-xl font-bold tracking-tighter mb-8 text-zinc-900">{heading}</h2>
 
       <form
         ref={formRef}
@@ -152,23 +152,23 @@ export default function MemberSection({ collectionName, heading, entityName }) {
           title={editId ? s.passwordTitle : undefined}
           value={form.password}
           onChange={handleChange("password")}
-          className="bg-transparent border-b border-white/10 py-3 text-[10px] tracking-[0.2em] outline-none focus:border-white text-white disabled:opacity-40 disabled:cursor-not-allowed"
+          className="bg-transparent border-b border-zinc-200 py-3 text-[10px] tracking-[0.2em] outline-none focus:border-zinc-900 text-zinc-900 placeholder:text-zinc-400 disabled:opacity-40 disabled:cursor-not-allowed"
         />
-        <div className="relative border-b border-white/10 focus-within:border-white">
+        <div className="relative border-b border-zinc-200 focus-within:border-zinc-900">
           <select
             required
             value={form.accessLevel}
             onChange={handleChange("accessLevel")}
-            className="w-full bg-transparent py-3 text-[10px] tracking-[0.2em] text-white/50 outline-none appearance-none cursor-pointer uppercase font-light"
+            className="w-full bg-transparent py-3 text-[10px] tracking-[0.2em] text-zinc-600 outline-none appearance-none cursor-pointer font-light"
           >
-            <option value="user" className="bg-zinc-900 text-white">
+            <option value="user" className="bg-white text-zinc-900">
               {s.userOption}
             </option>
-            <option value="admin" className="bg-zinc-900 text-white">
+            <option value="admin" className="bg-white text-zinc-900">
               {s.adminOption}
             </option>
           </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-white/30 text-[8px]">
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400 text-[8px]">
             ▼
           </div>
         </div>
@@ -176,7 +176,7 @@ export default function MemberSection({ collectionName, heading, entityName }) {
         <button
           type="submit"
           disabled={saving}
-          className="border border-white/20 py-3 text-[9px] uppercase tracking-[0.4em] hover:bg-white hover:text-black transition-all md:col-span-2 lg:col-span-6 mt-2 disabled:opacity-40"
+          className="border border-zinc-300 py-3 text-[9px] uppercase tracking-[0.4em] hover:bg-zinc-900 hover:text-white hover:border-zinc-900 transition-all md:col-span-2 lg:col-span-6 mt-2 disabled:opacity-40"
         >
           {saving
             ? s.saving
@@ -190,35 +190,35 @@ export default function MemberSection({ collectionName, heading, entityName }) {
           truncating every column, so below md this renders as cards instead. */}
       <div className="md:hidden space-y-3 max-h-[400px] overflow-y-auto">
         {members.map((m) => (
-          <div key={m.id} className="border border-white/10 rounded-sm p-4 space-y-3">
+          <div key={m.id} className="border border-zinc-200 rounded-sm p-4 space-y-3">
             <div className="flex items-center gap-3">
               <img src={m.image || DEFAULT_AVATAR} className="w-10 h-10 object-cover rounded-full shrink-0" alt="" />
               <div className="min-w-0">
-                <p className="text-[11px] text-white truncate">{m.name}</p>
-                <p className="text-[9px] text-white/40 truncate">
+                <p className="text-[11px] text-zinc-900 truncate">{m.name}</p>
+                <p className="text-[9px] text-zinc-500 truncate">
                   {m.role}
-                  {m.accessLevel === "admin" && <span className="text-blue-500"> [ADMIN]</span>}
+                  {m.accessLevel === "admin" && <span className="text-blue-600"> [ADMIN]</span>}
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2 text-[9px] text-white/40">
+            <div className="grid grid-cols-2 gap-2 text-[9px] text-zinc-500">
               <div>
-                <span className="block text-[8px] uppercase tracking-widest text-white/20">{s.id}</span>
+                <span className="block text-[8px] uppercase tracking-widest text-zinc-400">{s.id}</span>
                 {m.idCode || "-"}
               </div>
               <div className="min-w-0">
-                <span className="block text-[8px] uppercase tracking-widest text-white/20">{s.email}</span>
+                <span className="block text-[8px] uppercase tracking-widest text-zinc-400">{s.email}</span>
                 <span className="truncate block">{m.email || "-"}</span>
               </div>
             </div>
-            <div className="flex justify-end gap-4 pt-2 border-t border-white/5">
-              <button onClick={() => handleEdit(m.id)} className="text-[9px] text-blue-500">
+            <div className="flex justify-end gap-4 pt-2 border-t border-zinc-100">
+              <button onClick={() => handleEdit(m.id)} className="text-[9px] text-blue-600">
                 {s.edit}
               </button>
-              <button onClick={() => handleIssueTempPassword(m.id)} className="text-[9px] text-amber-500">
+              <button onClick={() => handleIssueTempPassword(m.id)} className="text-[9px] text-amber-600">
                 {s.issueTempPassword}
               </button>
-              <button onClick={() => handleDelete(m.id)} className="text-[9px] text-red-500">
+              <button onClick={() => handleDelete(m.id)} className="text-[9px] text-red-600">
                 {s.remove}
               </button>
             </div>
@@ -229,36 +229,36 @@ export default function MemberSection({ collectionName, heading, entityName }) {
       {/* Desktop/tablet: table */}
       <div className="hidden md:block max-h-[300px] overflow-y-auto overflow-x-auto">
         <table className="w-full text-left" style={{ tableLayout: "fixed", borderCollapse: "collapse" }}>
-          <thead className="sticky top-0 bg-zinc-900">
-            <tr className="border-b border-white/10 text-[8px] uppercase tracking-[0.4em] text-white/30">
-              <th className="pb-4 w-[25%]">{s.member}</th>
-              <th className="pb-4 w-[20%]">{s.role}</th>
-              <th className="pb-4 w-[15%]">{s.id}</th>
-              <th className="pb-4 w-[25%]">{s.email}</th>
-              <th className="pb-4 w-[15%] text-right pr-6">{s.actions}</th>
+          <thead className="sticky top-0 bg-zinc-50">
+            <tr className="border-b border-zinc-200 text-[8px] uppercase tracking-[0.4em] text-zinc-400">
+              <th className="pb-4 w-[22%]">{s.member}</th>
+              <th className="pb-4 w-[18%]">{s.role}</th>
+              <th className="pb-4 w-[13%]">{s.id}</th>
+              <th className="pb-4 w-[22%]">{s.email}</th>
+              <th className="pb-4 w-[25%] text-right pr-6">{s.actions}</th>
             </tr>
           </thead>
           <tbody>
             {members.map((m) => (
-              <tr key={m.id} className="group border-b border-white/5 hover:bg-white/[0.02]">
+              <tr key={m.id} className="group border-b border-zinc-100 hover:bg-zinc-50">
                 <td className="py-4 flex items-center gap-3">
                   <img src={m.image || DEFAULT_AVATAR} className="w-10 h-10 object-cover rounded-full" alt="" />
-                  <span className="text-[10px] text-white">{m.name}</span>
+                  <span className="text-[10px] text-zinc-900">{m.name}</span>
                 </td>
-                <td className="py-4 text-[9px] text-white/40">
+                <td className="py-4 text-[9px] text-zinc-500">
                   {m.role}
-                  {m.accessLevel === "admin" && <span className="text-blue-500 text-[8px]"> [ADMIN]</span>}
+                  {m.accessLevel === "admin" && <span className="text-blue-600 text-[8px]"> [ADMIN]</span>}
                 </td>
-                <td className="py-4 text-[9px] text-white/40">{m.idCode || "-"}</td>
-                <td className="py-4 text-[9px] text-white/40">{m.email || "-"}</td>
+                <td className="py-4 text-[9px] text-zinc-500">{m.idCode || "-"}</td>
+                <td className="py-4 text-[9px] text-zinc-500">{m.email || "-"}</td>
                 <td className="py-4 text-right space-x-2 pr-6">
-                  <button onClick={() => handleEdit(m.id)} className="text-[8px] text-blue-500">
+                  <button onClick={() => handleEdit(m.id)} className="text-[8px] text-blue-600">
                     {s.edit}
                   </button>
-                  <button onClick={() => handleIssueTempPassword(m.id)} className="text-[8px] text-amber-500">
+                  <button onClick={() => handleIssueTempPassword(m.id)} className="text-[8px] text-amber-600">
                     {s.issueTempPassword}
                   </button>
-                  <button onClick={() => handleDelete(m.id)} className="text-[8px] text-red-500">
+                  <button onClick={() => handleDelete(m.id)} className="text-[8px] text-red-600">
                     {s.remove}
                   </button>
                 </td>

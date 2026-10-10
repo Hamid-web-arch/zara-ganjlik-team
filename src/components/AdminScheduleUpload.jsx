@@ -74,48 +74,46 @@ export default function AdminScheduleUpload() {
   };
 
   return (
-    <div className="my-8">
-      <div className="glass p-8 rounded-sm">
-        <div className="border-b border-white/10 pb-4 mb-6">
-          <h2 className="font-sync text-xs tracking-widest uppercase">{s.title}</h2>
-          <p className="text-[9px] uppercase tracking-widest text-white/30 mt-1">{s.desc}</p>
-          {currentInfo && (
-            <p className="text-[9px] text-white/40 mt-2">
-              {s.current} <span className="text-white">{currentInfo.weekLabel || s.untitledWeek}</span> —{" "}
-              {s.foundFor.replace("{n}", currentInfo.count)}
-            </p>
-          )}
-        </div>
-
-        <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4 items-start md:items-end">
-          <div className="flex-1 space-y-2 w-full">
-            <label className="text-[9px] uppercase tracking-widest text-white/30 block">{s.weekLabel}</label>
-            <input
-              type="text"
-              value={weekLabel}
-              onChange={(e) => setWeekLabel(e.target.value)}
-              placeholder="13.07 - 19.07.2026"
-              className="w-full bg-transparent border-b border-white/10 py-3 text-[10px] tracking-widest outline-none focus:border-white transition-all text-white"
-            />
-          </div>
-          <div className="flex-1 space-y-2 w-full">
-            <label className="text-[9px] uppercase tracking-widest text-white/30 block">{s.excelFile}</label>
-            <input
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={(e) => setFile(e.target.files[0] || null)}
-              className="w-full bg-white/5 border border-white/5 py-3 px-4 text-[9px] outline-none cursor-pointer"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={uploading}
-            className="bg-white text-black px-8 py-3 text-[9px] font-bold uppercase tracking-widest hover:bg-gray-50 transition disabled:opacity-40 whitespace-nowrap"
-          >
-            {uploading ? s.uploading : s.upload}
-          </button>
-        </form>
+    <div className="bg-white border border-zinc-200 p-4 md:p-8 rounded-sm">
+      <div className="border-b border-zinc-200 pb-4 mb-6">
+        <h2 className="font-sync text-xs tracking-widest uppercase text-zinc-900">{s.title}</h2>
+        <p className="text-[9px] uppercase tracking-widest text-zinc-400 mt-1">{s.desc}</p>
+        {currentInfo && (
+          <p className="text-[9px] text-zinc-500 mt-2">
+            {s.current} <span className="text-zinc-900">{currentInfo.weekLabel || s.untitledWeek}</span> —{" "}
+            {s.foundFor.replace("{n}", currentInfo.count)}
+          </p>
+        )}
       </div>
+
+      <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4 items-start md:items-end">
+        <div className="flex-1 space-y-2 w-full">
+          <label className="text-[9px] uppercase tracking-widest text-zinc-400 block">{s.weekLabel}</label>
+          <input
+            type="text"
+            value={weekLabel}
+            onChange={(e) => setWeekLabel(e.target.value)}
+            placeholder="13.07 - 19.07.2026"
+            className="w-full bg-transparent border-b border-zinc-200 py-3 text-[10px] tracking-widest outline-none focus:border-zinc-900 transition-all text-zinc-900"
+          />
+        </div>
+        <div className="flex-1 space-y-2 w-full">
+          <label className="text-[9px] uppercase tracking-widest text-zinc-400 block">{s.excelFile}</label>
+          <input
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={(e) => setFile(e.target.files[0] || null)}
+            className="w-full bg-zinc-50 border border-zinc-200 py-3 px-4 text-[9px] outline-none cursor-pointer text-zinc-700"
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={uploading}
+          className="bg-zinc-900 text-white px-8 py-3 text-[9px] font-bold uppercase tracking-widest hover:bg-zinc-700 transition disabled:opacity-40 whitespace-nowrap"
+        >
+          {uploading ? s.uploading : s.upload}
+        </button>
+      </form>
     </div>
   );
 }

@@ -55,45 +55,43 @@ export default function EnergyVideoUpload() {
   };
 
   return (
-    <div className="my-8">
-      <div className="glass p-8 rounded-sm">
-        <div className="border-b border-white/10 pb-4 mb-6">
-          <h2 className="font-sync text-xs tracking-widest uppercase">{s.title}</h2>
-          <p className="text-[9px] uppercase tracking-widest text-white/30 mt-1">{s.desc}</p>
+    <div className="bg-white border border-zinc-200 p-4 md:p-8 rounded-sm">
+      <div className="border-b border-zinc-200 pb-4 mb-6">
+        <h2 className="font-sync text-xs tracking-widest uppercase text-zinc-900">{s.title}</h2>
+        <p className="text-[9px] uppercase tracking-widest text-zinc-400 mt-1">{s.desc}</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4 items-start md:items-end">
+        <div className="flex-1 space-y-2 w-full">
+          <label className="text-[9px] uppercase tracking-widest text-zinc-400 block">{s.newVideo}</label>
+          <input
+            type="file"
+            accept="video/*"
+            onChange={handleFileChange}
+            className="w-full bg-zinc-50 border border-zinc-200 py-3 px-4 text-[9px] outline-none cursor-pointer text-zinc-700"
+          />
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4 items-start md:items-end">
-          <div className="flex-1 space-y-2 w-full">
-            <label className="text-[9px] uppercase tracking-widest text-white/30 block">{s.newVideo}</label>
-            <input
-              type="file"
-              accept="video/*"
-              onChange={handleFileChange}
-              className="w-full bg-white/5 border border-white/5 py-3 px-4 text-[9px] outline-none cursor-pointer"
-            />
-          </div>
+        <button
+          type="submit"
+          disabled={uploading || !file}
+          className="bg-zinc-900 text-white px-8 py-3 text-[9px] font-bold uppercase tracking-widest hover:bg-zinc-700 transition disabled:opacity-40 whitespace-nowrap"
+        >
+          {uploading ? s.uploading : s.upload}
+        </button>
+      </form>
 
-          <button
-            type="submit"
-            disabled={uploading || !file}
-            className="bg-white text-black px-8 py-3 text-[9px] font-bold uppercase tracking-widest hover:bg-gray-50 transition disabled:opacity-40 whitespace-nowrap"
-          >
-            {uploading ? s.uploading : s.upload}
-          </button>
-        </form>
-
-        {previewUrl && (
-          <div className="mt-6 space-y-2">
-            <label className="text-[9px] uppercase tracking-widest text-white/30 block">{s.preview}</label>
-            <video
-              src={previewUrl}
-              className="w-full max-w-md h-40 object-cover rounded-sm border border-white/10"
-              controls
-              muted
-            />
-          </div>
-        )}
-      </div>
+      {previewUrl && (
+        <div className="mt-6 space-y-2">
+          <label className="text-[9px] uppercase tracking-widest text-zinc-400 block">{s.preview}</label>
+          <video
+            src={previewUrl}
+            className="w-full max-w-md h-40 object-cover rounded-sm border border-zinc-200"
+            controls
+            muted
+          />
+        </div>
+      )}
     </div>
   );
 }

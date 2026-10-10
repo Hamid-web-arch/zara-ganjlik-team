@@ -43,32 +43,32 @@ export default function AdminCommentsList({ videoId }) {
   }, {});
 
   if (comments.length === 0) {
-    return <p className="text-[9px] text-white/30 uppercase tracking-widest py-3 text-center">{s.none}</p>;
+    return <p className="text-[9px] text-zinc-400 uppercase tracking-widest py-3 text-center">{s.none}</p>;
   }
 
   return (
     <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
       {mainComments.map((comment) => (
-        <div key={comment.id} className="border-b border-white/5 pb-2">
+        <div key={comment.id} className="border-b border-zinc-100 pb-2">
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-start gap-2 min-w-0">
               <img
                 src={comment.authorImage || DEFAULT_AVATAR}
                 alt=""
-                className="w-5 h-5 rounded-full object-cover border border-white/10 shrink-0 mt-0.5"
+                className="w-5 h-5 rounded-full object-cover border border-zinc-200 shrink-0 mt-0.5"
               />
               <div className="min-w-0">
-                <p className="text-[9px] text-white/70 capitalize tracking-widest truncate">
+                <p className="text-[9px] text-zinc-600 capitalize tracking-widest truncate">
                   {comment.authorName || "Staff Member"}
                 </p>
-                <p className="text-[10px] text-white/90 break-words">{comment.text}</p>
+                <p className="text-[10px] text-zinc-900 break-words">{comment.text}</p>
               </div>
             </div>
             <button
               disabled={deletingId === comment.id}
               onClick={() => handleDelete(comment)}
               title={s.deleteComment}
-              className="text-red-500 hover:text-red-500 text-[10px] shrink-0 disabled:opacity-40 cursor-pointer"
+              className="text-red-600 hover:text-red-700 text-[10px] shrink-0 disabled:opacity-40 cursor-pointer"
             >
               <i className="fa-solid fa-trash" />
             </button>
@@ -80,20 +80,20 @@ export default function AdminCommentsList({ videoId }) {
                 <img
                   src={reply.authorImage || DEFAULT_AVATAR}
                   alt=""
-                  className="w-4 h-4 rounded-full object-cover border border-white/10 shrink-0 mt-0.5"
+                  className="w-4 h-4 rounded-full object-cover border border-zinc-200 shrink-0 mt-0.5"
                 />
                 <div className="min-w-0">
-                  <p className="text-[8px] text-white/50 capitalize tracking-widest truncate">
+                  <p className="text-[8px] text-zinc-500 capitalize tracking-widest truncate">
                     ↩ {reply.authorName || "Staff"}
                   </p>
-                  <p className="text-[9px] text-white/70 break-words">{reply.text}</p>
+                  <p className="text-[9px] text-zinc-700 break-words">{reply.text}</p>
                 </div>
               </div>
               <button
                 disabled={deletingId === reply.id}
                 onClick={() => handleDelete(reply)}
                 title={s.deleteReply}
-                className="text-red-500 hover:text-red-500 text-[9px] shrink-0 disabled:opacity-40 cursor-pointer"
+                className="text-red-600 hover:text-red-700 text-[9px] shrink-0 disabled:opacity-40 cursor-pointer"
               >
                 <i className="fa-solid fa-trash" />
               </button>

@@ -92,102 +92,100 @@ export default function AdminMomentsPanel() {
 
   const tabClass = (active) =>
     active
-      ? "border border-white bg-white text-black text-[9px] font-bold tracking-widest px-4 py-2 uppercase transition cursor-pointer"
-      : "border border-white/10 bg-transparent text-white/40 text-[9px] font-bold tracking-widest px-4 py-2 uppercase transition hover:border-white/20 cursor-pointer";
+      ? "border border-zinc-900 bg-zinc-900 text-white text-[9px] font-bold tracking-widest px-4 py-2 uppercase transition cursor-pointer"
+      : "border border-zinc-200 bg-transparent text-zinc-400 text-[9px] font-bold tracking-widest px-4 py-2 uppercase transition hover:border-zinc-400 cursor-pointer";
 
   return (
-    <div className="my-8">
-      <div className="glass p-8 rounded-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/10 pb-4 mb-8 gap-4">
-          <div>
-            <h2 className="font-sync text-xs tracking-widest uppercase">{s.title}</h2>
-            <p className="text-[9px] uppercase tracking-widest text-white/30 mt-1">{s.subtitle}</p>
-          </div>
-
-          <div className="flex gap-2 select-none">
-            <button onClick={() => setTab("pending")} className={tabClass(tab === "pending")}>
-              {s.pending} (<span>{pendingCount}</span>)
-            </button>
-            <button onClick={() => setTab("approved")} className={tabClass(tab === "approved")}>
-              {s.live} (<span>{liveCount}</span>)
-            </button>
-          </div>
+    <div className="bg-white border border-zinc-200 p-4 md:p-8 rounded-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-200 pb-4 mb-8 gap-4">
+        <div>
+          <h2 className="font-sync text-xs tracking-widest uppercase text-zinc-900">{s.title}</h2>
+          <p className="text-[9px] uppercase tracking-widest text-zinc-400 mt-1">{s.subtitle}</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loading && (
-            <div className="col-span-full py-12 text-center text-white/40 text-[9px] tracking-widest uppercase font-light animate-pulse">
-              {s.connecting}
-            </div>
-          )}
+        <div className="flex gap-2 select-none">
+          <button onClick={() => setTab("pending")} className={tabClass(tab === "pending")}>
+            {s.pending} (<span>{pendingCount}</span>)
+          </button>
+          <button onClick={() => setTab("approved")} className={tabClass(tab === "approved")}>
+            {s.live} (<span>{liveCount}</span>)
+          </button>
+        </div>
+      </div>
 
-          {!loading && list === null && (
-            <div className="col-span-full py-12 text-center text-red-500 text-[9px]">{s.error}</div>
-          )}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {loading && (
+          <div className="col-span-full py-12 text-center text-zinc-400 text-[9px] tracking-widest uppercase font-light animate-pulse">
+            {s.connecting}
+          </div>
+        )}
 
-          {!loading && list !== null && list.length === 0 && (
-            <div className="col-span-full py-12 text-center text-white/20 text-[9px] tracking-widest uppercase font-light">
-              {s.empty}
-            </div>
-          )}
+        {!loading && list === null && (
+          <div className="col-span-full py-12 text-center text-red-600 text-[9px]">{s.error}</div>
+        )}
 
-          {!loading &&
-            list?.map((video) => (
-              <div
-                key={video.id}
-                className="border border-white/5 bg-white/[0.02] p-4 rounded-sm flex flex-col justify-between gap-4 transition-all hover:border-white/10"
+        {!loading && list !== null && list.length === 0 && (
+          <div className="col-span-full py-12 text-center text-zinc-300 text-[9px] tracking-widest uppercase font-light">
+            {s.empty}
+          </div>
+        )}
+
+        {!loading &&
+          list?.map((video) => (
+            <div
+              key={video.id}
+              className="border border-zinc-200 bg-zinc-50 p-4 rounded-sm flex flex-col justify-between gap-4 transition-all hover:border-zinc-300"
+            >
+              <div className="relative aspect-[9/16] w-full max-h-[260px] bg-zinc-200 rounded-sm overflow-hidden border border-zinc-200">
+                <video src={video.url} className="w-full h-full object-cover" controls muted />
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-[8px] text-zinc-400 tracking-widest uppercase">{s.caption}</span>
+                <p className="text-[10px] text-zinc-700 font-light tracking-wide leading-relaxed uppercase">
+                  {video.caption}
+                </p>
+              </div>
+
+              <button
+                onClick={() => setExpandedCommentsId(expandedCommentsId === video.id ? null : video.id)}
+                className="text-[8px] text-zinc-500 hover:text-zinc-900 uppercase tracking-widest flex items-center gap-1.5 cursor-pointer border-t border-zinc-200 pt-2"
               >
-                <div className="relative aspect-[9/16] w-full max-h-[260px] bg-black/50 rounded-sm overflow-hidden border border-white/5">
-                  <video src={video.url} className="w-full h-full object-cover" controls muted />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-[8px] text-white/30 tracking-widest uppercase">{s.caption}</span>
-                  <p className="text-[10px] text-white/80 font-light tracking-wide leading-relaxed uppercase">
-                    {video.caption}
-                  </p>
-                </div>
+                <i className="fa-solid fa-comment" />
+                {expandedCommentsId === video.id ? s.hideComments : s.showComments}
+              </button>
 
-                <button
-                  onClick={() => setExpandedCommentsId(expandedCommentsId === video.id ? null : video.id)}
-                  className="text-[8px] text-white/40 hover:text-white uppercase tracking-widest flex items-center gap-1.5 cursor-pointer border-t border-white/5 pt-2"
-                >
-                  <i className="fa-solid fa-comment" />
-                  {expandedCommentsId === video.id ? s.hideComments : s.showComments}
-                </button>
+              {expandedCommentsId === video.id && <AdminCommentsList videoId={video.id} />}
 
-                {expandedCommentsId === video.id && <AdminCommentsList videoId={video.id} />}
-
-                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/5">
-                  {tab === "pending" ? (
-                    <>
-                      <button
-                        disabled={busyId === video.id}
-                        onClick={() => handleApprove(video.id)}
-                        className="bg-white text-black text-[9px] font-bold tracking-widest py-3 uppercase transition hover:bg-gray-50 cursor-pointer disabled:opacity-40"
-                      >
-                        {busyId === video.id ? s.wait : s.approve}
-                      </button>
-                      <button
-                        disabled={busyId === video.id}
-                        onClick={() => handleReject(video.id)}
-                        className="bg-transparent border border-white/10 text-white/40 text-[9px] font-bold tracking-widest py-3 uppercase transition hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 cursor-pointer disabled:opacity-40"
-                      >
-                        {busyId === video.id ? s.rejecting : s.reject}
-                      </button>
-                    </>
-                  ) : (
+              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-zinc-200">
+                {tab === "pending" ? (
+                  <>
                     <button
                       disabled={busyId === video.id}
-                      onClick={() => handleRemove(video.id)}
-                      className="col-span-2 bg-transparent border border-red-500/30 text-red-500 text-[9px] font-bold tracking-widest py-3 uppercase transition hover:bg-red-500/10 hover:border-red-500 cursor-pointer disabled:opacity-40"
+                      onClick={() => handleApprove(video.id)}
+                      className="bg-zinc-900 text-white text-[9px] font-bold tracking-widest py-3 uppercase transition hover:bg-zinc-700 cursor-pointer disabled:opacity-40"
                     >
-                      {busyId === video.id ? s.removing : s.removeLive}
+                      {busyId === video.id ? s.wait : s.approve}
                     </button>
-                  )}
-                </div>
+                    <button
+                      disabled={busyId === video.id}
+                      onClick={() => handleReject(video.id)}
+                      className="bg-transparent border border-zinc-200 text-zinc-500 text-[9px] font-bold tracking-widest py-3 uppercase transition hover:bg-red-50 hover:text-red-600 hover:border-red-200 cursor-pointer disabled:opacity-40"
+                    >
+                      {busyId === video.id ? s.rejecting : s.reject}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    disabled={busyId === video.id}
+                    onClick={() => handleRemove(video.id)}
+                    className="col-span-2 bg-transparent border border-red-300 text-red-600 text-[9px] font-bold tracking-widest py-3 uppercase transition hover:bg-red-50 hover:border-red-500 cursor-pointer disabled:opacity-40"
+                  >
+                    {busyId === video.id ? s.removing : s.removeLive}
+                  </button>
+                )}
               </div>
-            ))}
-        </div>
+            </div>
+          ))}
       </div>
     </div>
   );
