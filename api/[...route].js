@@ -28,7 +28,7 @@ export default async function handler(req, res) {
       case "schedule":
         return await scheduleHandler(req, res);
       default:
-        return res.status(404).json({ error: "Not found" });
+        return res.status(404).json({ error: "Not found", debugQuery: req.query, debugUrl: req.url });
     }
   } catch (error) {
     console.error(`API xətası (${resource}):`, error);
