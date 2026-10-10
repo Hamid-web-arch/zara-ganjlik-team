@@ -6,6 +6,7 @@ import { validateImageFile } from "../lib/fileValidation";
 import { useAuthGuard } from "../hooks/useAuthGuard";
 import { useAuth } from "../lib/authState";
 import StaffSchedule from "../components/StaffSchedule";
+import StaffTrainings from "../components/StaffTrainings";
 import { useLanguage } from "../lib/i18n/languageContext";
 
 const DEFAULT_AVATAR =
@@ -173,6 +174,7 @@ export default function StaffProfilePage() {
         </div>
 
         {profile && <StaffSchedule employeeName={profile.name} />}
+        {profile && <StaffTrainings />}
 
         <div className="mt-12 p-8 border border-white/5 bg-white/5 rounded-sm space-y-6">
           <h2 className="text-[10px] uppercase tracking-[0.3em] mb-6">{s.security}</h2>

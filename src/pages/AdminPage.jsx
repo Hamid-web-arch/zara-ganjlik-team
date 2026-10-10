@@ -10,6 +10,7 @@ import AdminMomentsPanel from "../components/AdminMomentsPanel";
 import AdminScheduleUpload from "../components/AdminScheduleUpload";
 import EnergyVideoUpload from "../components/EnergyVideoUpload";
 import AdminBriefingUpload from "../components/AdminBriefingUpload";
+import AdminTrainingPanel from "../components/AdminTrainingPanel";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useLanguage } from "../lib/i18n/languageContext";
 
@@ -173,6 +174,7 @@ export default function AdminPage() {
     { id: "schedule", label: s.schedule.title, render: () => <AdminScheduleUpload /> },
     { id: "moments", label: s.moments.title, render: () => <AdminMomentsPanel /> },
     { id: "briefings", label: s.briefings.title, render: () => <AdminBriefingUpload /> },
+    { id: "trainings", label: s.trainings.title, render: () => <AdminTrainingPanel /> },
     {
       id: "crew",
       label: s.members.manageCrew,

@@ -9,7 +9,7 @@ import { requireAuth, requireAdmin, hashPassword } from "./_auth.js";
 // sql.unsafe(...) below is used only for this one static, hard-coded column list (never
 // for request-derived values) — it's not a column the driver's tagged template can bind
 // as a parameter, since it names columns rather than supplying a value.
-const MEMBER_COLUMNS = `id, kind, name, role, id_code as "idCode", email, access_level as "accessLevel", image`;
+const MEMBER_COLUMNS = `id, kind, name, role, id_code as "idCode", email, access_level as "accessLevel", image, section`;
 
 // Refuses to demote/delete the last admin — there'd be no account left able to reach the
 // admin panel to undo it (the only other way back in is a local DB script).
@@ -18,6 +18,17 @@ async function wouldRemoveLastAdmin(id, kind) {
   if (!target || target.access_level !== "admin") return false;
   const [{ count }] = await sql`select count(*)::int as count from members where access_level = 'admin'`;
   return count <= 1;
+}
+
+// A member sees/receives a training if they match ANY of its target's lists, or if the
+// target is entirely empty (meaning "everyone").
+function matchesTarget(member, target) {
+  const { memberIds = [], roles = [], sections = [] } = target || {};
+  if (memberIds.length === 0 && roles.length === 0 && sections.length === 0) return true;
+  if (member.id && memberIds.includes(member.id)) return true;
+  if (member.role && roles.includes(member.role)) return true;
+  if (member.section && sections.includes(member.section)) return true;
+  return false;
 }
 
 export default async function handler(req, res) {
@@ -41,6 +52,8 @@ export default async function handler(req, res) {
         return await settingsHandler(req, res, rest);
       case "schedule":
         return await scheduleHandler(req, res);
+      case "trainings":
+        return await trainingsHandler(req, res, rest);
       default:
         return res.status(404).json({ error: "Not found" });
     }
@@ -66,7 +79,7 @@ async function membersHandler(req, res, [kind, id]) {
 
   if (req.method === "POST") {
     if (!requireAdmin(req, res)) return;
-    const { name, role, idCode, email, password, accessLevel } = req.body || {};
+    const { name, role, idCode, email, password, accessLevel, section } = req.body || {};
     if (!name || !role || !idCode || !email || !password) {
       return res.status(400).json({ error: "Bütün sahələr tələb olunur." });
     }
@@ -74,8 +87,8 @@ async function membersHandler(req, res, [kind, id]) {
     const level = accessLevel === "admin" ? "admin" : "user";
     try {
       const [row] = await sql`
-        insert into members (kind, name, role, id_code, email, password_hash, access_level)
-        values (${kind}, ${name}, ${role}, ${idCode}, ${email}, ${passwordHash}, ${level})
+        insert into members (kind, name, role, id_code, email, password_hash, access_level, section)
+        values (${kind}, ${name}, ${role}, ${idCode}, ${email}, ${passwordHash}, ${level}, ${section || null})
         returning ${sql.unsafe(MEMBER_COLUMNS)}
       `;
       return res.status(201).json(row);
@@ -93,7 +106,7 @@ async function membersHandler(req, res, [kind, id]) {
     const body = req.body || {};
 
     if (isAdmin) {
-      const { name, role, idCode, email, accessLevel, image } = body;
+      const { name, role, idCode, email, accessLevel, image, section } = body;
       if (accessLevel && accessLevel !== "admin" && (await wouldRemoveLastAdmin(id, kind))) {
         return res.status(400).json({ error: "Sonuncu admin hesabını adi istifadəçiyə endirmək olmaz." });
       }
@@ -105,6 +118,7 @@ async function membersHandler(req, res, [kind, id]) {
           email = coalesce(${email}, email),
           access_level = coalesce(${accessLevel}, access_level),
           image = coalesce(${image}, image),
+          section = coalesce(${section}, section),
           updated_at = now()
         where id = ${id}::uuid and kind = ${kind}
         returning ${sql.unsafe(MEMBER_COLUMNS)}
@@ -354,6 +368,135 @@ async function scheduleHandler(req, res) {
       on conflict (id) do update set week_label = ${weekLabel || ""}, by_employee = ${json}::jsonb, uploaded_at = now()
     `;
     return res.status(200).json({ success: true });
+  }
+
+  return res.status(405).json({ error: "Method not allowed" });
+}
+
+// ---------- trainings (documents/videos admins assign to staff/crew, with progress
+// tracking and an optional quiz) ----------
+const TRAINING_COLUMNS = `id, title, description, file_url as "fileUrl", file_name as "fileName", file_type as "fileType", target, quiz, created_at as "createdAt"`;
+
+async function trainingsHandler(req, res, [id]) {
+  if (req.method === "GET" && !id) {
+    const user = requireAuth(req, res);
+    if (!user) return;
+
+    if (user.accessLevel === "admin") {
+      const trainings = await sql`select ${sql.unsafe(TRAINING_COLUMNS)} from trainings order by created_at desc`;
+      const stats = await sql`
+        select training_id as "trainingId", count(*)::int as "openedCount",
+               count(*) filter (where completed)::int as "completedCount"
+        from training_progress group by training_id
+      `;
+      const statsById = Object.fromEntries(stats.map((s) => [s.trainingId, s]));
+      return res.status(200).json(
+        trainings.map((t) => ({
+          ...t,
+          openedCount: statsById[t.id]?.openedCount || 0,
+          completedCount: statsById[t.id]?.completedCount || 0,
+        }))
+      );
+    }
+
+    const [member] = await sql`select id, role, section from members where id = ${user.id}::uuid`;
+    const trainings = await sql`select ${sql.unsafe(TRAINING_COLUMNS)} from trainings order by created_at desc`;
+    const progress = await sql`
+      select training_id as "trainingId", opened_at as "openedAt", seconds_spent as "secondsSpent", completed
+      from training_progress where member_id = ${user.id}::uuid
+    `;
+    const progressById = Object.fromEntries(progress.map((p) => [p.trainingId, p]));
+    const visible = trainings
+      .filter((t) => matchesTarget(member, t.target))
+      .map(({ target: _target, ...t }) => ({ ...t, myProgress: progressById[t.id] || null }));
+    return res.status(200).json(visible);
+  }
+
+  if (req.method === "GET" && id) {
+    const user = requireAuth(req, res);
+    if (!user) return;
+    const [training] = await sql`select ${sql.unsafe(TRAINING_COLUMNS)} from trainings where id = ${id}::uuid`;
+    if (!training) return res.status(404).json({ error: "Tapılmadı." });
+
+    if (user.accessLevel === "admin") {
+      const progress = await sql`
+        select tp.member_id as "memberId", m.name, m.role, m.section, m.kind,
+               tp.opened_at as "openedAt", tp.seconds_spent as "secondsSpent", tp.completed,
+               tp.quiz_answers as "quizAnswers", tp.quiz_score as "quizScore",
+               tp.quiz_seconds_spent as "quizSecondsSpent", tp.quiz_submitted_at as "quizSubmittedAt"
+        from training_progress tp join members m on m.id = tp.member_id
+        where tp.training_id = ${id}::uuid
+        order by tp.opened_at desc
+      `;
+      const candidates = await sql`select id, name, role, section, kind from members where kind in ('staff', 'crew')`;
+      const targetedMembers = candidates.filter((m) => matchesTarget(m, training.target));
+      return res.status(200).json({ ...training, progress, targetedMembers });
+    }
+
+    const [member] = await sql`select id, role, section from members where id = ${user.id}::uuid`;
+    if (!matchesTarget(member, training.target)) return res.status(403).json({ error: "Bu təlimə icazəniz yoxdur." });
+    const [myProgress] = await sql`
+      select opened_at as "openedAt", seconds_spent as "secondsSpent", completed
+      from training_progress where training_id = ${id}::uuid and member_id = ${user.id}::uuid
+    `;
+    const { target: _target, ...publicTraining } = training;
+    return res.status(200).json({ ...publicTraining, myProgress: myProgress || null });
+  }
+
+  if (req.method === "POST" && !id) {
+    const admin = requireAdmin(req, res);
+    if (!admin) return;
+    const { title, description, fileUrl, fileName, fileType, target, quiz } = req.body || {};
+    if (!title?.trim() || !fileUrl || !fileName || !fileType) {
+      return res.status(400).json({ error: "Başlıq və fayl tələb olunur." });
+    }
+    const targetJson = JSON.stringify(target || {});
+    const quizJson = quiz ? JSON.stringify(quiz) : null;
+    const [row] = await sql`
+      insert into trainings (title, description, file_url, file_name, file_type, target, quiz, created_by)
+      values (${title.trim()}, ${description?.trim() || ""}, ${fileUrl}, ${fileName}, ${fileType},
+              ${targetJson}::jsonb, ${quizJson}::jsonb, ${admin.id}::uuid)
+      returning ${sql.unsafe(TRAINING_COLUMNS)}
+    `;
+    return res.status(201).json(row);
+  }
+
+  if (req.method === "DELETE" && id) {
+    if (!requireAdmin(req, res)) return;
+    const [row] = await sql`delete from trainings where id = ${id}::uuid returning id`;
+    if (!row) return res.status(404).json({ error: "Tapılmadı." });
+    return res.status(200).json({ success: true });
+  }
+
+  // A member marking their own progress on a training they can see — not admin-only,
+  // since every staff/crew member calls this for the trainings assigned to them.
+  if (req.method === "PATCH" && id) {
+    const user = requireAuth(req, res);
+    if (!user) return;
+    const { action, secondsSpent } = req.body || {};
+
+    if (action === "open") {
+      await sql`
+        insert into training_progress (training_id, member_id)
+        values (${id}::uuid, ${user.id}::uuid)
+        on conflict (training_id, member_id) do nothing
+      `;
+      return res.status(200).json({ success: true });
+    }
+
+    if (action === "complete") {
+      // Sanity-capped so a stray client bug can't inflate a session into days of "time spent".
+      const extra = Math.max(0, Math.min(Number(secondsSpent) || 0, 24 * 60 * 60));
+      await sql`
+        insert into training_progress (training_id, member_id, seconds_spent, completed, updated_at)
+        values (${id}::uuid, ${user.id}::uuid, ${extra}, true, now())
+        on conflict (training_id, member_id)
+        do update set seconds_spent = training_progress.seconds_spent + ${extra}, completed = true, updated_at = now()
+      `;
+      return res.status(200).json({ success: true });
+    }
+
+    return res.status(400).json({ error: "Naməlum əməliyyat." });
   }
 
   return res.status(405).json({ error: "Method not allowed" });

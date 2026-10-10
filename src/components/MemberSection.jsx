@@ -12,11 +12,14 @@ import { useLanguage } from "../lib/i18n/languageContext";
 const DEFAULT_AVATAR =
   "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
 
-const EMPTY_FORM = { name: "", role: "", idCode: "", email: "", password: "", accessLevel: "user" };
+const EMPTY_FORM = { name: "", role: "", idCode: "", email: "", password: "", accessLevel: "user", section: "" };
+const SECTIONS = ["woman", "men", "kids"];
 
 export default function MemberSection({ collectionName, heading, entityName }) {
   const { t } = useLanguage();
   const s = t.adminPanel.members;
+  // Owner accounts aren't sales staff, so the Woman/Men/Kids department doesn't apply.
+  const needsSection = collectionName !== "owner";
   const [members, setMembers] = useState([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [editId, setEditId] = useState(null);
@@ -45,6 +48,7 @@ export default function MemberSection({ collectionName, heading, entityName }) {
       email: member.email || "",
       password: "",
       accessLevel: member.accessLevel || "user",
+      section: member.section || "",
     });
     setEditId(id);
     formRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -80,6 +84,12 @@ export default function MemberSection({ collectionName, heading, entityName }) {
     e.preventDefault();
     setSaving(true);
 
+    if (needsSection && !form.section) {
+      notify(s.sectionRequired);
+      setSaving(false);
+      return;
+    }
+
     try {
       if (editId) {
         // email/password are intentionally left out of an edit: the API only accepts
@@ -90,6 +100,7 @@ export default function MemberSection({ collectionName, heading, entityName }) {
           role: form.role,
           idCode: form.idCode,
           accessLevel: form.accessLevel,
+          section: needsSection ? form.section : null,
         });
         notify(s.updated.replace("{entity}", entityName));
       } else {
@@ -105,6 +116,7 @@ export default function MemberSection({ collectionName, heading, entityName }) {
           email: form.email,
           password: form.password,
           accessLevel: form.accessLevel,
+          section: needsSection ? form.section : null,
         });
         notify(s.added.replace("{entity}", entityName));
       }
@@ -173,6 +185,29 @@ export default function MemberSection({ collectionName, heading, entityName }) {
           </div>
         </div>
 
+        {needsSection && (
+          <div className="relative border-b border-zinc-200 focus-within:border-zinc-900">
+            <select
+              required
+              value={form.section}
+              onChange={handleChange("section")}
+              className="w-full bg-transparent py-3 text-[10px] tracking-[0.2em] text-zinc-600 outline-none appearance-none cursor-pointer font-light"
+            >
+              <option value="" disabled className="bg-white text-zinc-900">
+                {s.sectionPh}
+              </option>
+              {SECTIONS.map((sec) => (
+                <option key={sec} value={sec} className="bg-white text-zinc-900">
+                  {s.sectionOptions[sec]}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400 text-[8px]">
+              ▼
+            </div>
+          </div>
+        )}
+
         <button
           type="submit"
           disabled={saving}
@@ -197,6 +232,7 @@ export default function MemberSection({ collectionName, heading, entityName }) {
                 <p className="text-[11px] text-zinc-900 truncate">{m.name}</p>
                 <p className="text-[9px] text-zinc-500 truncate">
                   {m.role}
+                  {m.section && <span className="text-zinc-400"> · {s.sectionOptions[m.section]}</span>}
                   {m.accessLevel === "admin" && <span className="text-blue-600"> [ADMIN]</span>}
                 </p>
               </div>
@@ -247,6 +283,7 @@ export default function MemberSection({ collectionName, heading, entityName }) {
                 </td>
                 <td className="py-4 text-[9px] text-zinc-500">
                   {m.role}
+                  {m.section && <span className="text-zinc-400"> · {s.sectionOptions[m.section]}</span>}
                   {m.accessLevel === "admin" && <span className="text-blue-600 text-[8px]"> [ADMIN]</span>}
                 </td>
                 <td className="py-4 text-[9px] text-zinc-500">{m.idCode || "-"}</td>

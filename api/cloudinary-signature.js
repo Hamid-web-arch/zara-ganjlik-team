@@ -11,6 +11,9 @@ const UPLOAD_TYPES = {
   briefing: { folder: "zara/briefings", resourceType: "video", adminOnly: true },
   energy: { folder: "zara/energy", resourceType: "video", adminOnly: true },
   hero: { folder: "zara/hero", resourceType: "image", adminOnly: true },
+  // "auto": trainings can be pdf/docx/image/video — Cloudinary detects the right
+  // resource type (raw for pdf/docx) from the uploaded file itself.
+  training: { folder: "zara/trainings", resourceType: "auto", adminOnly: true },
 };
 
 export default async function handler(req, res) {

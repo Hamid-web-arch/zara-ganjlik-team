@@ -111,6 +111,15 @@ export const putSettings = (key, value) => request(`/api/settings/${key}`, { met
 export const getSchedule = () => request(`/api/schedule`);
 export const putSchedule = (weekLabel, byEmployee) => request(`/api/schedule`, { method: "PUT", body: { weekLabel, byEmployee } });
 
+// ---------- trainings ----------
+export const listTrainings = () => request(`/api/trainings`);
+export const getTraining = (id) => request(`/api/trainings/${id}`);
+export const createTraining = (data) => request(`/api/trainings`, { method: "POST", body: data });
+export const deleteTraining = (id) => request(`/api/trainings/${id}`, { method: "DELETE" });
+export const markTrainingOpened = (id) => request(`/api/trainings/${id}`, { method: "PATCH", body: { action: "open" } });
+export const markTrainingCompleted = (id, secondsSpent) =>
+  request(`/api/trainings/${id}`, { method: "PATCH", body: { action: "complete", secondsSpent } });
+
 // ---------- media upload ----------
 /**
  * Uploads a file directly to Cloudinary using a short-lived signature issued by
