@@ -67,12 +67,12 @@ export function hashToken(token) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-export function setRefreshCookie(res, token) {
-  const maxAge = REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60;
-  res.setHeader(
-    "Set-Cookie",
-    `${REFRESH_COOKIE}=${token}; Path=/api; HttpOnly; Secure; SameSite=Strict; Max-Age=${maxAge}`
-  );
+/** `remember=false` sets a session cookie (no Max-Age) that the browser drops on close,
+ * instead of the usual 30-day persistent one ("remember me" at login). */
+export function setRefreshCookie(res, token, remember = true) {
+  const parts = [`${REFRESH_COOKIE}=${token}`, "Path=/api", "HttpOnly", "Secure", "SameSite=Strict"];
+  if (remember) parts.push(`Max-Age=${REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60}`);
+  res.setHeader("Set-Cookie", parts.join("; "));
 }
 
 export function clearRefreshCookie(res) {

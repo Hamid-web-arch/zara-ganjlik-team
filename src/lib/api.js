@@ -41,8 +41,11 @@ async function request(path, { method = "GET", body, retry = true } = {}) {
 }
 
 // ---------- auth ----------
-export async function login(email, password) {
-  const { accessToken: token, profile } = await request("/api/auth", { method: "POST", body: { action: "login", email, password } });
+export async function login(email, password, remember = true) {
+  const { accessToken: token, profile } = await request("/api/auth", {
+    method: "POST",
+    body: { action: "login", email, password, remember },
+  });
   setAccessToken(token);
   return profile;
 }
@@ -102,6 +105,8 @@ export const listBriefings = () => request(`/api/briefings`);
 export const getBriefing = (id) => request(`/api/briefings/${id}`);
 export const createBriefing = (data) => request(`/api/briefings`, { method: "POST", body: data });
 export const deleteBriefing = (id) => request(`/api/briefings/${id}`, { method: "DELETE" });
+/** Toggles the signed-in member's reaction on a briefing (same emoji again removes it). */
+export const reactToBriefing = (id, emoji) => request(`/api/briefings/${id}`, { method: "PATCH", body: { emoji } });
 
 // ---------- settings ----------
 export const getSettings = (key) => request(`/api/settings/${key}`);

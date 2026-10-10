@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getBriefing } from "../lib/api";
 import { useAuthGuard } from "../hooks/useAuthGuard";
-import BriefingComments from "../components/BriefingComments";
+import BriefingReactions from "../components/BriefingReactions";
 import { useLanguage } from "../lib/i18n/languageContext";
 
 export default function BriefingDetailPage() {
@@ -68,7 +68,11 @@ export default function BriefingDetailPage() {
             </div>
 
             <div className="mt-10 border-t border-white/10 pt-8">
-              <BriefingComments videoId={briefing.id} />
+              <BriefingReactions
+                briefingId={briefing.id}
+                reactions={briefing.reactions || {}}
+                onChange={(reactions) => setBriefing((prev) => ({ ...prev, reactions }))}
+              />
             </div>
           </>
         )}

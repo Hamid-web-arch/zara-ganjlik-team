@@ -15,7 +15,7 @@ export const momentsStrings = {
     format: "MP4 format, max 50MB",
     storyLabel: "BU ANIN HEKAYƏSİ NƏDİR?",
     captionPlaceholder: "Gənclik Mall komandası ilə keçən o maraqlı günü təsvir et...",
-    uploading: "UPLOADING TO BULUD...",
+    uploading: "BULUDA YÜKLƏNİR...",
     submit: "YÜKLƏ VƏ TƏSDİQƏ GÖNDƏR",
     selectVideo: "Zəhmət olmasa video seçin!",
     success: "Müraciətiniz uğurla göndərildi! Menecer təsdiqlədikdən sonra canlı yayında görünəcək. 🛡️",

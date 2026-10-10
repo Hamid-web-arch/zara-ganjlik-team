@@ -130,7 +130,7 @@ export default function AdminBriefingUpload() {
         {!loading &&
           briefings.map((b) => (
             <div key={b.id} className="border border-zinc-200 bg-zinc-50 p-3 rounded-sm space-y-2">
-              <video src={b.url} className="w-full aspect-video object-cover rounded-sm bg-zinc-200" muted preload="metadata" />
+              <video src={b.url} className="w-full aspect-video object-cover rounded-sm bg-zinc-200" controls preload="metadata" />
               <p className="text-[10px] text-zinc-900 truncate">{b.title}</p>
               <button
                 disabled={deletingId === b.id}

@@ -42,6 +42,10 @@ create table refresh_tokens (
   token_hash text not null,
   expires_at timestamptz not null,
   revoked boolean not null default false,
+  -- Whether the refresh cookie was set to persist (Max-Age) or expire with the browser
+  -- session ("remember me" at login) — carried forward on each rotation so a session-only
+  -- login can't silently turn persistent the next time the access token refreshes.
+  remember boolean not null default true,
   created_at timestamptz not null default now()
 );
 create index refresh_tokens_member_idx on refresh_tokens (member_id);
@@ -67,6 +71,9 @@ create table approved_moments (
   caption text not null,
   status moment_status not null default 'pending',
   liked_by uuid[] not null default '{}',
+  author_id uuid references members (id) on delete set null,
+  author_name text,
+  author_image text,
   created_at timestamptz not null default now()
 );
 
@@ -75,6 +82,10 @@ create table briefings (
   title text not null,
   description text not null default '',
   url text not null,
+  -- Briefings get WhatsApp-style reactions instead of text comments: {memberId: emoji}.
+  -- A table-per-reaction would be one row per person per briefing for the same data —
+  -- this is small, always read/written whole, and never queried by sub-field.
+  reactions jsonb not null default '{}',
   created_at timestamptz not null default now()
 );
 

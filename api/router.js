@@ -160,14 +160,16 @@ async function momentsHandler(req, res, [id]) {
     if (req.query.status === "approved") {
       if (!requireAuth(req, res)) return;
       const rows = await sql`
-        select id, url, caption, status, liked_by as "likedBy", created_at as "createdAt"
+        select id, url, caption, status, liked_by as "likedBy",
+               author_name as "authorName", author_image as "authorImage", created_at as "createdAt"
         from approved_moments where status = 'approved' order by created_at desc
       `;
       return res.status(200).json(rows);
     }
     if (!requireAdmin(req, res)) return;
     const all = await sql`
-      select id, url, caption, status, liked_by as "likedBy", created_at as "createdAt"
+      select id, url, caption, status, liked_by as "likedBy",
+             author_name as "authorName", author_image as "authorImage", created_at as "createdAt"
       from approved_moments order by created_at desc
     `;
     return res.status(200).json({
@@ -177,12 +179,16 @@ async function momentsHandler(req, res, [id]) {
   }
 
   if (req.method === "POST" && !id) {
-    if (!requireAuth(req, res)) return;
+    const user = requireAuth(req, res);
+    if (!user) return;
     const { url, caption } = req.body || {};
     if (!url) return res.status(400).json({ error: "Video URL tələb olunur." });
+    const [author] = await sql`select name, image from members where id = ${user.id}::uuid`;
     const [row] = await sql`
-      insert into approved_moments (url, caption) values (${url}, ${caption || "Zara Ganjlik Moment"})
-      returning id, url, caption, status, liked_by as "likedBy", created_at as "createdAt"
+      insert into approved_moments (url, caption, author_id, author_name, author_image)
+      values (${url}, ${caption || "Zara Ganjlik Moment"}, ${user.id}::uuid, ${author?.name || null}, ${author?.image || null})
+      returning id, url, caption, status, liked_by as "likedBy",
+                author_name as "authorName", author_image as "authorImage", created_at as "createdAt"
     `;
     return res.status(201).json(row);
   }
@@ -299,11 +305,11 @@ async function briefingsHandler(req, res, [id]) {
   if (req.method === "GET") {
     if (!requireAuth(req, res)) return;
     if (id) {
-      const [row] = await sql`select id, title, description, url, created_at as "createdAt" from briefings where id = ${id}::uuid`;
+      const [row] = await sql`select id, title, description, url, reactions, created_at as "createdAt" from briefings where id = ${id}::uuid`;
       if (!row) return res.status(404).json({ error: "Tapılmadı." });
       return res.status(200).json(row);
     }
-    const rows = await sql`select id, title, description, url, created_at as "createdAt" from briefings order by created_at desc`;
+    const rows = await sql`select id, title, description, url, reactions, created_at as "createdAt" from briefings order by created_at desc`;
     return res.status(200).json(rows);
   }
 
@@ -313,9 +319,31 @@ async function briefingsHandler(req, res, [id]) {
     if (!title?.trim() || !url) return res.status(400).json({ error: "Başlıq və video tələb olunur." });
     const [row] = await sql`
       insert into briefings (title, description, url) values (${title.trim()}, ${description?.trim() || ""}, ${url})
-      returning id, title, description, url, created_at as "createdAt"
+      returning id, title, description, url, reactions, created_at as "createdAt"
     `;
     return res.status(201).json(row);
+  }
+
+  // Any signed-in member reacting to a briefing — WhatsApp-style, one emoji per person,
+  // clicking the same emoji again removes it.
+  if (req.method === "PATCH" && id) {
+    const user = requireAuth(req, res);
+    if (!user) return;
+    const { emoji } = req.body || {};
+    if (!emoji) return res.status(400).json({ error: "emoji tələb olunur." });
+
+    const [current] = await sql`select reactions from briefings where id = ${id}::uuid`;
+    if (!current) return res.status(404).json({ error: "Tapılmadı." });
+
+    const [row] =
+      current.reactions[user.id] === emoji
+        ? await sql`update briefings set reactions = reactions - ${user.id}::text where id = ${id}::uuid returning reactions`
+        : await sql`
+            update briefings set reactions = reactions || jsonb_build_object(${user.id}::text, ${emoji}::text)
+            where id = ${id}::uuid
+            returning reactions
+          `;
+    return res.status(200).json(row);
   }
 
   if (req.method === "DELETE" && id) {

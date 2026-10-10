@@ -27,6 +27,7 @@ export default function AuthPage() {
   const [role, setRole] = useState(null); // null | "admin" | "staff"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(true);
   const [resetOpen, setResetOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const roleRef = useRef(role);
@@ -44,7 +45,7 @@ export default function AuthPage() {
     }
 
     try {
-      const profile = await login(email.trim(), password);
+      const profile = await login(email.trim(), password, remember);
 
       if (profile.mustResetPassword) {
         // A temporary (admin-set) password — must be replaced before anything else,
@@ -195,6 +196,16 @@ export default function AuthPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full bg-transparent border-b border-white/10 py-4 text-[10px] md:text-[11px] tracking-[0.3em] outline-none focus:border-white transition-all placeholder:text-white/20"
                   />
+
+                  <label className="flex items-center gap-2.5 text-[9px] uppercase tracking-[0.3em] text-white/40 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={remember}
+                      onChange={(e) => setRemember(e.target.checked)}
+                      className="accent-white"
+                    />
+                    {s.rememberMe}
+                  </label>
 
                   <button
                     type="submit"

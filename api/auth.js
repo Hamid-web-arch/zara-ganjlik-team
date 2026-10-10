@@ -33,15 +33,15 @@ function toProfile(member) {
   };
 }
 
-async function issueSession(res, member) {
+async function issueSession(res, member, remember = true) {
   const accessToken = signAccessToken({ id: member.id, kind: member.kind, accessLevel: member.access_level });
   const refreshToken = generateRefreshToken();
   const expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000);
   await sql`
-    insert into refresh_tokens (member_id, token_hash, expires_at)
-    values (${member.id}::uuid, ${hashToken(refreshToken)}, ${expiresAt})
+    insert into refresh_tokens (member_id, token_hash, expires_at, remember)
+    values (${member.id}::uuid, ${hashToken(refreshToken)}, ${expiresAt}, ${remember})
   `;
-  setRefreshCookie(res, refreshToken);
+  setRefreshCookie(res, refreshToken, remember);
   return accessToken;
 }
 
@@ -50,14 +50,14 @@ export default async function handler(req, res) {
   const { action } = req.body || {};
 
   if (action === "login") {
-    const { email, password } = req.body;
+    const { email, password, remember } = req.body;
     if (!email || !password) return res.status(400).json({ error: "Email və şifrə tələb olunur." });
 
     const member = await findMemberByEmail(email.trim());
     if (!member || !(await verifyPassword(password, member.password_hash))) {
       return res.status(401).json({ error: "Giriş rədd edildi: Məlumatlar yanlışdır." });
     }
-    const accessToken = await issueSession(res, member);
+    const accessToken = await issueSession(res, member, remember !== false);
     return res.status(200).json({ accessToken, profile: toProfile(member) });
   }
 
@@ -81,9 +81,11 @@ export default async function handler(req, res) {
     }
 
     // Rotate: revoke the used refresh token and issue a fresh one, so a stolen token
-    // only works once before the legitimate client's next refresh invalidates it.
+    // only works once before the legitimate client's next refresh invalidates it. Carries
+    // the original "remember me" choice forward so a session-only login can't turn
+    // persistent just because the access token happened to refresh.
     await sql`update refresh_tokens set revoked = true where id = ${row.id}::uuid`;
-    const accessToken = await issueSession(res, member);
+    const accessToken = await issueSession(res, member, row.remember);
     return res.status(200).json({ accessToken, profile: toProfile(member) });
   }
 

@@ -3,6 +3,9 @@ import { likeMoment, unlikeMoment } from "../lib/api";
 import MomentComments from "./MomentComments";
 import { useLanguage } from "../lib/i18n/languageContext";
 
+const DEFAULT_AVATAR =
+  "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
+
 function formatTime(seconds) {
   if (Number.isNaN(seconds)) return "00:00";
   const mins = Math.floor(seconds / 60);
@@ -173,11 +176,13 @@ export default function MomentCard({
       ) : (
         <div className="absolute left-0 bottom-0 w-full p-6 pb-12 z-40 md:relative md:p-12 md:col-span-5 md:h-full md:bg-black flex flex-col justify-end md:justify-center gap-6 text-white">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-zinc-900 text-gray-400 border border-white/10 flex items-center justify-center font-black text-xs">
-              ST
-            </div>
+            <img
+              src={video.authorImage || DEFAULT_AVATAR}
+              alt=""
+              className="w-12 h-12 rounded-full object-cover border border-white/10"
+            />
             <div className="flex flex-col">
-              <span className="text-sm font-bold tracking-widest uppercase">Staff Member</span>
+              <span className="text-sm font-bold tracking-widest uppercase">{video.authorName || "Staff Member"}</span>
               <span className="text-[10px] text-gray-400 font-light tracking-wide uppercase">Zara Ganjlik</span>
             </div>
           </div>

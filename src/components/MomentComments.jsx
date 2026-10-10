@@ -111,7 +111,7 @@ export default function MomentComments({ videoId, onClose, onCountChange }) {
             {(repliesByParent[comment.id] || []).map((reply) => (
               <div
                 key={reply.id}
-                className="ml-5 pl-2 border-l-2 border-white/10 mt-1 flex flex-col gap-0.5 bg-white/5 p-2 rounded"
+                className="ml-5 pl-2 border-l-2 border-white/10 mt-1 flex flex-col gap-0.5 bg-white/5 p-2 rounded group/reply"
               >
                 <div className="flex items-center justify-between text-[8px] tracking-widest font-bold">
                   <div className="flex items-center gap-1.5 min-w-0">
@@ -127,6 +127,17 @@ export default function MomentComments({ videoId, onClose, onCountChange }) {
                   </span>
                 </div>
                 <p className="text-[10px] font-light tracking-wide text-white/70 break-words">{reply.text}</p>
+                <div className="flex justify-end opacity-60 group-hover/reply:opacity-100 transition-opacity">
+                  <button
+                    // Stays in the same thread (parent = the top-level comment, not this
+                    // reply) so replies never nest more than one level deep — the
+                    // "replying to X" banner below still names the actual reply's author.
+                    onClick={() => setReplyTo({ id: comment.id, author: reply.authorName || "Staff" })}
+                    className="text-[8px] tracking-widest font-bold text-gray-400 hover:text-white transition cursor-pointer flex items-center gap-1 uppercase"
+                  >
+                    <i className="fa-solid fa-reply text-[7px]" /> {s.reply}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
