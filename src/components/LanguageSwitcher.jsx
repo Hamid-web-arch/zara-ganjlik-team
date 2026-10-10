@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "../lib/i18n/languageContext";
 
-export default function LanguageSwitcher() {
+export default function LanguageSwitcher({ light = false }) {
   const { language, setLanguage, languages } = useLanguage();
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
@@ -22,7 +22,9 @@ export default function LanguageSwitcher() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 text-[10px] uppercase tracking-[0.4em] font-bold hover:opacity-50 transition cursor-pointer"
+        className={`flex items-center gap-2 text-[10px] uppercase tracking-[0.4em] font-bold transition cursor-pointer ${
+          light ? "text-zinc-500 hover:text-zinc-900" : "hover:opacity-50"
+        }`}
         aria-haspopup="listbox"
         aria-expanded={open}
       >
@@ -33,7 +35,9 @@ export default function LanguageSwitcher() {
       {open && (
         <ul
           role="listbox"
-          className="absolute right-0 mt-3 min-w-[80px] bg-black text-white border border-white/20 py-2 z-50"
+          className={`absolute right-0 mt-3 min-w-[80px] py-2 z-50 border ${
+            light ? "bg-white text-zinc-900 border-zinc-200 shadow-sm" : "bg-black text-white border-white/20"
+          }`}
         >
           {languages.map((lng) => (
             <li key={lng.code}>
@@ -43,9 +47,9 @@ export default function LanguageSwitcher() {
                   setLanguage(lng.code);
                   setOpen(false);
                 }}
-                className={`w-full text-left px-4 py-2 text-[10px] uppercase tracking-[0.3em] hover:bg-white/10 transition ${
-                  lng.code === language ? "font-bold" : "font-light opacity-70"
-                }`}
+                className={`w-full text-left px-4 py-2 text-[10px] uppercase tracking-[0.3em] transition ${
+                  light ? "hover:bg-zinc-100" : "hover:bg-white/10"
+                } ${lng.code === language ? "font-bold" : light ? "font-light text-zinc-400" : "font-light opacity-70"}`}
               >
                 {lng.label}
               </button>

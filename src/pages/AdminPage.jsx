@@ -10,6 +10,7 @@ import AdminMomentsPanel from "../components/AdminMomentsPanel";
 import AdminScheduleUpload from "../components/AdminScheduleUpload";
 import EnergyVideoUpload from "../components/EnergyVideoUpload";
 import AdminBriefingUpload from "../components/AdminBriefingUpload";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useLanguage } from "../lib/i18n/languageContext";
 
 function HeroSettingsSection() {
@@ -179,6 +180,9 @@ export default function AdminPage() {
               GNC. <span className="text-zinc-400">Admin</span>
             </h1>
             <p className="text-[9px] uppercase tracking-[0.3em] text-zinc-400 mt-1">{s.console}</p>
+            <div className="mt-3">
+              <LanguageSwitcher light />
+            </div>
           </div>
           {/* Compact on mobile, where the full-width buttons below are hidden to keep the
               nav bar from being pushed down by them. */}
