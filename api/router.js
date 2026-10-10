@@ -12,7 +12,12 @@ import { requireAuth, requireAdmin, hashPassword } from "./_auth.js";
 const MEMBER_COLUMNS = `id, kind, name, role, id_code as "idCode", email, access_level as "accessLevel", image`;
 
 export default async function handler(req, res) {
-  const [resource, ...rest] = req.query.route || [];
+  // Vercel's bracket catch-all ([...route].js) turned out not to reliably match more
+  // than one path segment on this (non-framework) project, so the routing is done
+  // explicitly instead: vercel.json rewrites /api/<anything> to
+  // /api/router?path=<anything>, and the segments are split out here.
+  const segments = String(req.query.path || "").split("/").filter(Boolean);
+  const [resource, ...rest] = segments;
   try {
     switch (resource) {
       case "members":
@@ -28,7 +33,7 @@ export default async function handler(req, res) {
       case "schedule":
         return await scheduleHandler(req, res);
       default:
-        return res.status(404).json({ error: "Not found", debugQuery: req.query, debugUrl: req.url });
+        return res.status(404).json({ error: "Not found" });
     }
   } catch (error) {
     console.error(`API xətası (${resource}):`, error);
