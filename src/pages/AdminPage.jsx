@@ -168,6 +168,13 @@ export default function AdminPage() {
       label: s.members.manageStaff,
       render: () => <MemberSection collectionName="staff" heading={s.members.manageStaff} entityName="Staff" />,
     },
+    {
+      id: "owner",
+      label: s.members.manageOwner,
+      // kind="owner": never shown on the public homepage (it only ever queries
+      // staff/crew) — for admin accounts that shouldn't appear as a team member.
+      render: () => <MemberSection collectionName="owner" heading={s.members.manageOwner} entityName="Owner" />,
+    },
   ];
   const active = SECTIONS.find((item) => item.id === section) || SECTIONS[0];
 

@@ -50,9 +50,14 @@ export default async function handler(req, res) {
   }
 }
 
-// ---------- members (staff/crew, one table distinguished by `kind`) ----------
+// ---------- members (staff/crew/owner, one table distinguished by `kind`) ----------
+// "owner" is a third kind for admin accounts the public homepage should never list — it
+// only ever queries "staff" and "crew" (see src/pages/HomePage.jsx), so an "owner" row is
+// invisible there by construction, not by filtering.
+const MEMBER_KINDS = ["staff", "crew", "owner"];
+
 async function membersHandler(req, res, [kind, id]) {
-  if (kind !== "staff" && kind !== "crew") return res.status(400).json({ error: "kind staff və ya crew olmalıdır." });
+  if (!MEMBER_KINDS.includes(kind)) return res.status(400).json({ error: "kind staff, crew və ya owner olmalıdır." });
 
   if (req.method === "GET") {
     const rows = await sql`select ${sql.unsafe(MEMBER_COLUMNS)} from members where kind = ${kind} order by created_at desc`;

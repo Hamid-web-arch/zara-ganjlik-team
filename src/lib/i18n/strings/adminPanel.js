@@ -16,6 +16,7 @@ export const adminPanelStrings = {
     members: {
       manageCrew: "MANAGE CREW",
       manageStaff: "MANAGE STAFF",
+      manageOwner: "SAHİB HESABI",
       name: "NAME",
       role: "ROLE",
       idCode: "ID CODE",
@@ -138,6 +139,7 @@ export const adminPanelStrings = {
     members: {
       manageCrew: "MANAGE CREW",
       manageStaff: "MANAGE STAFF",
+      manageOwner: "OWNER ACCOUNT",
       name: "NAME",
       role: "ROLE",
       idCode: "ID CODE",
@@ -260,6 +262,7 @@ export const adminPanelStrings = {
     members: {
       manageCrew: "УПРАВЛЕНИЕ CREW",
       manageStaff: "УПРАВЛЕНИЕ STAFF",
+      manageOwner: "АККАУНТ ВЛАДЕЛЬЦА",
       name: "ИМЯ",
       role: "ДОЛЖНОСТЬ",
       idCode: "ID-КОД",

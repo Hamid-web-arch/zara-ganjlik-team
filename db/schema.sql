@@ -4,7 +4,9 @@
 create extension if not exists pgcrypto;
 
 create type access_level as enum ('user', 'admin');
-create type member_kind as enum ('staff', 'crew');
+-- 'owner' is a third kind alongside 'staff'/'crew': an account with admin access that
+-- never shows up on the public homepage, since nothing there ever queries that kind.
+create type member_kind as enum ('staff', 'crew', 'owner');
 create type moment_status as enum ('pending', 'approved');
 
 -- One table for both staff and crew (distinguished by `kind`), not two separate tables:
