@@ -12,23 +12,11 @@ import {
   REFRESH_TOKEN_TTL_DAYS,
 } from "./_auth.js";
 
-// Every auth action (login/refresh/logout/forgot-password/reset-password) lives in this
-// one file, dispatched by body.action, instead of five near-identical endpoint files.
+// Every auth action (login/refresh/logout/forgot-password/reset-password/me) lives in
+// this one file, dispatched by body.action, instead of six near-identical endpoint files.
 
-async function findMemberByEmail(email) {
-  const [staffRow] = await sql`select * from staff where email = ${email}`;
-  if (staffRow) return { ...staffRow, kind: "staff" };
-  const [crewRow] = await sql`select * from crew where email = ${email}`;
-  if (crewRow) return { ...crewRow, kind: "crew" };
-  return null;
-}
-
-async function findMemberById(id, kind) {
-  if (kind !== "staff" && kind !== "crew") return null;
-  const rows =
-    kind === "staff" ? await sql`select * from staff where id = ${id}` : await sql`select * from crew where id = ${id}`;
-  return rows[0] || null;
-}
+const findMemberByEmail = (email) => sql`select * from members where email = ${email}`.then((r) => r[0] || null);
+const findMemberById = (id) => sql`select * from members where id = ${id}::uuid`.then((r) => r[0] || null);
 
 function toProfile(member) {
   return {
@@ -48,8 +36,8 @@ async function issueSession(res, member) {
   const refreshToken = generateRefreshToken();
   const expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000);
   await sql`
-    insert into refresh_tokens (member_id, member_kind, token_hash, expires_at)
-    values (${member.id}, ${member.kind}, ${hashToken(refreshToken)}, ${expiresAt})
+    insert into refresh_tokens (member_id, token_hash, expires_at)
+    values (${member.id}::uuid, ${hashToken(refreshToken)}, ${expiresAt})
   `;
   setRefreshCookie(res, refreshToken);
   return accessToken;
@@ -75,17 +63,16 @@ export default async function handler(req, res) {
     const token = getRefreshCookie(req);
     if (!token) return res.status(401).json({ error: "Sessiya tapılmadı." });
 
-    const tokenHash = hashToken(token);
     const [row] = await sql`
       select * from refresh_tokens
-      where token_hash = ${tokenHash} and revoked = false and expires_at > now()
+      where token_hash = ${hashToken(token)} and revoked = false and expires_at > now()
     `;
     if (!row) {
       clearRefreshCookie(res);
       return res.status(401).json({ error: "Sessiya etibarsızdır." });
     }
 
-    const member = await findMemberById(row.member_id, row.member_kind);
+    const member = await findMemberById(row.member_id);
     if (!member) {
       clearRefreshCookie(res);
       return res.status(401).json({ error: "Sessiya etibarsızdır." });
@@ -93,16 +80,14 @@ export default async function handler(req, res) {
 
     // Rotate: revoke the used refresh token and issue a fresh one, so a stolen token
     // only works once before the legitimate client's next refresh invalidates it.
-    await sql`update refresh_tokens set revoked = true where id = ${row.id}`;
-    const accessToken = await issueSession(res, { ...member, kind: row.member_kind });
-    return res.status(200).json({ accessToken, profile: toProfile({ ...member, kind: row.member_kind }) });
+    await sql`update refresh_tokens set revoked = true where id = ${row.id}::uuid`;
+    const accessToken = await issueSession(res, member);
+    return res.status(200).json({ accessToken, profile: toProfile(member) });
   }
 
   if (action === "logout") {
     const token = getRefreshCookie(req);
-    if (token) {
-      await sql`update refresh_tokens set revoked = true where token_hash = ${hashToken(token)}`;
-    }
+    if (token) await sql`update refresh_tokens set revoked = true where token_hash = ${hashToken(token)}`;
     clearRefreshCookie(res);
     return res.status(200).json({ success: true });
   }
@@ -116,8 +101,8 @@ export default async function handler(req, res) {
       const token = generateRefreshToken();
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
       await sql`
-        insert into password_reset_tokens (member_id, member_kind, token_hash, expires_at)
-        values (${member.id}, ${member.kind}, ${hashToken(token)}, ${expiresAt})
+        insert into password_reset_tokens (member_id, token_hash, expires_at)
+        values (${member.id}::uuid, ${hashToken(token)}, ${expiresAt})
       `;
       await sendResetEmail(member.email, token);
     }
@@ -131,32 +116,27 @@ export default async function handler(req, res) {
     if (!token || !newPassword) return res.status(400).json({ error: "Token və yeni şifrə tələb olunur." });
     if (newPassword.length < 8) return res.status(400).json({ error: "Şifrə ən azı 8 simvol olmalıdır." });
 
-    const tokenHash = hashToken(token);
     const [row] = await sql`
       select * from password_reset_tokens
-      where token_hash = ${tokenHash} and used = false and expires_at > now()
+      where token_hash = ${hashToken(token)} and used = false and expires_at > now()
     `;
     if (!row) return res.status(400).json({ error: "Link etibarsızdır və ya vaxtı keçib." });
 
     const passwordHash = await hashPassword(newPassword);
-    if (row.member_kind === "staff") {
-      await sql`update staff set password_hash = ${passwordHash}, updated_at = now() where id = ${row.member_id}`;
-    } else {
-      await sql`update crew set password_hash = ${passwordHash}, updated_at = now() where id = ${row.member_id}`;
-    }
-    await sql`update password_reset_tokens set used = true where id = ${row.id}`;
+    await sql`update members set password_hash = ${passwordHash}, updated_at = now() where id = ${row.member_id}::uuid`;
+    await sql`update password_reset_tokens set used = true where id = ${row.id}::uuid`;
     // A password reset invalidates every existing session, in case the reset was
     // triggered because of a compromised account.
-    await sql`update refresh_tokens set revoked = true where member_id = ${row.member_id} and member_kind = ${row.member_kind}`;
+    await sql`update refresh_tokens set revoked = true where member_id = ${row.member_id}::uuid`;
     return res.status(200).json({ success: true });
   }
 
   if (action === "me") {
     const user = getAuthUser(req);
     if (!user) return res.status(401).json({ error: "Giriş tələb olunur." });
-    const member = await findMemberById(user.id, user.kind);
+    const member = await findMemberById(user.id);
     if (!member) return res.status(401).json({ error: "Hesab tapılmadı." });
-    return res.status(200).json({ profile: toProfile({ ...member, kind: user.kind }) });
+    return res.status(200).json({ profile: toProfile(member) });
   }
 
   return res.status(400).json({ error: "Naməlum əməliyyat." });
