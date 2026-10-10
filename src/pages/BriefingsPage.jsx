@@ -1,30 +1,22 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { Link } from "react-router-dom";
+import { listBriefings } from "../lib/api";
 import { useAuthGuard } from "../hooks/useAuthGuard";
 import { useLanguage } from "../lib/i18n/languageContext";
 
 export default function BriefingsPage() {
-  const navigate = useNavigate();
   const { t } = useLanguage();
-  const { authorized } = useAuthGuard({ onError: () => navigate("/auth") });
+  const { authorized } = useAuthGuard();
   const [briefings, setBriefings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!authorized) return;
-    (async () => {
-      setLoading(true);
-      try {
-        const snap = await getDocs(query(collection(db, "briefings"), orderBy("createdAt", "desc")));
-        setBriefings(snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
-      } catch (error) {
-        console.error("Breefinglər yüklənərkən xəta:", error);
-      } finally {
-        setLoading(false);
-      }
-    })();
+    setLoading(true);
+    listBriefings()
+      .then(setBriefings)
+      .catch((error) => console.error("Breefinglər yüklənərkən xəta:", error))
+      .finally(() => setLoading(false));
   }, [authorized]);
 
   if (!authorized) {

@@ -1,43 +1,24 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { Link, useParams } from "react-router-dom";
+import { getBriefing } from "../lib/api";
 import { useAuthGuard } from "../hooks/useAuthGuard";
 import BriefingComments from "../components/BriefingComments";
 import { useLanguage } from "../lib/i18n/languageContext";
 
-const DEFAULT_AVATAR =
-  "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
-
 export default function BriefingDetailPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { t } = useLanguage();
-  const { authorized, profile } = useAuthGuard({ onError: () => navigate("/auth") });
+  const { authorized } = useAuthGuard();
   const [briefing, setBriefing] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const currentUser = profile
-    ? {
-        uid: profile.uid,
-        name: profile.name || profile.authEmail || "Staff Member",
-        image: profile.image || DEFAULT_AVATAR,
-      }
-    : null;
-
   useEffect(() => {
     if (!authorized) return;
-    (async () => {
-      setLoading(true);
-      try {
-        const snap = await getDoc(doc(db, "briefings", id));
-        if (snap.exists()) setBriefing({ id: snap.id, ...snap.data() });
-      } catch (error) {
-        console.error("Breefing yüklənərkən xəta:", error);
-      } finally {
-        setLoading(false);
-      }
-    })();
+    setLoading(true);
+    getBriefing(id)
+      .then(setBriefing)
+      .catch((error) => console.error("Breefing yüklənərkən xəta:", error))
+      .finally(() => setLoading(false));
   }, [authorized, id]);
 
   if (!authorized) {
@@ -87,7 +68,7 @@ export default function BriefingDetailPage() {
             </div>
 
             <div className="mt-10 border-t border-white/10 pt-8">
-              <BriefingComments videoId={briefing.id} currentUser={currentUser} />
+              <BriefingComments videoId={briefing.id} />
             </div>
           </>
         )}

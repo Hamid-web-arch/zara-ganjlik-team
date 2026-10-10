@@ -165,12 +165,7 @@ export default function MomentCard({
 
       {showComments ? (
         <div className="absolute inset-0 z-40 md:relative md:col-span-5 md:h-full">
-          <MomentComments
-            videoId={video.id}
-            currentUser={currentUser}
-            onClose={() => setShowComments(false)}
-            onCountChange={onCommentCountChange}
-          />
+          <MomentComments videoId={video.id} onClose={() => setShowComments(false)} onCountChange={onCommentCountChange} />
         </div>
       ) : (
         <div className="absolute left-0 bottom-0 w-full p-6 pb-12 z-40 md:relative md:p-12 md:col-span-5 md:h-full md:bg-black flex flex-col justify-end md:justify-center gap-6 text-white">

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { addDoc, collection, onSnapshot, query, where } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { listComments, createComment } from "../lib/api";
 import { useLanguage } from "../lib/i18n/languageContext";
 
 const DEFAULT_AVATAR =
@@ -16,7 +15,7 @@ function formatCommentDate(timestamp) {
   );
 }
 
-export default function BriefingComments({ videoId, currentUser }) {
+export default function BriefingComments({ videoId }) {
   const { t } = useLanguage();
   const s = t.comments;
   const [comments, setComments] = useState([]);
@@ -25,17 +24,9 @@ export default function BriefingComments({ videoId, currentUser }) {
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    const q = query(collection(db, "comments"), where("videoId", "==", videoId));
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const all = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-        all.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-        setComments(all);
-      },
-      (error) => console.error(s.errLoad, error)
-    );
-    return () => unsubscribe();
+    listComments(videoId)
+      .then(setComments)
+      .catch((error) => console.error(s.errLoad, error));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId]);
 
@@ -46,15 +37,8 @@ export default function BriefingComments({ videoId, currentUser }) {
 
     setSending(true);
     try {
-      await addDoc(collection(db, "comments"), {
-        videoId,
-        parentId: replyTo?.id || null,
-        text,
-        authorUid: currentUser?.uid || null,
-        authorName: currentUser?.name || "Staff Member",
-        authorImage: currentUser?.image || null,
-        createdAt: Date.now(),
-      });
+      const comment = await createComment(videoId, text, replyTo?.id);
+      setComments((prev) => [...prev, comment]);
       setInput("");
       setReplyTo(null);
     } catch (err) {
