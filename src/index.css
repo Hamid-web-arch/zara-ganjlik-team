@@ -64,7 +64,8 @@ body {
 .zara-container {
   scroll-snap-type: y mandatory;
   overflow-y: scroll;
-  height: 100vh;
+  height: 100vh; /* fallback for browsers without dvh support */
+  height: 100dvh;
   scrollbar-width: none;
 }
 
@@ -75,7 +76,8 @@ body {
 .zara-card {
   scroll-snap-align: start;
   scroll-snap-stop: always;
-  height: 100vh;
+  height: 100vh; /* fallback for browsers without dvh support */
+  height: 100dvh;
 }
 
 .text-outline {

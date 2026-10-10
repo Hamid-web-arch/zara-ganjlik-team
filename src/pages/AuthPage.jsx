@@ -83,7 +83,7 @@ export default function AuthPage() {
   const copy = role ? s.roles[role] : null;
 
   return (
-    <div className="antialiased text-white min-h-screen relative overflow-x-hidden">
+    <div className="antialiased text-white min-h-dvh relative overflow-x-hidden">
       <div className="fixed inset-0 z-0">
         <img
           src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070"
@@ -93,7 +93,7 @@ export default function AuthPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black" />
       </div>
 
-      <main className="relative z-10 min-h-screen flex flex-col items-center justify-center p-4 md:p-8">
+      <main className="relative z-10 min-h-dvh flex flex-col items-center justify-center p-4 md:p-8">
         <div className="absolute top-8 left-8 md:top-12 md:left-20 flex flex-col gap-1">
           <h1 className="font-sync text-xl md:text-2xl font-bold tracking-tighter">GNC.</h1>
           <span className="text-[7px] md:text-[9px] tracking-[0.5em] text-white/20">6615-GENCLIK</span>

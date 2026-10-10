@@ -12,6 +12,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [heroTitle, setHeroTitle] = useState("Ganjlik 6615");
   const [heroImage, setHeroImage] = useState(DEFAULT_HERO_IMAGE);
   const [energyVideo, setEnergyVideo] = useState(DEFAULT_ENERGY_VIDEO);
@@ -113,12 +114,44 @@ export default function HomePage() {
                 {t.nav.login}
               </Link>
             </div>
+
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((v) => !v)}
+              className="md:hidden text-base px-1 -mr-1"
+              aria-label={t.nav.menu}
+              aria-expanded={mobileMenuOpen}
+            >
+              <i className={`fa-solid ${mobileMenuOpen ? "fa-xmark" : "fa-bars"}`} />
+            </button>
           </div>
         </nav>
+
       </header>
 
+      {/* Rendered with its own solid background (not inside <header>) so it stays
+          legible regardless of the header's transparent/white scroll state. */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed top-0 left-0 w-full z-[99] bg-black text-white pt-24 pb-8 px-6 flex flex-col gap-6 border-b border-white/10">
+          <a
+            href="#team-section"
+            onClick={() => setMobileMenuOpen(false)}
+            className="text-[11px] uppercase tracking-[0.4em] font-light"
+          >
+            {t.nav.staff}
+          </a>
+          <a
+            href="#moments"
+            onClick={() => setMobileMenuOpen(false)}
+            className="text-[11px] uppercase tracking-[0.4em] font-light"
+          >
+            {t.nav.moments}
+          </a>
+        </div>
+      )}
+
       {/* HERO SECTION */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative h-dvh flex items-center justify-center overflow-hidden">
         <img src={heroImage} className="absolute w-full h-full object-cover opacity-40 animate-infinite-zoom" alt="" />
 
         <div className="relative z-10 text-center px-4 animate-entrance">

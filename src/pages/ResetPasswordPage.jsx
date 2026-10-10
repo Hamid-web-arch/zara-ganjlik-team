@@ -32,7 +32,7 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="antialiased text-white min-h-screen relative overflow-x-hidden flex items-center justify-center p-4">
+    <div className="antialiased text-white min-h-dvh relative overflow-x-hidden flex items-center justify-center p-4">
       <div className="fixed inset-0 z-0 bg-black" />
       <div className="relative z-10 w-full max-w-md glass p-10 space-y-8 rounded-sm">
         <h1 className="font-sync text-2xl font-bold tracking-tighter">{s.title}</h1>

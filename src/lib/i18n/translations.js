@@ -21,6 +21,7 @@ export const translations = {
       staff: "The Staff",
       moments: "Moments",
       login: "Login",
+      menu: "Menyu",
     },
     hero: {
       eyebrow: "Retail Excellence",
@@ -117,6 +118,7 @@ export const translations = {
       staff: "The Staff",
       moments: "Moments",
       login: "Login",
+      menu: "Menu",
     },
     hero: {
       eyebrow: "Retail Excellence",
@@ -213,6 +215,7 @@ export const translations = {
       staff: "The Staff",
       moments: "Moments",
       login: "Login",
+      menu: "Меню",
     },
     hero: {
       eyebrow: "Retail Excellence",
