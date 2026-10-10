@@ -224,7 +224,7 @@ export default function AuthPage() {
       </main>
 
       {resetOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md overflow-y-auto">
           <div className="glass w-full max-w-md p-10 space-y-8 relative">
             <button
               type="button"

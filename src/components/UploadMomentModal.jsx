@@ -43,7 +43,7 @@ export default function UploadMomentModal({ open, onClose, onUploaded }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[250] px-4 flex items-center justify-center">
+    <div className="fixed inset-0 z-[250] px-4 py-8 flex items-center justify-center overflow-y-auto">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
 
       <div className="relative w-full max-w-[450px] bg-white text-black p-8 md:p-10 shadow-2xl z-10 rounded-sm">

@@ -45,7 +45,7 @@ export default function NotifyHost() {
       </div>
 
       {confirmState && (
-        <div className="fixed inset-0 z-[410] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[410] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
           <div role="dialog" aria-modal="true" className="glass w-full max-w-sm p-8 space-y-6 rounded-sm">
             <p className="text-[11px] tracking-wide text-white whitespace-pre-line">{confirmState.message}</p>
             <div className="flex gap-3 justify-end">
