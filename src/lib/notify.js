@@ -3,6 +3,7 @@
 // for and renders. That keeps this usable from any handler, async or not.
 const TOAST_EVENT = "gnc:toast";
 const CONFIRM_EVENT = "gnc:confirm";
+const PROMPT_EVENT = "gnc:prompt";
 
 export function notify(message) {
   window.dispatchEvent(new CustomEvent(TOAST_EVENT, { detail: { message: String(message) } }));
@@ -15,4 +16,13 @@ export function confirmAsync(message) {
   });
 }
 
-export const NOTIFY_EVENTS = { TOAST_EVENT, CONFIRM_EVENT };
+/** Resolves the typed value, or null if the user cancels. */
+export function promptAsync(message, { placeholder = "", inputType = "text" } = {}) {
+  return new Promise((resolve) => {
+    window.dispatchEvent(
+      new CustomEvent(PROMPT_EVENT, { detail: { message: String(message), placeholder, inputType, resolve } })
+    );
+  });
+}
+
+export const NOTIFY_EVENTS = { TOAST_EVENT, CONFIRM_EVENT, PROMPT_EVENT };

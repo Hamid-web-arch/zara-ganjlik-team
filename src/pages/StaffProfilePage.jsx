@@ -1,7 +1,7 @@
 import { notify } from "../lib/notify";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { updateMember, uploadToCloudinary, forgotPassword } from "../lib/api";
+import { updateMember, uploadToCloudinary, forgotPassword, changePassword } from "../lib/api";
 import { validateImageFile } from "../lib/fileValidation";
 import { useAuthGuard } from "../hooks/useAuthGuard";
 import { useAuth } from "../lib/authState";
@@ -19,6 +19,11 @@ export default function StaffProfilePage() {
   const { logout } = useAuth();
   const [profile, setProfile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
 
   // Local, editable copy of the auth-resolved profile — handleUpload below mutates it
   // optimistically after a successful image upload, which the hook's own value can't do.
@@ -66,6 +71,26 @@ export default function StaffProfilePage() {
     } catch (error) {
       console.error("Şifrə sıfırlama xətası:", error);
       notify(s.notify.resetFailed);
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (newPassword.length < 8) return notify(s.notify.tooShort);
+    if (newPassword !== confirmPassword) return notify(s.notify.mismatch);
+
+    setChangingPassword(true);
+    try {
+      await changePassword(currentPassword, newPassword);
+      notify(s.notify.passwordChanged);
+      setShowChangePassword(false);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      notify(error.message || s.notify.passwordChangeFailed);
+    } finally {
+      setChangingPassword(false);
     }
   };
 
@@ -149,14 +174,68 @@ export default function StaffProfilePage() {
 
         {profile && <StaffSchedule employeeName={profile.name} />}
 
-        <div className="mt-12 p-8 border border-white/5 bg-white/5 rounded-sm">
+        <div className="mt-12 p-8 border border-white/5 bg-white/5 rounded-sm space-y-6">
           <h2 className="text-[10px] uppercase tracking-[0.3em] mb-6">{s.security}</h2>
-          <button
-            onClick={handleResetPassword}
-            className="text-[9px] uppercase tracking-[0.3em] border border-white/20 px-6 py-3 hover:bg-white hover:text-black transition"
-          >
-            {s.resetPassword}
-          </button>
+
+          {!showChangePassword ? (
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => setShowChangePassword(true)}
+                className="text-[9px] uppercase tracking-[0.3em] border border-white/20 px-6 py-3 hover:bg-white hover:text-black transition"
+              >
+                {s.changePassword}
+              </button>
+              <button
+                onClick={handleResetPassword}
+                className="text-[9px] uppercase tracking-[0.3em] border border-white/20 px-6 py-3 hover:bg-white hover:text-black transition"
+              >
+                {s.resetPassword}
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleChangePassword} className="space-y-5 max-w-sm">
+              <input
+                type="password"
+                placeholder={s.currentPasswordPh}
+                required
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full bg-transparent border-b border-white/10 py-3 text-[11px] tracking-[0.2em] outline-none focus:border-white placeholder:text-white/30"
+              />
+              <input
+                type="password"
+                placeholder={s.newPasswordPh}
+                required
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full bg-transparent border-b border-white/10 py-3 text-[11px] tracking-[0.2em] outline-none focus:border-white placeholder:text-white/30"
+              />
+              <input
+                type="password"
+                placeholder={s.confirmPasswordPh}
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full bg-transparent border-b border-white/10 py-3 text-[11px] tracking-[0.2em] outline-none focus:border-white placeholder:text-white/30"
+              />
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  disabled={changingPassword}
+                  className="text-[9px] uppercase tracking-[0.3em] bg-white text-black px-6 py-3 hover:bg-gray-200 transition disabled:opacity-40"
+                >
+                  {changingPassword ? s.changing : s.save}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowChangePassword(false)}
+                  className="text-[9px] uppercase tracking-[0.3em] border border-white/20 px-6 py-3 hover:bg-white hover:text-black transition"
+                >
+                  {t.common.cancel}
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     </div>

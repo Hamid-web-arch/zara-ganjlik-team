@@ -9,6 +9,7 @@ import {
   clearRefreshCookie,
   getRefreshCookie,
   getAuthUser,
+  requireAdmin,
   REFRESH_TOKEN_TTL_DAYS,
 } from "./_auth.js";
 
@@ -149,6 +150,48 @@ export default async function handler(req, res) {
     `;
     const member = await findMemberById(user.id);
     return res.status(200).json({ profile: toProfile(member) });
+  }
+
+  if (action === "change-password") {
+    // Self-service: the member knows their current password and wants a new one,
+    // distinct from set-password (temporary password, no current one to check).
+    const user = getAuthUser(req);
+    if (!user) return res.status(401).json({ error: "Giriş tələb olunur." });
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Cari və yeni şifrə tələb olunur." });
+    }
+    if (newPassword.length < 8) return res.status(400).json({ error: "Yeni şifrə ən azı 8 simvol olmalıdır." });
+
+    const member = await findMemberById(user.id);
+    if (!member || !(await verifyPassword(currentPassword, member.password_hash))) {
+      return res.status(401).json({ error: "Cari şifrə yanlışdır." });
+    }
+    const passwordHash = await hashPassword(newPassword);
+    await sql`update members set password_hash = ${passwordHash}, updated_at = now() where id = ${user.id}::uuid`;
+    return res.status(200).json({ success: true });
+  }
+
+  if (action === "admin-reset-password") {
+    // Admin issues a new one-time password for a member who forgot theirs — mirrors
+    // member creation: the admin never sees/sets a permanent password, only a temporary
+    // one the member must replace on their next login (set-password above).
+    const admin = requireAdmin(req, res);
+    if (!admin) return;
+    const { memberId, newPassword } = req.body;
+    if (!memberId || !newPassword || newPassword.length < 8) {
+      return res.status(400).json({ error: "Üzv və ən azı 8 simvollu şifrə tələb olunur." });
+    }
+    const passwordHash = await hashPassword(newPassword);
+    const [row] = await sql`
+      update members set password_hash = ${passwordHash}, must_reset_password = true, updated_at = now()
+      where id = ${memberId}::uuid
+      returning id
+    `;
+    if (!row) return res.status(404).json({ error: "Üzv tapılmadı." });
+    // Invalidate existing sessions, same reasoning as a password-reset-link reset.
+    await sql`update refresh_tokens set revoked = true where member_id = ${memberId}::uuid`;
+    return res.status(200).json({ success: true });
   }
 
   if (action === "me") {

@@ -1,6 +1,12 @@
-import { notify, confirmAsync } from "../lib/notify";
+import { notify, confirmAsync, promptAsync } from "../lib/notify";
 import { useEffect, useRef, useState } from "react";
-import { listMembers, createMember, updateMember, deleteMember as deleteMemberApi } from "../lib/api";
+import {
+  listMembers,
+  createMember,
+  updateMember,
+  deleteMember as deleteMemberApi,
+  issueTemporaryPassword,
+} from "../lib/api";
 import { useLanguage } from "../lib/i18n/languageContext";
 
 const DEFAULT_AVATAR =
@@ -42,6 +48,21 @@ export default function MemberSection({ collectionName, heading, entityName }) {
     });
     setEditId(id);
     formRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleIssueTempPassword = async (id) => {
+    const value = await promptAsync(s.issueTempPasswordPrompt, { placeholder: s.password, inputType: "password" });
+    if (value === null) return; // cancelled
+    if (value.length < 8) {
+      notify(s.tooShortPassword);
+      return;
+    }
+    try {
+      await issueTemporaryPassword(id, value);
+      notify(s.issueTempPasswordSuccess);
+    } catch (error) {
+      notify(s.issueTempPasswordError + error.message);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -194,6 +215,9 @@ export default function MemberSection({ collectionName, heading, entityName }) {
               <button onClick={() => handleEdit(m.id)} className="text-[9px] text-blue-500">
                 {s.edit}
               </button>
+              <button onClick={() => handleIssueTempPassword(m.id)} className="text-[9px] text-amber-500">
+                {s.issueTempPassword}
+              </button>
               <button onClick={() => handleDelete(m.id)} className="text-[9px] text-red-500">
                 {s.remove}
               </button>
@@ -230,6 +254,9 @@ export default function MemberSection({ collectionName, heading, entityName }) {
                 <td className="py-4 text-right space-x-2 pr-6">
                   <button onClick={() => handleEdit(m.id)} className="text-[8px] text-blue-500">
                     {s.edit}
+                  </button>
+                  <button onClick={() => handleIssueTempPassword(m.id)} className="text-[8px] text-amber-500">
+                    {s.issueTempPassword}
                   </button>
                   <button onClick={() => handleDelete(m.id)} className="text-[8px] text-red-500">
                     {s.remove}

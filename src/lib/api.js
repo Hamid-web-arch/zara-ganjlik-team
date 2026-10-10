@@ -69,6 +69,12 @@ export const resetPassword = (token, newPassword) =>
 /** For a member who just signed in with a temporary (admin-set) password. */
 export const setPassword = (newPassword) =>
   request("/api/auth", { method: "POST", body: { action: "set-password", newPassword } });
+/** Self-service password change from the profile page (knows their current password). */
+export const changePassword = (currentPassword, newPassword) =>
+  request("/api/auth", { method: "POST", body: { action: "change-password", currentPassword, newPassword } });
+/** Admin: issues a new one-time password for an existing member; they must reset it at next login. */
+export const issueTemporaryPassword = (memberId, newPassword) =>
+  request("/api/auth", { method: "POST", body: { action: "admin-reset-password", memberId, newPassword } });
 
 // ---------- members (staff/crew) ----------
 export const listMembers = (kind) => request(`/api/members/${kind}`);
