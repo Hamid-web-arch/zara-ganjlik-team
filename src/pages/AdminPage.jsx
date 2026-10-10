@@ -173,11 +173,23 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-white text-zinc-900 flex flex-col md:flex-row">
       <aside className="md:w-64 md:shrink-0 md:flex md:flex-col md:h-screen md:sticky md:top-0 border-b md:border-b-0 md:border-r border-zinc-200 bg-zinc-50">
-        <div className="p-6 border-b border-zinc-200">
-          <h1 className="font-sync text-lg tracking-tighter uppercase text-zinc-900">
-            GNC. <span className="text-zinc-400">Admin</span>
-          </h1>
-          <p className="text-[9px] uppercase tracking-[0.3em] text-zinc-400 mt-1">{s.console}</p>
+        <div className="p-6 border-b border-zinc-200 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="font-sync text-lg tracking-tighter uppercase text-zinc-900">
+              GNC. <span className="text-zinc-400">Admin</span>
+            </h1>
+            <p className="text-[9px] uppercase tracking-[0.3em] text-zinc-400 mt-1">{s.console}</p>
+          </div>
+          {/* Compact on mobile, where the full-width buttons below are hidden to keep the
+              nav bar from being pushed down by them. */}
+          <div className="flex gap-3 md:hidden shrink-0 pt-1">
+            <Link to="/" className="text-[9px] uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition">
+              {s.back}
+            </Link>
+            <button onClick={handleLogout} className="text-[9px] uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition">
+              {s.logout}
+            </button>
+          </div>
         </div>
 
         <nav className="flex md:flex-col overflow-x-auto md:overflow-y-auto md:flex-1">
@@ -197,7 +209,7 @@ export default function AdminPage() {
           ))}
         </nav>
 
-        <div className="p-4 flex gap-2 border-t border-zinc-200">
+        <div className="hidden md:flex p-4 gap-2 border-t border-zinc-200">
           <Link
             to="/"
             className="flex-1 text-center text-[9px] uppercase tracking-widest border border-zinc-200 px-4 py-3 hover:bg-zinc-900 hover:text-white transition"
