@@ -1,16 +1,8 @@
 import { notify } from "../lib/notify";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail,
-  onAuthStateChanged,
-  setPersistence,
-  browserLocalPersistence,
-  signOut,
-} from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../lib/firebase";
+import { login, forgotPassword, logout as apiLogout } from "../lib/api";
+import { useAuth } from "../lib/authContext";
 import { useLanguage } from "../lib/i18n/languageContext";
 
 // Colour is not language-specific, so it stays out of the translation tables.
@@ -31,6 +23,7 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const s = t.authPage;
+  const { setProfile } = useAuth();
   const [role, setRole] = useState(null); // null | "admin" | "staff"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,50 +31,6 @@ export default function AuthPage() {
   const [resetEmail, setResetEmail] = useState("");
   const roleRef = useRef(role);
   roleRef.current = role;
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user || !window.location.pathname.includes("/auth")) return;
-
-      try {
-        const staffSnap = await getDoc(doc(db, "staff", user.uid));
-        const crewSnap = await getDoc(doc(db, "crew", user.uid));
-        const userData = staffSnap.exists()
-          ? staffSnap.data()
-          : crewSnap.exists()
-          ? crewSnap.data()
-          : null;
-
-        if (!userData) {
-          await signOut(auth);
-          notify(s.notify.noUserData);
-          return;
-        }
-
-        const userAccessLevel = userData.accessLevel; // 'admin' | 'user'
-        const selectedRole = localStorage.getItem("user_role");
-
-        if (userAccessLevel === "admin") {
-          navigate(selectedRole === "admin" ? "/admin" : "/staff-profile");
-        } else if (selectedRole === "admin") {
-          // Any non-admin accessLevel (including unset/misspelled values) is denied
-          // manager access — only "user" used to be checked, so an unexpected value
-          // left the form stuck with no feedback.
-          await signOut(auth);
-          notify(s.notify.noAdminAccess);
-        } else {
-          navigate("/staff-profile");
-        }
-      } catch (error) {
-        console.error("Auth Xətası:", error);
-        await signOut(auth);
-        notify(s.notify.loginError);
-      }
-    });
-
-    return () => unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigate, s]);
 
   const handleSelectRole = (nextRole) => setRole(nextRole);
   const handleBack = () => setRole(null);
@@ -95,10 +44,20 @@ export default function AuthPage() {
     }
 
     try {
-      localStorage.setItem("user_role", selectedRole);
-      await setPersistence(auth, browserLocalPersistence);
-      await signInWithEmailAndPassword(auth, email.trim(), password);
-      // Redirect happens via onAuthStateChanged
+      const profile = await login(email.trim(), password);
+
+      if (profile.accessLevel === "admin") {
+        setProfile(profile);
+        navigate(selectedRole === "admin" ? "/admin" : "/staff-profile");
+      } else if (selectedRole === "admin") {
+        // Picking the manager portal with a non-admin account is denied, same as before
+        // — sign the session back out rather than leaving it half-authenticated.
+        await apiLogout();
+        notify(s.notify.noAdminAccess);
+      } else {
+        setProfile(profile);
+        navigate("/staff-profile");
+      }
     } catch (error) {
       console.error("Giriş xətası:", error);
       notify(s.notify.wrongCreds);
@@ -112,7 +71,7 @@ export default function AuthPage() {
       return;
     }
     try {
-      await sendPasswordResetEmail(auth, value);
+      await forgotPassword(value);
       notify(s.notify.linkSent);
       setResetOpen(false);
     } catch (error) {
