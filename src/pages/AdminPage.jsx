@@ -1,12 +1,10 @@
 import { notify } from "../lib/notify";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { signOut } from "firebase/auth";
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
-import { auth, db } from "../lib/firebase";
-import { uploadToCloudinary } from "../lib/adminApi";
+import { getSettings, putSettings, uploadToCloudinary } from "../lib/api";
 import { validateImageFile } from "../lib/fileValidation";
 import { useAuthGuard } from "../hooks/useAuthGuard";
+import { useAuth } from "../lib/authContext";
 import MemberSection from "../components/MemberSection";
 import AdminMomentsPanel from "../components/AdminMomentsPanel";
 import AdminScheduleUpload from "../components/AdminScheduleUpload";
@@ -24,21 +22,16 @@ function HeroSettingsSection() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const docSnap = await getDoc(doc(db, "settings", "hero"));
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setTitle(data.title || "");
-          if (data.image) {
-            setImageUrl(data.image);
-            setPreviewUrl(data.image);
-          }
+    getSettings("hero")
+      .then((data) => {
+        if (!data) return;
+        setTitle(data.title || "");
+        if (data.image) {
+          setImageUrl(data.image);
+          setPreviewUrl(data.image);
         }
-      } catch (error) {
-        console.error("Hero məlumat gətirilərkən xəta:", error);
-      }
-    })();
+      })
+      .catch((error) => console.error("Hero məlumat gətirilərkən xəta:", error));
   }, []);
 
   const handleFileChange = (e) => {
@@ -67,11 +60,7 @@ function HeroSettingsSection() {
         finalImageUrl = await uploadToCloudinary(file, "hero");
       }
 
-      await setDoc(doc(db, "settings", "hero"), {
-        title: title.trim() || "Gandjlik 6615",
-        image: finalImageUrl,
-        updatedAt: serverTimestamp(),
-      });
+      await putSettings("hero", { title: title.trim() || "Gandjlik 6615", image: finalImageUrl });
 
       setImageUrl(finalImageUrl);
       setFile(null);
@@ -140,10 +129,11 @@ export default function AdminPage() {
   const { t } = useLanguage();
   const s = t.adminPanel;
   const { authorized } = useAuthGuard({ requireAdmin: true });
+  const { logout } = useAuth();
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await logout();
       navigate("/auth");
     } catch (error) {
       console.error("Logout xətası:", error);

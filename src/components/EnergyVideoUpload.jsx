@@ -1,8 +1,6 @@
 import { notify } from "../lib/notify";
 import { useEffect, useState } from "react";
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
-import { db } from "../lib/firebase";
-import { uploadToCloudinary } from "../lib/adminApi";
+import { getSettings, putSettings, uploadToCloudinary } from "../lib/api";
 import { validateVideoFile } from "../lib/fileValidation";
 import { useLanguage } from "../lib/i18n/languageContext";
 
@@ -14,16 +12,11 @@ export default function EnergyVideoUpload() {
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const snap = await getDoc(doc(db, "settings", "energyVideo"));
-        if (snap.exists() && snap.data().videoUrl) {
-          setPreviewUrl(snap.data().videoUrl);
-        }
-      } catch (error) {
-        console.error("Video ayarları yüklənərkən xəta:", error);
-      }
-    })();
+    getSettings("energy")
+      .then((data) => {
+        if (data?.videoUrl) setPreviewUrl(data.videoUrl);
+      })
+      .catch((error) => console.error("Video ayarları yüklənərkən xəta:", error));
   }, []);
 
   const handleFileChange = (e) => {
@@ -49,12 +42,7 @@ export default function EnergyVideoUpload() {
     setUploading(true);
     try {
       const url = await uploadToCloudinary(file, "energy");
-
-      await setDoc(doc(db, "settings", "energyVideo"), {
-        videoUrl: url,
-        updatedAt: serverTimestamp(),
-      });
-
+      await putSettings("energy", { videoUrl: url });
       setPreviewUrl(url);
       setFile(null);
       notify(s.success);

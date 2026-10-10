@@ -1,7 +1,6 @@
 import { notify } from "../lib/notify";
 import { useEffect, useState } from "react";
-import { collection, doc, getDoc, getDocs, serverTimestamp, setDoc } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { getSchedule, putSchedule, listMembers } from "../lib/api";
 import { normalizeName, parseScheduleWorkbook } from "../lib/scheduleParser";
 import { useLanguage } from "../lib/i18n/languageContext";
 
@@ -14,17 +13,11 @@ export default function AdminScheduleUpload() {
   const [currentInfo, setCurrentInfo] = useState(null);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const snap = await getDoc(doc(db, "work_schedule", "current"));
-        if (snap.exists()) {
-          const data = snap.data();
-          setCurrentInfo({ weekLabel: data.weekLabel || "", count: Object.keys(data.byEmployee || {}).length });
-        }
-      } catch (error) {
-        console.error("Qrafik məlumatı yüklənərkən xəta:", error);
-      }
-    })();
+    getSchedule()
+      .then((data) => {
+        if (data) setCurrentInfo({ weekLabel: data.weekLabel || "", count: Object.keys(data.byEmployee || {}).length });
+      })
+      .catch((error) => console.error("Qrafik məlumatı yüklənərkən xəta:", error));
   }, []);
 
   const handleSubmit = async (e) => {
@@ -36,16 +29,16 @@ export default function AdminScheduleUpload() {
 
     setUploading(true);
     try {
-      const [XLSX, staffSnap, crewSnap] = await Promise.all([
+      const [XLSX, staffMembers, crewMembers] = await Promise.all([
         import("xlsx"),
-        getDocs(collection(db, "staff")),
-        getDocs(collection(db, "crew")),
+        listMembers("staff"),
+        listMembers("crew"),
       ]);
 
       const employeeNames = [];
       const seen = new Set();
-      [...staffSnap.docs, ...crewSnap.docs].forEach((docSnap) => {
-        const name = (docSnap.data().name || "").trim();
+      [...staffMembers, ...crewMembers].forEach((member) => {
+        const name = (member.name || "").trim();
         const key = normalizeName(name);
         if (name && !seen.has(key)) {
           seen.add(key);
@@ -62,11 +55,7 @@ export default function AdminScheduleUpload() {
         Object.values(entry.days).some((day) => (day.hours?.length || 0) === 0 && Number(day.total) > 0)
       ).length;
 
-      await setDoc(doc(db, "work_schedule", "current"), {
-        weekLabel: weekLabel.trim(),
-        uploadedAt: serverTimestamp(),
-        byEmployee,
-      });
+      await putSchedule(weekLabel.trim(), byEmployee);
 
       setCurrentInfo({ weekLabel: weekLabel.trim(), count: matchedCount });
       setFile(null);

@@ -1,8 +1,6 @@
 import { notify, confirmAsync } from "../lib/notify";
 import { useEffect, useState } from "react";
-import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query } from "firebase/firestore";
-import { db } from "../lib/firebase";
-import { uploadToCloudinary } from "../lib/adminApi";
+import { listBriefings, createBriefing, deleteBriefing, uploadToCloudinary } from "../lib/api";
 import { validateVideoFile } from "../lib/fileValidation";
 import { useLanguage } from "../lib/i18n/languageContext";
 
@@ -20,8 +18,7 @@ export default function AdminBriefingUpload() {
   const loadBriefings = async () => {
     setLoading(true);
     try {
-      const snap = await getDocs(query(collection(db, "briefings"), orderBy("createdAt", "desc")));
-      setBriefings(snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
+      setBriefings(await listBriefings());
     } catch (error) {
       console.error("Breefinglər yüklənərkən xəta:", error);
     } finally {
@@ -52,13 +49,7 @@ export default function AdminBriefingUpload() {
     setUploading(true);
     try {
       const url = await uploadToCloudinary(file, "briefing");
-
-      await addDoc(collection(db, "briefings"), {
-        title: title.trim(),
-        description: description.trim(),
-        url,
-        createdAt: Date.now(),
-      });
+      await createBriefing({ title: title.trim(), description: description.trim(), url });
 
       setTitle("");
       setDescription("");
@@ -77,7 +68,7 @@ export default function AdminBriefingUpload() {
     if (!(await confirmAsync(s.deleteConfirm))) return;
     setDeletingId(id);
     try {
-      await deleteDoc(doc(db, "briefings", id));
+      await deleteBriefing(id);
       setBriefings((prev) => prev.filter((b) => b.id !== id));
     } catch (error) {
       notify(t.adminPanel.comments.deleteError + error.message);
