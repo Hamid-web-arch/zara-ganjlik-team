@@ -33,15 +33,18 @@ if (!process.env.DATABASE_URL) {
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 const ask = (q) => new Promise((resolve) => rl.question(q, resolve));
 
-const name = (await ask("Ad Soyad: ")).trim();
-const role = (await ask("Vəzifə (məs. General Manager): ")).trim() || "Admin";
-const idCode = (await ask("ID kod (məs. 0001): ")).trim() || "0001";
+// Only email/password actually matter for logging in — name, role and idCode are just
+// display fields you can edit later from the admin panel itself once logged in.
 const email = (await ask("Email: ")).trim();
 const password = (await ask("Şifrə (ən azı 8 simvol): ")).trim();
 rl.close();
 
-if (!name || !email || password.length < 8) {
-  console.error("Ad, email tələb olunur, şifrə ən azı 8 simvol olmalıdır.");
+const name = "Admin";
+const role = "Admin";
+const idCode = "0001";
+
+if (!email || password.length < 8) {
+  console.error("Email tələb olunur, şifrə ən azı 8 simvol olmalıdır.");
   process.exit(1);
 }
 
@@ -56,6 +59,7 @@ try {
   `;
   console.log(`\nAdmin hesabı yaradıldı: ${row.email} (id: ${row.id})`);
   console.log("İndi /auth səhifəsində bu email/şifrə ilə Manager girişi edə bilərsiniz.");
+  console.log("Ad/Vəzifə/ID kodu admin paneldə MANAGE STAFF bölməsindən sonra dəyişə bilərsiniz.");
 } catch (error) {
   if (error.code === "23505") console.error("Bu email artıq mövcuddur.");
   else console.error("Xəta:", error.message);
