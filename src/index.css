@@ -162,3 +162,42 @@ input:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 30px white inset !important;
   -webkit-text-fill-color: #18181b !important;
 }
+
+/* Admin panel dark-mode toggle: a manual .dark class (not prefers-color-scheme), so it's
+   one override block keyed off the admin panel's existing utility classes instead of
+   adding a dark: variant to every element in every admin component. */
+.admin-light.dark {
+  background-color: #0a0a0b;
+  color: #e4e4e7;
+}
+.admin-light.dark input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px #18181b inset !important;
+  -webkit-text-fill-color: #f4f4f5 !important;
+}
+.admin-light.dark .bg-white { background-color: #18181b; }
+.admin-light.dark .bg-zinc-50 { background-color: #27272a; }
+.admin-light.dark .bg-zinc-200 { background-color: #3f3f46; }
+.admin-light.dark .bg-zinc-900 { background-color: #e4e4e7; }
+.admin-light.dark .text-white { color: #18181b; }
+.admin-light.dark .text-zinc-900 { color: #f4f4f5; }
+.admin-light.dark .text-zinc-700 { color: #d4d4d8; }
+.admin-light.dark .text-zinc-600 { color: #a1a1aa; }
+.admin-light.dark .text-zinc-500 { color: #a1a1aa; }
+.admin-light.dark .text-zinc-400 { color: #71717a; }
+.admin-light.dark .text-zinc-300 { color: #52525b; }
+.admin-light.dark .placeholder\:text-zinc-400::placeholder { color: #52525b; }
+.admin-light.dark .border-zinc-100 { border-color: #27272a; }
+.admin-light.dark .border-zinc-200 { border-color: #3f3f46; }
+.admin-light.dark .border-zinc-300 { border-color: #52525b; }
+.admin-light.dark .border-zinc-900 { border-color: #e4e4e7; }
+.admin-light.dark .focus\:border-zinc-900:focus { border-color: #e4e4e7; }
+.admin-light.dark .focus-within\:border-zinc-900:focus-within { border-color: #e4e4e7; }
+.admin-light.dark .hover\:bg-zinc-50:hover { background-color: #27272a; }
+.admin-light.dark .hover\:bg-zinc-100:hover { background-color: #27272a; }
+.admin-light.dark .hover\:bg-zinc-700:hover { background-color: #d4d4d8; }
+.admin-light.dark .hover\:bg-zinc-900:hover { background-color: #f4f4f5; }
+.admin-light.dark .hover\:text-zinc-900:hover { color: #f4f4f5; }
+.admin-light.dark .hover\:text-white:hover { color: #18181b; }
+.admin-light.dark .hover\:border-zinc-300:hover { border-color: #52525b; }
+.admin-light.dark .hover\:border-zinc-400:hover { border-color: #71717a; }
+.admin-light.dark .hover\:border-zinc-900:hover { border-color: #e4e4e7; }

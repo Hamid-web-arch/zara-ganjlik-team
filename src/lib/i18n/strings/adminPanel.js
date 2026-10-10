@@ -3,6 +3,8 @@ export const adminPanelStrings = {
     console: "Management Console",
     logout: "Çıxış",
     back: "Geri",
+    darkMode: "Qara rejim",
+    lightMode: "Ağ rejim",
     hero: {
       title: "Hero Section Ayarları",
       titleLabel: "Başlıq Yazısı",
@@ -126,6 +128,8 @@ export const adminPanelStrings = {
     console: "Management Console",
     logout: "Logout",
     back: "Back",
+    darkMode: "Dark mode",
+    lightMode: "Light mode",
     hero: {
       title: "Hero Section Settings",
       titleLabel: "Headline Text",
@@ -249,6 +253,8 @@ export const adminPanelStrings = {
     console: "Панель управления",
     logout: "Выйти",
     back: "Назад",
+    darkMode: "Тёмный режим",
+    lightMode: "Светлый режим",
     hero: {
       title: "Настройки главного блока",
       titleLabel: "Заголовок",

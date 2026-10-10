@@ -130,6 +130,21 @@ export default function AdminPage() {
   const { authorized } = useAuthGuard({ requireAdmin: true });
   const { logout } = useAuth();
   const [section, setSection] = useState("hero");
+  const [dark, setDark] = useState(() => {
+    try {
+      return localStorage.getItem("admin-theme") === "dark";
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("admin-theme", dark ? "dark" : "light");
+    } catch {
+      // ignore (private browsing, storage disabled, etc.)
+    }
+  }, [dark]);
 
   const handleLogout = async () => {
     try {
@@ -179,7 +194,7 @@ export default function AdminPage() {
   const active = SECTIONS.find((item) => item.id === section) || SECTIONS[0];
 
   return (
-    <div className="admin-light min-h-screen bg-white text-zinc-900 flex flex-col md:flex-row">
+    <div className={`admin-light min-h-screen bg-white text-zinc-900 flex flex-col md:flex-row ${dark ? "dark" : ""}`}>
       <aside className="md:w-64 md:shrink-0 md:flex md:flex-col md:h-screen md:sticky md:top-0 border-b md:border-b-0 md:border-r border-zinc-200 bg-zinc-50">
         <div className="p-6 border-b border-zinc-200 flex items-start justify-between gap-4">
           <div>
@@ -187,8 +202,16 @@ export default function AdminPage() {
               GNC. <span className="text-zinc-400">Admin</span>
             </h1>
             <p className="text-[9px] uppercase tracking-[0.3em] text-zinc-400 mt-1">{s.console}</p>
-            <div className="mt-3">
+            <div className="mt-3 flex items-center gap-4">
               <LanguageSwitcher light />
+              <button
+                type="button"
+                onClick={() => setDark((v) => !v)}
+                className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-500 hover:text-zinc-900 transition cursor-pointer"
+                title={dark ? s.lightMode : s.darkMode}
+              >
+                <i className={`fa-solid ${dark ? "fa-sun" : "fa-moon"}`} />
+              </button>
             </div>
           </div>
           {/* Compact on mobile, where the full-width buttons below are hidden to keep the
