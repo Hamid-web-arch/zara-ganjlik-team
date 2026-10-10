@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../lib/authContext";
+import { useAuth } from "../lib/authState";
 
 /**
  * Same external contract as before the Firebase removal: { loading, authorized, profile,

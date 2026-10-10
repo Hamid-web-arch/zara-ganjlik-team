@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { getSchedule } from "../lib/api";
 import { normalizeName } from "../lib/scheduleParser";
 import { useLanguage } from "../lib/i18n/languageContext";
 
@@ -45,21 +44,19 @@ export default function StaffSchedule({ employeeName }) {
   useEffect(() => {
     if (!employeeName) return;
 
-    (async () => {
-      try {
-        const snap = await getDoc(doc(db, "work_schedule", "current"));
-        if (!snap.exists()) {
+    getSchedule()
+      .then((data) => {
+        if (!data) {
           setSchedule(null);
           return;
         }
-        const data = snap.data();
         setWeekLabel(data.weekLabel || "");
         setSchedule(data.byEmployee?.[normalizeName(employeeName)] || null);
-      } catch (error) {
+      })
+      .catch((error) => {
         console.error("İş qrafiki yüklənərkən xəta:", error);
         setSchedule(null);
-      }
-    })();
+      });
   }, [employeeName]);
 
   return (

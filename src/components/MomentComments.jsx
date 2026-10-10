@@ -15,7 +15,7 @@ function formatCommentDate(timestamp) {
   );
 }
 
-export default function MomentComments({ videoId, currentUser, onClose, onCountChange }) {
+export default function MomentComments({ videoId, onClose, onCountChange }) {
   const { t } = useLanguage();
   const s = t.comments;
   const [comments, setComments] = useState([]);

@@ -12,8 +12,6 @@
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",
     "bcryptjs": "^3.0.3",
-    "firebase": "^12.16.0",
-    "firebase-admin": "^13.10.0",
     "jsonwebtoken": "^9.0.3",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",

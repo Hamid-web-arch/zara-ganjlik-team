@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { getSettings, putSettings, uploadToCloudinary } from "../lib/api";
 import { validateImageFile } from "../lib/fileValidation";
 import { useAuthGuard } from "../hooks/useAuthGuard";
-import { useAuth } from "../lib/authContext";
+import { useAuth } from "../lib/authState";
 import MemberSection from "../components/MemberSection";
 import AdminMomentsPanel from "../components/AdminMomentsPanel";
 import AdminScheduleUpload from "../components/AdminScheduleUpload";

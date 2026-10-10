@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { updateMember, uploadToCloudinary, forgotPassword } from "../lib/api";
 import { validateImageFile } from "../lib/fileValidation";
 import { useAuthGuard } from "../hooks/useAuthGuard";
-import { useAuth } from "../lib/authContext";
+import { useAuth } from "../lib/authState";
 import StaffSchedule from "../components/StaffSchedule";
 import { useLanguage } from "../lib/i18n/languageContext";
 

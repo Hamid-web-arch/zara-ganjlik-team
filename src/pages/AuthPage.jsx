@@ -2,7 +2,7 @@ import { notify } from "../lib/notify";
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login, forgotPassword, logout as apiLogout } from "../lib/api";
-import { useAuth } from "../lib/authContext";
+import { useAuth } from "../lib/authState";
 import { useLanguage } from "../lib/i18n/languageContext";
 
 // Colour is not language-specific, so it stays out of the translation tables.
