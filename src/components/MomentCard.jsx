@@ -145,7 +145,10 @@ export default function MomentCard({
             <i className="fa-solid fa-play text-xl ml-1" />
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col gap-2 z-40 opacity-0 group-hover/player:opacity-100 transition-opacity duration-300 select-none">
+        {/* Touch devices have no :hover, so these controls default to visible and only
+            hide-until-hover on md+ (mouse) screens — otherwise mobile users could never
+            see or use the scrubber/time display at all. */}
+        <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col gap-2 z-40 opacity-100 md:opacity-0 md:group-hover/player:opacity-100 transition-opacity duration-300 select-none">
           <div
             onClick={handleSeek}
             className="w-full h-1.5 bg-white/20 rounded-full cursor-pointer relative progress-container"

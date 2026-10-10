@@ -152,7 +152,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-black text-white p-6 md:p-12">
-      <header className="max-w-6xl mx-auto flex justify-between items-center mb-12">
+      <header className="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-12">
         <div>
           <h1 className="font-sync text-xl tracking-tighter uppercase">
             GNC. <span className="text-white/20">Admin</span>

@@ -82,23 +82,21 @@ export default function StaffProfilePage() {
   return (
     <div className="bg-black text-white min-h-screen">
       <div className="max-w-4xl mx-auto p-8 pt-20">
-        <div className="flex items-center justify-between mb-12">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-12">
           <h1 className="font-fashion text-4xl text-white tracking-tighter">{s.myProfile}</h1>
-          <div className="flex gap-4">
-            <div>
-              <Link
-                to="/"
-                className="text-[9px] uppercase tracking-[0.3em] border border-white/20 px-6 py-3 hover:bg-white hover:text-black transition inline-block"
-              >
-                {s.backHome}
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="text-[9px] uppercase tracking-[0.3em] border border-white/20 px-6 py-3 hover:bg-white hover:text-black transition"
-              >
-                {s.logout}
-              </button>
-            </div>
+          <div className="flex gap-3">
+            <Link
+              to="/"
+              className="text-[9px] uppercase tracking-[0.3em] border border-white/20 px-6 py-3 hover:bg-white hover:text-black transition inline-block"
+            >
+              {s.backHome}
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="text-[9px] uppercase tracking-[0.3em] border border-white/20 px-6 py-3 hover:bg-white hover:text-black transition"
+            >
+              {s.logout}
+            </button>
           </div>
         </div>
 
@@ -111,14 +109,16 @@ export default function StaffProfilePage() {
                 alt={s.myProfile}
               />
             </div>
-            <label className="absolute bottom-0 right-0 bg-white text-black p-2 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition">
+            {/* Visible by default — :hover doesn't exist on touch, so gating this on
+                hover alone (as before) made it undiscoverable on mobile. */}
+            <label className="absolute bottom-0 right-0 bg-white text-black p-2 rounded-full cursor-pointer opacity-100 md:opacity-0 md:group-hover:opacity-100 transition">
               <input type="file" onChange={handleUpload} disabled={uploading} className="hidden" />
               <span className="text-[8px] font-bold">{s.edit}</span>
             </label>
           </div>
 
           <div className="flex-1 w-full space-y-8">
-            <div className="grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div>
                 <label className="text-[8px] uppercase tracking-[0.2em] text-white/40">{s.fullName}</label>
                 <p className="text-sm tracking-widest mt-1">
