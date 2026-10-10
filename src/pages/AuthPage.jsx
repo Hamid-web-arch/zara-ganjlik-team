@@ -46,6 +46,14 @@ export default function AuthPage() {
     try {
       const profile = await login(email.trim(), password);
 
+      if (profile.mustResetPassword) {
+        // A temporary (admin-set) password — must be replaced before anything else,
+        // regardless of which portal they picked.
+        setProfile(profile);
+        navigate("/force-password-reset");
+        return;
+      }
+
       if (profile.accessLevel === "admin") {
         setProfile(profile);
         navigate(selectedRole === "admin" ? "/admin" : "/staff-profile");

@@ -66,6 +66,9 @@ export async function refreshSession() {
 export const forgotPassword = (email) => request("/api/auth", { method: "POST", body: { action: "forgot-password", email } });
 export const resetPassword = (token, newPassword) =>
   request("/api/auth", { method: "POST", body: { action: "reset-password", token, newPassword } });
+/** For a member who just signed in with a temporary (admin-set) password. */
+export const setPassword = (newPassword) =>
+  request("/api/auth", { method: "POST", body: { action: "set-password", newPassword } });
 
 // ---------- members (staff/crew) ----------
 export const listMembers = (kind) => request(`/api/members/${kind}`);

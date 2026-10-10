@@ -22,6 +22,10 @@ create table members (
   password_hash text not null,
   access_level access_level not null default 'user',
   image text,
+  -- Set whenever an admin creates a member or resets their login (they only ever get a
+  -- password chosen by someone else at that point) — cleared once the member sets their
+  -- own password. Checked at login to force the change before anything else is usable.
+  must_reset_password boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

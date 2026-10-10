@@ -28,6 +28,7 @@ function toProfile(member) {
     email: member.email,
     accessLevel: member.access_level,
     image: member.image,
+    mustResetPassword: member.must_reset_password,
   };
 }
 
@@ -129,6 +130,25 @@ export default async function handler(req, res) {
     // triggered because of a compromised account.
     await sql`update refresh_tokens set revoked = true where member_id = ${row.member_id}::uuid`;
     return res.status(200).json({ success: true });
+  }
+
+  if (action === "set-password") {
+    // For a member who just signed in with a temporary password (mustResetPassword) and
+    // needs to choose their own — unlike reset-password, this trusts the access token
+    // from the login that just happened instead of an emailed token.
+    const user = getAuthUser(req);
+    if (!user) return res.status(401).json({ error: "Giriş tələb olunur." });
+    const { newPassword } = req.body;
+    if (!newPassword || newPassword.length < 8) {
+      return res.status(400).json({ error: "Şifrə ən azı 8 simvol olmalıdır." });
+    }
+    const passwordHash = await hashPassword(newPassword);
+    await sql`
+      update members set password_hash = ${passwordHash}, must_reset_password = false, updated_at = now()
+      where id = ${user.id}::uuid
+    `;
+    const member = await findMemberById(user.id);
+    return res.status(200).json({ profile: toProfile(member) });
   }
 
   if (action === "me") {

@@ -1,5 +1,16 @@
 export const authStrings = {
   az: {
+    forceReset: {
+      title: "YENİ ŞİFRƏ TƏYİN EDİN",
+      subtitle: "Salam {name}, hesabınız müvəqqəti şifrə ilə yaradılıb. Davam etmək üçün öz şifrənizi təyin edin.",
+      newPasswordPh: "YENİ ŞİFRƏ",
+      confirmPh: "ŞİFRƏNİ TƏKRARLAYIN",
+      submit: "Şifrəni təyin et və davam et",
+      submitting: "YADDA SAXLANILIR...",
+      tooShort: "Şifrə ən azı 8 simvol olmalıdır.",
+      mismatch: "Şifrələr uyğun gəlmir.",
+      logout: "Çıxış et",
+    },
     resetPasswordPage: {
       title: "YENİ ŞİFRƏ",
       newPasswordPh: "YENİ ŞİFRƏ",
@@ -59,6 +70,17 @@ export const authStrings = {
     },
   },
   en: {
+    forceReset: {
+      title: "SET A NEW PASSWORD",
+      subtitle: "Hi {name}, your account was created with a temporary password. Set your own to continue.",
+      newPasswordPh: "NEW PASSWORD",
+      confirmPh: "CONFIRM PASSWORD",
+      submit: "Set password and continue",
+      submitting: "SAVING...",
+      tooShort: "Password must be at least 8 characters.",
+      mismatch: "Passwords do not match.",
+      logout: "Log out",
+    },
     resetPasswordPage: {
       title: "NEW PASSWORD",
       newPasswordPh: "NEW PASSWORD",
@@ -118,6 +140,17 @@ export const authStrings = {
     },
   },
   ru: {
+    forceReset: {
+      title: "УСТАНОВИТЕ НОВЫЙ ПАРОЛЬ",
+      subtitle: "Здравствуйте, {name}. Ваш аккаунт создан с временным паролем. Установите свой, чтобы продолжить.",
+      newPasswordPh: "НОВЫЙ ПАРОЛЬ",
+      confirmPh: "ПОВТОРИТЕ ПАРОЛЬ",
+      submit: "Установить пароль и продолжить",
+      submitting: "СОХРАНЕНИЕ...",
+      tooShort: "Пароль должен содержать не менее 8 символов.",
+      mismatch: "Пароли не совпадают.",
+      logout: "Выйти",
+    },
     resetPasswordPage: {
       title: "НОВЫЙ ПАРОЛЬ",
       newPasswordPh: "НОВЫЙ ПАРОЛЬ",
