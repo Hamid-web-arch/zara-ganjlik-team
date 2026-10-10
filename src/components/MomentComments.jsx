@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { addDoc, collection, onSnapshot, query, where } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { listComments, createComment } from "../lib/api";
 import { useLanguage } from "../lib/i18n/languageContext";
 
 const DEFAULT_AVATAR =
@@ -26,18 +25,12 @@ export default function MomentComments({ videoId, currentUser, onClose, onCountC
   const listRef = useRef(null);
 
   useEffect(() => {
-    const q = query(collection(db, "comments"), where("videoId", "==", videoId));
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const all = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-        all.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+    listComments(videoId)
+      .then((all) => {
         setComments(all);
-        onCountChange?.(videoId, snapshot.size);
-      },
-      (error) => console.error(s.errLoad, error)
-    );
-    return () => unsubscribe();
+        onCountChange?.(videoId, all.length);
+      })
+      .catch((error) => console.error(s.errLoad, error));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId]);
 
@@ -52,14 +45,11 @@ export default function MomentComments({ videoId, currentUser, onClose, onCountC
 
     setSending(true);
     try {
-      await addDoc(collection(db, "comments"), {
-        videoId,
-        parentId: replyTo?.id || null,
-        text,
-        authorUid: currentUser?.uid || null,
-        authorName: currentUser?.name || "Staff Member",
-        authorImage: currentUser?.image || null,
-        createdAt: Date.now(),
+      const comment = await createComment(videoId, text, replyTo?.id);
+      setComments((prev) => {
+        const next = [...prev, comment];
+        onCountChange?.(videoId, next.length);
+        return next;
       });
       setInput("");
       setReplyTo(null);

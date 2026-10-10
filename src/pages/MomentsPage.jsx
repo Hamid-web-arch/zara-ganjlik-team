@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { collection, getCountFromServer, getDocs, query, where } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { listApprovedMoments, commentCounts as fetchCommentCounts } from "../lib/api";
 import { useAuthGuard } from "../hooks/useAuthGuard";
 import MomentCard from "../components/MomentCard";
 import UploadMomentModal from "../components/UploadMomentModal";
@@ -16,9 +15,9 @@ export default function MomentsPage() {
   const s = t.momentsPage;
   const containerRef = useRef(null);
   const hasInteractedRef = useRef(false);
-  const { authorized, profile } = useAuthGuard({ onError: () => navigate("/auth") });
+  const { authorized, profile } = useAuthGuard();
   const currentUser = profile
-    ? { uid: profile.uid, name: profile.name || profile.authEmail || "Staff Member", image: profile.image || DEFAULT_AVATAR }
+    ? { uid: profile.uid, name: profile.name || "Staff Member", image: profile.image || DEFAULT_AVATAR }
     : null;
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,22 +27,11 @@ export default function MomentsPage() {
   const loadApprovedVideos = useCallback(async () => {
     setLoading(true);
     try {
-      const snapshot = await getDocs(query(collection(db, "approved_moments"), where("status", "==", "approved")));
-      const list = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-      list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      const list = await listApprovedMoments();
       setVideos(list);
-
-      // Count aggregations return only a number, so this never downloads comment documents
-      // (the previous version read every comment on every page load just to count them).
-      const entries = await Promise.all(
-        list.map(async (video) => {
-          const countSnap = await getCountFromServer(
-            query(collection(db, "comments"), where("videoId", "==", video.id))
-          );
-          return [video.id, countSnap.data().count];
-        })
-      );
-      setCommentCounts(Object.fromEntries(entries));
+      // Batched into one query instead of one per video (see api/[...route].js's
+      // comments handler, videoIds param).
+      setCommentCounts(list.length ? await fetchCommentCounts(list.map((v) => v.id)) : {});
     } catch (error) {
       console.error("Moments məlumatları çəkilərkən xəta:", error);
     } finally {

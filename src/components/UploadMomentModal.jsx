@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { addDoc, collection } from "firebase/firestore";
-import { db } from "../lib/firebase";
-import { uploadToCloudinary } from "../lib/adminApi";
+import { uploadToCloudinary, createMoment } from "../lib/api";
 import { validateVideoFile } from "../lib/fileValidation";
 import { notify } from "../lib/notify";
 import { useLanguage } from "../lib/i18n/languageContext";
@@ -30,13 +28,7 @@ export default function UploadMomentModal({ open, onClose, onUploaded }) {
     setUploading(true);
     try {
       const url = await uploadToCloudinary(file, "moment");
-
-      await addDoc(collection(db, "approved_moments"), {
-        url,
-        caption: caption.trim() || "Zara Ganjlik Moment",
-        status: "pending",
-        createdAt: Date.now(),
-      });
+      await createMoment(url, caption.trim() || "Zara Ganjlik Moment");
 
       notify(s.success);
       setFile(null);

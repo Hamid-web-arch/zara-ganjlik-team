@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { likeMoment, unlikeMoment } from "../lib/api";
 import MomentComments from "./MomentComments";
 import { useLanguage } from "../lib/i18n/languageContext";
 
@@ -116,9 +115,7 @@ export default function MomentCard({
     setLikedBy((prev) => (wasLiked ? prev.filter((id) => id !== uid) : [...prev, uid]));
 
     try {
-      await updateDoc(doc(db, "approved_moments", video.id), {
-        likedBy: wasLiked ? arrayRemove(uid) : arrayUnion(uid),
-      });
+      await (wasLiked ? unlikeMoment(video.id) : likeMoment(video.id));
     } catch (err) {
       console.error("Bəyəni xətası:", err);
       setLikedBy((prev) => (wasLiked ? [...prev, uid] : prev.filter((id) => id !== uid)));
