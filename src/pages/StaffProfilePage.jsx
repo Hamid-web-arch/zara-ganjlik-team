@@ -1,12 +1,10 @@
 import { notify } from "../lib/notify";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { sendPasswordResetEmail, signOut } from "firebase/auth";
-import { doc, updateDoc } from "firebase/firestore";
-import { auth, db } from "../lib/firebase";
-import { uploadToCloudinary } from "../lib/adminApi";
+import { updateMember, uploadToCloudinary, forgotPassword } from "../lib/api";
 import { validateImageFile } from "../lib/fileValidation";
 import { useAuthGuard } from "../hooks/useAuthGuard";
+import { useAuth } from "../lib/authContext";
 import StaffSchedule from "../components/StaffSchedule";
 import { useLanguage } from "../lib/i18n/languageContext";
 
@@ -18,6 +16,7 @@ export default function StaffProfilePage() {
   const { t } = useLanguage();
   const s = t.staffProfile;
   const { profile: authProfile, collectionName } = useAuthGuard();
+  const { logout } = useAuth();
   const [profile, setProfile] = useState(null);
   const [uploading, setUploading] = useState(false);
 
@@ -48,7 +47,7 @@ export default function StaffProfilePage() {
 
     try {
       const imageUrl = await uploadToCloudinary(file, "avatar");
-      await updateDoc(doc(db, collectionName, profile.uid), { image: imageUrl });
+      await updateMember(collectionName, profile.uid, { image: imageUrl });
       setProfile((prev) => ({ ...prev, image: imageUrl }));
       notify(s.notify.imageUpdated);
     } catch (error) {
@@ -60,10 +59,9 @@ export default function StaffProfilePage() {
   };
 
   const handleResetPassword = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
+    if (!profile?.email) return;
     try {
-      await sendPasswordResetEmail(auth, user.email);
+      await forgotPassword(profile.email);
       notify(s.notify.resetSent);
     } catch (error) {
       console.error("Şifrə sıfırlama xətası:", error);
@@ -73,7 +71,7 @@ export default function StaffProfilePage() {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await logout();
       navigate("/auth");
     } catch (error) {
       console.error("Çıxış zamanı xəta:", error);
@@ -142,7 +140,7 @@ export default function StaffProfilePage() {
               <div>
                 <label className="text-[8px] uppercase tracking-[0.2em] text-white/40">{s.email}</label>
                 <p className="text-sm tracking-widest mt-1">
-                  {profile ? profile.email || profile.authEmail : t.common.loading}
+                  {profile ? profile.email : t.common.loading}
                 </p>
               </div>
             </div>
