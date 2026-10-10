@@ -11,6 +11,15 @@ import { requireAuth, requireAdmin, hashPassword } from "./_auth.js";
 // as a parameter, since it names columns rather than supplying a value.
 const MEMBER_COLUMNS = `id, kind, name, role, id_code as "idCode", email, access_level as "accessLevel", image`;
 
+// Refuses to demote/delete the last admin — there'd be no account left able to reach the
+// admin panel to undo it (the only other way back in is a local DB script).
+async function wouldRemoveLastAdmin(id, kind) {
+  const [target] = await sql`select access_level from members where id = ${id}::uuid and kind = ${kind}`;
+  if (!target || target.access_level !== "admin") return false;
+  const [{ count }] = await sql`select count(*)::int as count from members where access_level = 'admin'`;
+  return count <= 1;
+}
+
 export default async function handler(req, res) {
   // Vercel's bracket catch-all ([...route].js) turned out not to reliably match more
   // than one path segment on this (non-framework) project, so the routing is done
@@ -80,6 +89,9 @@ async function membersHandler(req, res, [kind, id]) {
 
     if (isAdmin) {
       const { name, role, idCode, email, accessLevel, image } = body;
+      if (accessLevel && accessLevel !== "admin" && (await wouldRemoveLastAdmin(id, kind))) {
+        return res.status(400).json({ error: "Sonuncu admin hesabını adi istifadəçiyə endirmək olmaz." });
+      }
       const [row] = await sql`
         update members set
           name = coalesce(${name}, name),
@@ -112,6 +124,9 @@ async function membersHandler(req, res, [kind, id]) {
 
   if (req.method === "DELETE") {
     if (!requireAdmin(req, res)) return;
+    if (await wouldRemoveLastAdmin(id, kind)) {
+      return res.status(400).json({ error: "Sonuncu admin hesabını silmək olmaz." });
+    }
     const [row] = await sql`delete from members where id = ${id}::uuid and kind = ${kind} returning id`;
     if (!row) return res.status(404).json({ error: "Üzv tapılmadı." });
     return res.status(200).json({ success: true });
