@@ -113,12 +113,12 @@ export default function HomePage() {
                 </a>
               </li>
               <li>
-                <a
-                  href="#moments"
+                <Link
+                  to="/moments"
                   className="text-[10px] uppercase tracking-[0.4em] font-light hover:opacity-50 transition"
                 >
                   {t.nav.moments}
-                </a>
+                </Link>
               </li>
             </ul>
 
@@ -169,13 +169,13 @@ export default function HomePage() {
           >
             {t.nav.staff}
           </a>
-          <a
-            href="#moments"
+          <Link
+            to="/moments"
             onClick={() => setMobileMenuOpen(false)}
             className="text-[11px] uppercase tracking-[0.4em] font-light"
           >
             {t.nav.moments}
-          </a>
+          </Link>
           <button
             type="button"
             onClick={() => setDark((v) => !v)}
