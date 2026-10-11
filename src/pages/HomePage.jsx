@@ -129,7 +129,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setDark((v) => !v)}
-              className="hover:opacity-50 transition cursor-pointer text-xs"
+              className="hidden md:block hover:opacity-50 transition cursor-pointer text-xs"
               title={dark ? t.nav.lightMode : t.nav.darkMode}
               aria-label={dark ? t.nav.lightMode : t.nav.darkMode}
             >
