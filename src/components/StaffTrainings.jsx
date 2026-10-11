@@ -3,6 +3,13 @@ import { notify } from "../lib/notify";
 import { listTrainings, markTrainingOpened, markTrainingCompleted } from "../lib/api";
 import { useLanguage } from "../lib/i18n/languageContext";
 
+// Cloudinary's documented way to force a real download (Content-Disposition: attachment)
+// instead of navigating to the file — plain `download` attributes are ignored by browsers
+// for cross-origin URLs like Cloudinary's, so this has to be a URL-level flag.
+function toDownloadUrl(url) {
+  return url.includes("/upload/") ? url.replace("/upload/", "/upload/fl_attachment/") : url;
+}
+
 export default function StaffTrainings() {
   const { t } = useLanguage();
   const s = t.staffProfile.trainings;
@@ -100,20 +107,41 @@ export default function StaffTrainings() {
               {active.fileType === "video" && (
                 <video src={active.fileUrl} controls className="w-full max-h-[50vh]" />
               )}
-              {active.fileType === "pdf" && (
-                <iframe src={active.fileUrl} title={active.title} className="w-full h-[50vh] bg-white" />
+              {(active.fileType === "pdf" || active.fileType === "document") && (
+                <div className="flex flex-col items-center justify-center gap-4 py-12 px-4">
+                  <i className="fa-regular fa-file-lines text-3xl text-white/30" />
+                  <p className="text-[10px] text-white/50 uppercase tracking-widest text-center break-all">{active.fileName}</p>
+                </div>
               )}
-              {active.fileType === "document" && (
+            </div>
+
+            {(active.fileType === "pdf" || active.fileType === "document") && (
+              <div className="flex gap-3">
                 <a
                   href={active.fileUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-center gap-2 py-10 text-[10px] uppercase tracking-widest text-white/70 hover:text-white transition"
+                  className="flex-1 text-center text-[9px] uppercase tracking-widest border border-white/20 py-3 hover:bg-white hover:text-black transition"
                 >
-                  {s.openFile} ({active.fileName})
+                  {s.openFile}
                 </a>
-              )}
-            </div>
+                <a
+                  href={toDownloadUrl(active.fileUrl)}
+                  className="flex-1 text-center text-[9px] uppercase tracking-widest border border-white/20 py-3 hover:bg-white hover:text-black transition"
+                >
+                  {s.download}
+                </a>
+              </div>
+            )}
+
+            {(active.fileType === "image" || active.fileType === "video") && (
+              <a
+                href={toDownloadUrl(active.fileUrl)}
+                className="block text-center text-[9px] uppercase tracking-widest border border-white/20 py-3 hover:bg-white hover:text-black transition"
+              >
+                {s.download}
+              </a>
+            )}
 
             {active.myProgress?.completed ? (
               <p className="text-[10px] uppercase tracking-widest text-emerald-500 text-center">{s.alreadyCompleted}</p>

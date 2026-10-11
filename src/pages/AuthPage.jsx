@@ -1,5 +1,5 @@
 import { notify } from "../lib/notify";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login, forgotPassword, logout as apiLogout } from "../lib/api";
 import { useAuth } from "../lib/authState";
@@ -23,7 +23,7 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const s = t.authPage;
-  const { setProfile } = useAuth();
+  const { loading, profile, setProfile } = useAuth();
   const [role, setRole] = useState(null); // null | "admin" | "staff"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,6 +32,14 @@ export default function AuthPage() {
   const [resetEmail, setResetEmail] = useState("");
   const roleRef = useRef(role);
   roleRef.current = role;
+
+  // A remembered session (30-day refresh cookie) means AuthProvider already resolved a
+  // profile on mount — land straight on the right portal instead of asking to sign in
+  // again, same as the post-submit redirect below.
+  useEffect(() => {
+    if (loading || !profile || profile.mustResetPassword) return;
+    navigate(profile.accessLevel === "admin" ? "/admin" : "/staff-profile");
+  }, [loading, profile, navigate]);
 
   const handleSelectRole = (nextRole) => setRole(nextRole);
   const handleBack = () => setRole(null);
