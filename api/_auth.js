@@ -18,14 +18,16 @@ export const verifyPassword = (password, hash) => bcrypt.compare(password, hash)
 
 // --- access tokens (short-lived JWT, carries identity + role so most endpoints never
 // need a DB round trip just to check who's asking) ---
-export function signAccessToken({ id, kind, accessLevel }) {
-  return jwt.sign({ uid: id, kind, accessLevel }, requireSecret(), { expiresIn: ACCESS_TOKEN_TTL });
+export function signAccessToken({ id, kind, accessLevel, permissions }) {
+  return jwt.sign({ uid: id, kind, accessLevel, permissions: permissions || [] }, requireSecret(), {
+    expiresIn: ACCESS_TOKEN_TTL,
+  });
 }
 
 export function verifyAccessToken(token) {
   try {
     const payload = jwt.verify(token, requireSecret());
-    return { id: payload.uid, kind: payload.kind, accessLevel: payload.accessLevel };
+    return { id: payload.uid, kind: payload.kind, accessLevel: payload.accessLevel, permissions: payload.permissions || [] };
   } catch {
     return null;
   }
@@ -52,6 +54,20 @@ export function requireAdmin(req, res) {
   if (!user) return null;
   if (user.accessLevel !== "admin") {
     res.status(403).json({ error: "Bu əməliyyat üçün admin icazəsi tələb olunur." });
+    return null;
+  }
+  return user;
+}
+
+/** Like requireAdmin, but for a specific admin-panel section — the General Admin
+ * (kind="owner") always passes; any other admin needs that section in their own
+ * `permissions` list, set by the General Admin. */
+export function requirePermission(req, res, section) {
+  const user = requireAdmin(req, res);
+  if (!user) return null;
+  if (user.kind === "owner") return user;
+  if (!user.permissions.includes(section)) {
+    res.status(403).json({ error: "Bu bölməyə icazəniz yoxdur." });
     return null;
   }
   return user;

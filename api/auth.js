@@ -30,11 +30,17 @@ function toProfile(member) {
     accessLevel: member.access_level,
     image: member.image,
     mustResetPassword: member.must_reset_password,
+    permissions: member.permissions || [],
   };
 }
 
 async function issueSession(res, member, remember = true) {
-  const accessToken = signAccessToken({ id: member.id, kind: member.kind, accessLevel: member.access_level });
+  const accessToken = signAccessToken({
+    id: member.id,
+    kind: member.kind,
+    accessLevel: member.access_level,
+    permissions: member.permissions,
+  });
   const refreshToken = generateRefreshToken();
   const expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000);
   await sql`

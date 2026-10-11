@@ -31,6 +31,11 @@ create table members (
   -- own password. Checked at login to force the change before anything else is usable.
   must_reset_password boolean not null default true,
   section member_section,
+  -- Which admin-panel sections an access_level='admin' member may use — ignored for
+  -- kind='owner' (the "General Admin", who always has everything) and for access_level=
+  -- 'user'. Only the General Admin can grant these or touch another admin's account at
+  -- all (see the admin-row checks in api/router.js's membersHandler).
+  permissions text[] not null default '{}',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

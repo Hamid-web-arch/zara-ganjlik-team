@@ -128,7 +128,7 @@ export default function AdminPage() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const s = t.adminPanel;
-  const { authorized } = useAuthGuard({ requireAdmin: true });
+  const { authorized, profile } = useAuthGuard({ requireAdmin: true });
   const { logout } = useAuth();
   const [section, setSection] = useState("hero");
   const [dark, setDark] = useState(() => {
@@ -167,8 +167,13 @@ export default function AdminPage() {
   }
 
   // One list drives both the sidebar and which section renders — add a resource here and
-  // it shows up in the nav for free, no separate routing/layout to keep in sync.
-  const SECTIONS = [
+  // it shows up in the nav for free, no separate routing/layout to keep in sync. Every
+  // entry but "owner" is gated by the viewer's granted `permissions`; "owner" (the
+  // General Admin's own account list) only ever shows for kind="owner" itself — it is
+  // never a grantable permission, regardless of what's in anyone's permissions array.
+  const isGeneralAdmin = profile?.kind === "owner";
+  const permissions = profile?.permissions || [];
+  const ALL_SECTIONS = [
     { id: "hero", label: s.hero.title, render: () => <HeroSettingsSection /> },
     { id: "energy", label: s.energy.title, render: () => <EnergyVideoUpload /> },
     { id: "schedule", label: s.schedule.title, render: () => <AdminScheduleUpload /> },
@@ -188,11 +193,15 @@ export default function AdminPage() {
     {
       id: "owner",
       label: s.members.manageOwner,
+      generalAdminOnly: true,
       // kind="owner": never shown on the public homepage (it only ever queries
       // staff/crew) — for admin accounts that shouldn't appear as a team member.
       render: () => <MemberSection collectionName="owner" heading={s.members.manageOwner} entityName="Owner" />,
     },
   ];
+  const SECTIONS = ALL_SECTIONS.filter((item) =>
+    item.generalAdminOnly ? isGeneralAdmin : isGeneralAdmin || permissions.includes(item.id)
+  );
   const active = SECTIONS.find((item) => item.id === section) || SECTIONS[0];
 
   return (
@@ -235,7 +244,7 @@ export default function AdminPage() {
               type="button"
               onClick={() => setSection(item.id)}
               className={`text-left whitespace-nowrap px-6 py-4 text-[10px] uppercase tracking-[0.2em] border-b border-zinc-100 transition shrink-0 ${
-                item.id === active.id
+                item.id === active?.id
                   ? "bg-zinc-900 text-white"
                   : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
               }`}
@@ -261,7 +270,9 @@ export default function AdminPage() {
         </div>
       </aside>
 
-      <main className="flex-1 min-w-0 p-6 md:p-10">{active.render()}</main>
+      <main className="flex-1 min-w-0 p-6 md:p-10">
+        {active ? active.render() : <p className="text-[10px] uppercase tracking-widest text-zinc-400">{s.noAccess}</p>}
+      </main>
     </div>
   );
 }

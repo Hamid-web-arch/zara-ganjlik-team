@@ -7,6 +7,7 @@ import {
   deleteMember as deleteMemberApi,
   issueTemporaryPassword,
 } from "../lib/api";
+import { useAuth } from "../lib/authState";
 import { useLanguage } from "../lib/i18n/languageContext";
 
 const DEFAULT_AVATAR =
@@ -14,16 +15,25 @@ const DEFAULT_AVATAR =
 
 const EMPTY_FORM = { name: "", role: "", idCode: "", email: "", password: "", accessLevel: "user", section: "" };
 const SECTIONS = ["woman", "men", "kids"];
+// Every grantable admin-panel section — kept in one place so the General Admin's
+// permission checklist and the sidebar filter (AdminPage.jsx) never drift apart.
+// "owner" is deliberately absent: it's never a grantable permission.
+const PERMISSION_SECTIONS = ["hero", "energy", "schedule", "moments", "briefings", "trainings", "crew", "staff"];
 
 export default function MemberSection({ collectionName, heading, entityName }) {
   const { t } = useLanguage();
   const s = t.adminPanel.members;
+  const { profile } = useAuth();
+  const isGeneralAdmin = profile?.kind === "owner";
   // Owner accounts aren't sales staff, so the Woman/Men/Kids department doesn't apply.
   const needsSection = collectionName !== "owner";
   const [members, setMembers] = useState([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [permEditing, setPermEditing] = useState(null); // the admin-level member being configured
+  const [permDraft, setPermDraft] = useState([]);
+  const [permSaving, setPermSaving] = useState(false);
   const formRef = useRef(null);
 
   const loadMembers = () =>
@@ -77,6 +87,29 @@ export default function MemberSection({ collectionName, heading, entityName }) {
       await loadMembers();
     } catch (error) {
       notify(s.deleteError + error.message);
+    }
+  };
+
+  const handleOpenPermissions = (member) => {
+    setPermEditing(member);
+    setPermDraft(member.permissions || []);
+  };
+
+  const togglePermission = (section) =>
+    setPermDraft((prev) => (prev.includes(section) ? prev.filter((p) => p !== section) : [...prev, section]));
+
+  const handleSavePermissions = async () => {
+    if (!permEditing) return;
+    setPermSaving(true);
+    try {
+      await updateMember(collectionName, permEditing.id, { permissions: permDraft });
+      notify(s.permissionsSaved);
+      setPermEditing(null);
+      await loadMembers();
+    } catch (error) {
+      notify(s.saveError + error.message);
+    } finally {
+      setPermSaving(false);
     }
   };
 
@@ -135,6 +168,11 @@ export default function MemberSection({ collectionName, heading, entityName }) {
   const inputClass =
     "bg-transparent border-b border-zinc-200 py-3 text-[10px] tracking-[0.2em] outline-none focus:border-zinc-900 text-zinc-900 placeholder:text-zinc-400";
 
+  // Only the General Admin may touch another admin-level account at all — everyone else's
+  // edit/temp-password/remove actions on one are blocked server-side too, this just keeps
+  // the buttons from being there to click in the first place.
+  const canManageRow = (m) => isGeneralAdmin || m.accessLevel !== "admin";
+
   return (
     <section className="bg-white border border-zinc-200 p-4 md:p-8 rounded-sm">
       <h2 className="font-sync text-xl font-bold tracking-tighter mb-8 text-zinc-900">{heading}</h2>
@@ -171,7 +209,9 @@ export default function MemberSection({ collectionName, heading, entityName }) {
             required
             value={form.accessLevel}
             onChange={handleChange("accessLevel")}
-            className="w-full bg-transparent py-3 text-[10px] tracking-[0.2em] text-zinc-600 outline-none appearance-none cursor-pointer font-light"
+            disabled={!isGeneralAdmin}
+            title={!isGeneralAdmin ? s.adminGrantTitle : undefined}
+            className="w-full bg-transparent py-3 text-[10px] tracking-[0.2em] text-zinc-600 outline-none appearance-none cursor-pointer font-light disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <option value="user" className="bg-white text-zinc-900">
               {s.userOption}
@@ -247,16 +287,27 @@ export default function MemberSection({ collectionName, heading, entityName }) {
                 <span className="truncate block">{m.email || "-"}</span>
               </div>
             </div>
-            <div className="flex justify-end gap-4 pt-2 border-t border-zinc-100">
-              <button onClick={() => handleEdit(m.id)} className="text-[9px] text-blue-600">
-                {s.edit}
-              </button>
-              <button onClick={() => handleIssueTempPassword(m.id)} className="text-[9px] text-amber-600">
-                {s.issueTempPassword}
-              </button>
-              <button onClick={() => handleDelete(m.id)} className="text-[9px] text-red-600">
-                {s.remove}
-              </button>
+            <div className="flex flex-wrap justify-end gap-4 pt-2 border-t border-zinc-100">
+              {canManageRow(m) ? (
+                <>
+                  <button onClick={() => handleEdit(m.id)} className="text-[9px] text-blue-600">
+                    {s.edit}
+                  </button>
+                  <button onClick={() => handleIssueTempPassword(m.id)} className="text-[9px] text-amber-600">
+                    {s.issueTempPassword}
+                  </button>
+                  {isGeneralAdmin && m.accessLevel === "admin" && collectionName !== "owner" && (
+                    <button onClick={() => handleOpenPermissions(m)} className="text-[9px] text-purple-600">
+                      {s.managePermissions}
+                    </button>
+                  )}
+                  <button onClick={() => handleDelete(m.id)} className="text-[9px] text-red-600">
+                    {s.remove}
+                  </button>
+                </>
+              ) : (
+                <span className="text-[9px] text-zinc-300">{s.generalAdminOnly}</span>
+              )}
             </div>
           </div>
         ))}
@@ -267,11 +318,11 @@ export default function MemberSection({ collectionName, heading, entityName }) {
         <table className="w-full text-left" style={{ tableLayout: "fixed", borderCollapse: "collapse" }}>
           <thead className="sticky top-0 bg-zinc-50">
             <tr className="border-b border-zinc-200 text-[8px] uppercase tracking-[0.4em] text-zinc-400">
-              <th className="pb-4 w-[22%]">{s.member}</th>
-              <th className="pb-4 w-[18%]">{s.role}</th>
-              <th className="pb-4 w-[13%]">{s.id}</th>
-              <th className="pb-4 w-[22%]">{s.email}</th>
-              <th className="pb-4 w-[25%] text-right pr-6">{s.actions}</th>
+              <th className="pb-4 w-[20%]">{s.member}</th>
+              <th className="pb-4 w-[16%]">{s.role}</th>
+              <th className="pb-4 w-[12%]">{s.id}</th>
+              <th className="pb-4 w-[20%]">{s.email}</th>
+              <th className="pb-4 w-[32%] text-right pr-6">{s.actions}</th>
             </tr>
           </thead>
           <tbody>
@@ -289,21 +340,68 @@ export default function MemberSection({ collectionName, heading, entityName }) {
                 <td className="py-4 text-[9px] text-zinc-500">{m.idCode || "-"}</td>
                 <td className="py-4 text-[9px] text-zinc-500">{m.email || "-"}</td>
                 <td className="py-4 text-right space-x-2 pr-6">
-                  <button onClick={() => handleEdit(m.id)} className="text-[8px] text-blue-600">
-                    {s.edit}
-                  </button>
-                  <button onClick={() => handleIssueTempPassword(m.id)} className="text-[8px] text-amber-600">
-                    {s.issueTempPassword}
-                  </button>
-                  <button onClick={() => handleDelete(m.id)} className="text-[8px] text-red-600">
-                    {s.remove}
-                  </button>
+                  {canManageRow(m) ? (
+                    <>
+                      <button onClick={() => handleEdit(m.id)} className="text-[8px] text-blue-600">
+                        {s.edit}
+                      </button>
+                      <button onClick={() => handleIssueTempPassword(m.id)} className="text-[8px] text-amber-600">
+                        {s.issueTempPassword}
+                      </button>
+                      {isGeneralAdmin && m.accessLevel === "admin" && collectionName !== "owner" && (
+                        <button onClick={() => handleOpenPermissions(m)} className="text-[8px] text-purple-600">
+                          {s.managePermissions}
+                        </button>
+                      )}
+                      <button onClick={() => handleDelete(m.id)} className="text-[8px] text-red-600">
+                        {s.remove}
+                      </button>
+                    </>
+                  ) : (
+                    <span className="text-[8px] text-zinc-300">{s.generalAdminOnly}</span>
+                  )}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {permEditing && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white w-full max-w-md p-8 space-y-6 rounded-sm border border-zinc-200">
+            <div>
+              <h3 className="text-sm font-bold tracking-tight text-zinc-900">{s.permissionsFor.replace("{name}", permEditing.name)}</h3>
+              <p className="text-[9px] uppercase tracking-widest text-zinc-400 mt-1">{s.permissionsHint}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {PERMISSION_SECTIONS.map((section) => (
+                <label key={section} className="flex items-center gap-2 text-[10px] text-zinc-700 cursor-pointer">
+                  <input type="checkbox" checked={permDraft.includes(section)} onChange={() => togglePermission(section)} />
+                  {s.permissionLabels[section]}
+                </label>
+              ))}
+            </div>
+            <div className="flex gap-3 justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setPermEditing(null)}
+                className="text-[9px] uppercase tracking-widest border border-zinc-200 px-5 py-3 hover:bg-zinc-100 transition"
+              >
+                {t.common.cancel}
+              </button>
+              <button
+                type="button"
+                onClick={handleSavePermissions}
+                disabled={permSaving}
+                className="text-[9px] font-bold uppercase tracking-widest bg-zinc-900 text-white px-5 py-3 hover:bg-zinc-700 transition disabled:opacity-40"
+              >
+                {permSaving ? s.saving : s.save}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
