@@ -79,6 +79,7 @@ export const translations = {
       theCrew: "The Crew",
       theStaff: "The Staff",
       members: "6615-GENCLIK TEAM MEMBERS",
+      empty: "Bu bölmə üçün hələ işçi əlavə olunmayıb.",
     },
     moments: {
       title: "Moments",
@@ -178,6 +179,7 @@ export const translations = {
       theCrew: "The Crew",
       theStaff: "The Staff",
       members: "6615-GENCLIK TEAM MEMBERS",
+      empty: "No team members assigned to this section yet.",
     },
     moments: {
       title: "Moments",
@@ -277,6 +279,7 @@ export const translations = {
       theCrew: "The Crew",
       theStaff: "The Staff",
       members: "6615-GENCLIK TEAM MEMBERS",
+      empty: "В этом разделе пока нет сотрудников.",
     },
     moments: {
       title: "Moments",

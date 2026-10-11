@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode, Mousewheel, Navigation } from "swiper/modules";
 import { listMembers } from "../lib/api";
+import { useLanguage } from "../lib/i18n/languageContext";
 import "swiper/css";
 
 const DEFAULT_AVATAR =
@@ -14,14 +15,23 @@ const BREAKPOINTS = {
   1440: { slidesPerView: 5, spaceBetween: 35 },
 };
 
-export default function TeamSwiper({ collectionName, swiperClass, prevClass, nextClass }) {
+export default function TeamSwiper({ collectionName, section, swiperClass, prevClass, nextClass }) {
+  const { t } = useLanguage();
   const [members, setMembers] = useState([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     listMembers(collectionName)
       .then((data) => setMembers(Array.isArray(data) ? data : []))
-      .catch((error) => console.error("Komanda siyahısı yüklənərkən xəta:", error));
+      .catch((error) => console.error("Komanda siyahısı yüklənərkən xəta:", error))
+      .finally(() => setLoaded(true));
   }, [collectionName]);
+
+  const filtered = section ? members.filter((m) => m.section === section) : members;
+
+  if (loaded && filtered.length === 0) {
+    return <p className="text-[9px] uppercase tracking-widest text-white/20">{t.staff.empty}</p>;
+  }
 
   return (
     <div className="relative w-full">
@@ -37,7 +47,7 @@ export default function TeamSwiper({ collectionName, swiperClass, prevClass, nex
         navigation={{ prevEl: `.${prevClass}`, nextEl: `.${nextClass}` }}
         className={`${swiperClass} w-full`}
       >
-        {members.map((member, index) => (
+        {filtered.map((member, index) => (
           <SwiperSlide key={index} className="group cursor-pointer !flex !flex-col !items-center !justify-center !text-center !h-auto">
             <div className="rounded-full overflow-hidden bg-white/5 mb-4 border border-white/5 relative select-none w-40 h-40 min-w-40 min-h-40 flex items-center justify-center">
               <img

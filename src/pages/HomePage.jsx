@@ -8,11 +8,15 @@ import LanguageSwitcher from "../components/LanguageSwitcher";
 const DEFAULT_HERO_IMAGE = "https://images.unsplash.com/photo-1441986300917-64674bd600d8";
 const DEFAULT_ENERGY_VIDEO = "https://vjs.zencdn.net/v/oceans.mp4";
 
+// Store section names, not brand copy, so they stay the same word in every language.
+const SECTIONS = ["Woman", "Men", "Kids"];
+
 export default function HomePage() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState(SECTIONS[0]);
   const [dark, setDark] = useState(() => {
     try {
       return localStorage.getItem("site-theme") === "dark";
@@ -442,30 +446,59 @@ export default function HomePage() {
 
       {/* THE STAFF */}
       <section id="team-section" className="py-24 bg-black overflow-hidden select-none">
-        <div className="max-w-7xl mx-auto px-6 space-y-20">
-          <div className="relative group/row">
-            <div className="mb-8 space-y-1">
-              <span className="text-[8px] uppercase tracking-[0.6em] text-white/30 block">{t.staff.teamDirectory}</span>
-              <h2 className="font-sync text-xl md:text-2xl font-bold tracking-tighter text-white uppercase">
-                {t.staff.theCrew}
-              </h2>
-            </div>
-            <TeamSwiper collectionName="crew" swiperClass="crewSwiper" prevClass="crew-prev" nextClass="crew-next" />
+        <div className="max-w-7xl mx-auto px-6 space-y-10">
+          <div className="space-y-1">
+            <span className="text-[8px] uppercase tracking-[0.6em] text-white/30 block">{t.staff.teamDirectory}</span>
           </div>
 
-          <div className="relative group/row">
-            <div className="mt-10 mb-8 space-y-1">
-              <h2 className="font-sync text-xl md:text-2xl font-bold tracking-tighter text-white uppercase">
-                {t.staff.theStaff}
-              </h2>
-              <p className="text-[8px] uppercase tracking-[0.5em] text-white/20">{t.staff.members}</p>
+          <div className="flex flex-wrap gap-3">
+            {SECTIONS.map((sec) => (
+              <button
+                key={sec}
+                type="button"
+                onClick={() => setActiveSection(sec)}
+                className={`px-8 py-3 text-[10px] uppercase tracking-[0.3em] font-bold border transition ${
+                  activeSection === sec
+                    ? "bg-white text-black border-white"
+                    : "border-white/20 text-white/50 hover:border-white/50 hover:text-white"
+                }`}
+              >
+                {sec}
+              </button>
+            ))}
+          </div>
+
+          <div className="space-y-20">
+            <div className="relative group/row">
+              <div className="mb-8 space-y-1">
+                <h2 className="font-sync text-xl md:text-2xl font-bold tracking-tighter text-white uppercase">
+                  {t.staff.theCrew}
+                </h2>
+              </div>
+              <TeamSwiper
+                collectionName="crew"
+                section={activeSection.toLowerCase()}
+                swiperClass="crewSwiper"
+                prevClass="crew-prev"
+                nextClass="crew-next"
+              />
             </div>
-            <TeamSwiper
-              collectionName="staff"
-              swiperClass="staffSwiper"
-              prevClass="staff-prev"
-              nextClass="staff-next"
-            />
+
+            <div className="relative group/row">
+              <div className="mt-10 mb-8 space-y-1">
+                <h2 className="font-sync text-xl md:text-2xl font-bold tracking-tighter text-white uppercase">
+                  {t.staff.theStaff}
+                </h2>
+                <p className="text-[8px] uppercase tracking-[0.5em] text-white/20">{t.staff.members}</p>
+              </div>
+              <TeamSwiper
+                collectionName="staff"
+                section={activeSection.toLowerCase()}
+                swiperClass="staffSwiper"
+                prevClass="staff-prev"
+                nextClass="staff-next"
+              />
+            </div>
           </div>
         </div>
       </section>
