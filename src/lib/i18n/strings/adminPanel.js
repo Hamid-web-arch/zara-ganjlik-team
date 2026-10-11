@@ -6,6 +6,7 @@ export const adminPanelStrings = {
     darkMode: "Qara rejim",
     lightMode: "Ağ rejim",
     noAccess: "Heç bir bölməyə icazəniz yoxdur. General Admin ilə əlaqə saxlayın.",
+    menu: "Menyu",
     hero: {
       title: "Hero Section Ayarları",
       titleLabel: "Başlıq Yazısı",
@@ -183,6 +184,7 @@ export const adminPanelStrings = {
     darkMode: "Dark mode",
     lightMode: "Light mode",
     noAccess: "You don't have access to any section. Contact the General Admin.",
+    menu: "Menu",
     hero: {
       title: "Hero Section Settings",
       titleLabel: "Headline Text",
@@ -360,6 +362,7 @@ export const adminPanelStrings = {
     darkMode: "Тёмный режим",
     lightMode: "Светлый режим",
     noAccess: "У вас нет доступа ни к одному разделу. Обратитесь к General Admin.",
+    menu: "Меню",
     hero: {
       title: "Настройки главного блока",
       titleLabel: "Заголовок",

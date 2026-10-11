@@ -131,6 +131,7 @@ export default function AdminPage() {
   const { authorized, profile } = useAuthGuard({ requireAdmin: true });
   const { logout } = useAuth();
   const [section, setSection] = useState("hero");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dark, setDark] = useState(() => {
     try {
       return localStorage.getItem("admin-theme") === "dark";
@@ -225,19 +226,55 @@ export default function AdminPage() {
               </button>
             </div>
           </div>
-          {/* Compact on mobile, where the full-width buttons below are hidden to keep the
-              nav bar from being pushed down by them. */}
-          <div className="flex gap-3 md:hidden shrink-0 pt-1">
-            <Link to="/" className="text-[9px] uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition">
-              {s.back}
-            </Link>
-            <button onClick={handleLogout} className="text-[9px] uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition">
-              {s.logout}
-            </button>
-          </div>
+          {/* Mobile: a hamburger opens the section list as a dropdown instead of the
+              desktop sidebar's always-visible vertical list (there's no room for that
+              here, and a horizontally-scrolling tab bar hid most sections off-screen). */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen((v) => !v)}
+            className="md:hidden shrink-0 text-lg px-1 -mr-1 text-zinc-700"
+            aria-label={s.menu}
+            aria-expanded={mobileMenuOpen}
+          >
+            <i className={`fa-solid ${mobileMenuOpen ? "fa-xmark" : "fa-bars"}`} />
+          </button>
         </div>
 
-        <nav className="flex md:flex-col overflow-x-auto md:overflow-y-auto md:flex-1">
+        {mobileMenuOpen && (
+          <div className="md:hidden border-b border-zinc-200 bg-white max-h-[70vh] overflow-y-auto">
+            {SECTIONS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => {
+                  setSection(item.id);
+                  setMobileMenuOpen(false);
+                }}
+                className={`block w-full text-left px-6 py-4 text-[10px] uppercase tracking-[0.2em] border-b border-zinc-100 transition ${
+                  item.id === active?.id ? "bg-zinc-900 text-white" : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+            <div className="flex gap-2 p-4">
+              <Link
+                to="/"
+                className="flex-1 text-center text-[9px] uppercase tracking-widest border border-zinc-200 px-4 py-3 hover:bg-zinc-900 hover:text-white transition"
+              >
+                {s.back}
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="flex-1 text-[9px] uppercase tracking-widest border border-zinc-200 px-4 py-3 hover:bg-zinc-900 hover:text-white transition"
+              >
+                {s.logout}
+              </button>
+            </div>
+          </div>
+        )}
+
+        <nav className="hidden md:flex md:flex-col md:overflow-y-auto md:flex-1">
           {SECTIONS.map((item) => (
             <button
               key={item.id}
