@@ -22,6 +22,8 @@ export const translations = {
       moments: "Moments",
       login: "Login",
       menu: "Menyu",
+      darkMode: "Qaranlıq rejim",
+      lightMode: "İşıqlı rejim",
     },
     hero: {
       eyebrow: "Retail Excellence",
@@ -119,6 +121,8 @@ export const translations = {
       moments: "Moments",
       login: "Login",
       menu: "Menu",
+      darkMode: "Dark mode",
+      lightMode: "Light mode",
     },
     hero: {
       eyebrow: "Retail Excellence",
@@ -216,6 +220,8 @@ export const translations = {
       moments: "Moments",
       login: "Login",
       menu: "Меню",
+      darkMode: "Тёмный режим",
+      lightMode: "Светлый режим",
     },
     hero: {
       eyebrow: "Retail Excellence",

@@ -19,7 +19,7 @@ export default function TeamSwiper({ collectionName, swiperClass, prevClass, nex
 
   useEffect(() => {
     listMembers(collectionName)
-      .then(setMembers)
+      .then((data) => setMembers(Array.isArray(data) ? data : []))
       .catch((error) => console.error("Komanda siyahısı yüklənərkən xəta:", error));
   }, [collectionName]);
 
