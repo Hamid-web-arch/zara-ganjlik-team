@@ -10,32 +10,32 @@ const HOURS = Array.from({ length: 16 }, (_, i) => 6 + i);
 // Keys match the normalised note text coming from the Excel file. Only colour is set
 // here — the visible label is looked up from the active language.
 const NOTE_STYLE = {
-  off: { noteKey: "off", className: "text-white/40" },
-  "day off": { noteKey: "off", className: "text-white/40" },
-  vacation: { noteKey: "vacation", className: "text-emerald-400" },
-  ld: { noteKey: "ld", className: "text-sky-400" },
-  absent: { noteKey: "absent", className: "text-red-500" },
-  "sick leave": { noteKey: "sick", className: "text-orange-400" },
+  off: { noteKey: "off", className: "text-white/40", lightClassName: "text-gray-400" },
+  "day off": { noteKey: "off", className: "text-white/40", lightClassName: "text-gray-400" },
+  vacation: { noteKey: "vacation", className: "text-emerald-400", lightClassName: "text-emerald-600" },
+  ld: { noteKey: "ld", className: "text-sky-400", lightClassName: "text-sky-600" },
+  absent: { noteKey: "absent", className: "text-red-500", lightClassName: "text-red-600" },
+  "sick leave": { noteKey: "sick", className: "text-orange-400", lightClassName: "text-orange-600" },
 };
 
-function getNoteInfo(note, notes) {
+function getNoteInfo(note, notes, dark) {
   const key = String(note || "")
     .trim()
     .toLowerCase()
     .replace(/\s+/g, " ");
   const style = NOTE_STYLE[key];
-  if (style) return { label: notes[style.noteKey], className: style.className };
+  if (style) return { label: notes[style.noteKey], className: dark ? style.className : style.lightClassName };
   // Unknown notes are shown as written in the spreadsheet.
-  return { label: note, className: "text-amber-400" };
+  return { label: note, className: "text-amber-500" };
 }
 
-function getCodeClassName(code) {
+function getCodeClassName(code, dark) {
   const key = String(code || "").trim().toLowerCase();
-  if (key === "off" || key === "day off" || key === "in") return "text-white/50";
-  return "text-sky-300";
+  if (key === "off" || key === "day off" || key === "in") return dark ? "text-white/50" : "text-gray-500";
+  return dark ? "text-sky-300" : "text-sky-600";
 }
 
-export default function StaffSchedule({ employeeName }) {
+export default function StaffSchedule({ employeeName, dark = true }) {
   const { t } = useLanguage();
   const s = t.staffSchedule;
   const [schedule, setSchedule] = useState(undefined); // undefined = loading, null = not found
@@ -59,15 +59,24 @@ export default function StaffSchedule({ employeeName }) {
       });
   }, [employeeName]);
 
+  const dim30 = dark ? "text-white/30" : "text-gray-400";
+  const dim40 = dark ? "text-white/40" : "text-gray-400";
+  const dim70 = dark ? "text-white/70" : "text-gray-700";
+  const stickyBg = dark ? "bg-zinc-900" : "bg-gray-50";
+
   return (
-    <div className="mt-12 p-8 border border-white/5 bg-white/5 rounded-sm">
+    <div className={`mt-12 p-8 border rounded-sm ${dark ? "border-white/5 bg-white/5" : "border-gray-200 bg-gray-50"}`}>
       <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
         <h2 className="text-[10px] uppercase tracking-[0.3em]">{s.title}</h2>
         {schedule && (
           <div className="flex items-center gap-4">
-            {weekLabel && <span className="text-[9px] text-white/40 uppercase tracking-widest">{weekLabel}</span>}
+            {weekLabel && <span className={`text-[9px] uppercase tracking-widest ${dim40}`}>{weekLabel}</span>}
             {schedule.weeklyTotal !== null && schedule.weeklyTotal !== undefined && schedule.weeklyTotal !== "" && (
-              <span className="text-[9px] text-emerald-300 uppercase tracking-widest border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 rounded-sm">
+              <span
+                className={`text-[9px] uppercase tracking-widest border px-3 py-1 rounded-sm ${
+                  dark ? "text-emerald-300 border-emerald-500/30 bg-emerald-500/10" : "text-emerald-700 border-emerald-500/30 bg-emerald-50"
+                }`}
+              >
                 {s.total.replace("{n}", schedule.weeklyTotal)}
               </span>
             )}
@@ -76,19 +85,17 @@ export default function StaffSchedule({ employeeName }) {
       </div>
 
       {schedule === undefined && (
-        <p className="text-[10px] text-white/30 uppercase tracking-widest animate-pulse">{s.loading}</p>
+        <p className={`text-[10px] uppercase tracking-widest animate-pulse ${dim30}`}>{s.loading}</p>
       )}
 
-      {schedule === null && (
-        <p className="text-[10px] text-white/30 uppercase tracking-widest">{s.notUploaded}</p>
-      )}
+      {schedule === null && <p className={`text-[10px] uppercase tracking-widest ${dim30}`}>{s.notUploaded}</p>}
 
       {schedule && (
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[760px]">
             <thead>
-              <tr className="border-b border-white/10 text-[8px] uppercase tracking-[0.2em] text-white/30">
-                <th className="pt-2 pb-3 pl-2 pr-4 sticky left-0 bg-zinc-900">{s.day}</th>
+              <tr className={`border-b text-[8px] uppercase tracking-[0.2em] ${dark ? "border-white/10" : "border-gray-200"} ${dim30}`}>
+                <th className={`pt-2 pb-3 pl-2 pr-4 sticky left-0 ${stickyBg}`}>{s.day}</th>
                 {HOURS.map((h) => (
                   <th key={h} className="pb-3 px-1 text-center font-normal">
                     {String(h).padStart(2, "0")}
@@ -105,14 +112,19 @@ export default function StaffSchedule({ employeeName }) {
                 const workedButUndetailed = !hasHours && totalNum > 0;
                 const showRestRow = !hasHours && !workedButUndetailed;
                 const note = day?.note
-                  ? getNoteInfo(day.note, s.notes)
+                  ? getNoteInfo(day.note, s.notes, dark)
                   : showRestRow
-                  ? { label: s.notes.off, className: "text-white/40" }
+                  ? { label: s.notes.off, className: dim40 }
                   : null;
 
                 return (
-                  <tr key={key} className={`border-b border-white/5 ${showRestRow ? "bg-white/[0.02]" : ""}`}>
-                    <td className="py-3 pl-2 pr-4 text-[10px] text-white/70 whitespace-nowrap sticky left-0 bg-zinc-900">
+                  <tr
+                    key={key}
+                    className={`border-b ${dark ? "border-white/5" : "border-gray-200/70"} ${
+                      showRestRow ? (dark ? "bg-white/[0.02]" : "bg-black/[0.02]") : ""
+                    }`}
+                  >
+                    <td className={`py-3 pl-2 pr-4 text-[10px] whitespace-nowrap sticky left-0 ${dim70} ${stickyBg}`}>
                       {s.days[key]}
                       {note && (
                         <span className={`block text-[8px] uppercase tracking-widest mt-0.5 ${note.className}`}>
@@ -121,11 +133,11 @@ export default function StaffSchedule({ employeeName }) {
                       )}
                     </td>
                     {workedButUndetailed ? (
-                      <td colSpan={HOURS.length} className="py-3 px-2 text-center text-[8px] text-white/30 italic">
+                      <td colSpan={HOURS.length} className={`py-3 px-2 text-center text-[8px] italic ${dim30}`}>
                         {s.noBreakdown}
                       </td>
                     ) : showRestRow ? (
-                      <td colSpan={HOURS.length} className="py-3 px-2 text-center text-[8px] text-white/20">
+                      <td colSpan={HOURS.length} className={`py-3 px-2 text-center text-[8px] ${dark ? "text-white/20" : "text-gray-300"}`}>
                         {s.restDay}
                       </td>
                     ) : (
@@ -134,17 +146,17 @@ export default function StaffSchedule({ employeeName }) {
                         return (
                           <td key={h} className="py-3 px-1 text-center text-[8px]">
                             {cell ? (
-                              <span className={`uppercase whitespace-nowrap ${getCodeClassName(cell.code)}`}>
+                              <span className={`uppercase whitespace-nowrap ${getCodeClassName(cell.code, dark)}`}>
                                 {cell.code}
                               </span>
                             ) : (
-                              <span className="text-white/10">–</span>
+                              <span className={dark ? "text-white/10" : "text-gray-200"}>–</span>
                             )}
                           </td>
                         );
                       })
                     )}
-                    <td className="py-3 pl-4 pr-2 text-right text-[10px] text-white/70">
+                    <td className={`py-3 pl-4 pr-2 text-right text-[10px] ${dim70}`}>
                       {day?.total !== "" && day?.total != null ? day.total : "-"}
                     </td>
                   </tr>

@@ -10,7 +10,7 @@ function toDownloadUrl(url) {
   return url.includes("/upload/") ? url.replace("/upload/", "/upload/fl_attachment/") : url;
 }
 
-export default function StaffTrainings() {
+export default function StaffTrainings({ dark = true }) {
   const { t } = useLanguage();
   const s = t.staffProfile.trainings;
   const [trainings, setTrainings] = useState([]);
@@ -53,23 +53,31 @@ export default function StaffTrainings() {
 
   if (!loading && trainings.length === 0) return null;
 
+  const outlineBtn = dark
+    ? "border-white/20 hover:bg-white hover:text-black"
+    : "border-black/20 hover:bg-black hover:text-white";
+
   return (
-    <div className="mt-12 p-8 border border-white/5 bg-white/5 rounded-sm">
+    <div className={`mt-12 p-8 border rounded-sm ${dark ? "border-white/5 bg-white/5" : "border-gray-200 bg-gray-50"}`}>
       <h2 className="text-[10px] uppercase tracking-[0.3em] mb-6">{s.heading}</h2>
 
       {loading ? (
-        <p className="text-[9px] text-white/30 uppercase tracking-widest">{t.common.loading}</p>
+        <p className={`text-[9px] uppercase tracking-widest ${dark ? "text-white/30" : "text-gray-400"}`}>{t.common.loading}</p>
       ) : (
         <div className="space-y-3">
           {trainings.map((tr) => (
             <button
               key={tr.id}
               onClick={() => handleOpen(tr)}
-              className="w-full flex items-center justify-between gap-4 text-left border border-white/10 rounded-sm px-5 py-4 hover:border-white/30 transition"
+              className={`w-full flex items-center justify-between gap-4 text-left border rounded-sm px-5 py-4 transition ${
+                dark ? "border-white/10 hover:border-white/30" : "border-gray-200 hover:border-gray-400"
+              }`}
             >
               <div className="min-w-0">
-                <p className="text-[11px] text-white truncate">{tr.title}</p>
-                {tr.description && <p className="text-[9px] text-white/40 mt-1 truncate">{tr.description}</p>}
+                <p className="text-[11px] truncate">{tr.title}</p>
+                {tr.description && (
+                  <p className={`text-[9px] mt-1 truncate ${dark ? "text-white/40" : "text-gray-400"}`}>{tr.description}</p>
+                )}
               </div>
               <span
                 className={`shrink-0 text-[8px] uppercase tracking-widest px-3 py-1.5 rounded-sm border ${
@@ -77,7 +85,9 @@ export default function StaffTrainings() {
                     ? "border-emerald-500/30 text-emerald-500"
                     : tr.myProgress
                     ? "border-amber-500/30 text-amber-500"
-                    : "border-white/10 text-white/30"
+                    : dark
+                    ? "border-white/10 text-white/30"
+                    : "border-gray-200 text-gray-400"
                 }`}
               >
                 {tr.myProgress?.completed ? s.completed : tr.myProgress ? s.opened : s.notOpened}
@@ -89,28 +99,32 @@ export default function StaffTrainings() {
 
       {active && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md overflow-y-auto">
-          <div className="glass w-full max-w-2xl p-8 space-y-6 relative">
+          <div className={`w-full max-w-2xl p-8 space-y-6 relative ${dark ? "glass" : "bg-white border border-gray-200 text-black rounded-sm shadow-xl"}`}>
             <button
               type="button"
               onClick={() => setActive(null)}
-              className="absolute top-4 right-4 text-white/40 hover:text-white transition"
+              className={`absolute top-4 right-4 transition ${dark ? "text-white/40 hover:text-white" : "text-gray-400 hover:text-black"}`}
             >
               ✕
             </button>
             <div className="space-y-2">
               <h3 className="font-sync text-lg font-bold tracking-tighter pr-8">{active.title}</h3>
-              {active.description && <p className="text-[11px] text-white/50 leading-relaxed">{active.description}</p>}
+              {active.description && (
+                <p className={`text-[11px] leading-relaxed ${dark ? "text-white/50" : "text-gray-500"}`}>{active.description}</p>
+              )}
             </div>
 
-            <div className="bg-black/30 rounded-sm overflow-hidden">
+            <div className={`rounded-sm overflow-hidden ${dark ? "bg-black/30" : "bg-gray-100"}`}>
               {active.fileType === "image" && <img src={active.fileUrl} alt={active.title} className="w-full max-h-[50vh] object-contain" />}
               {active.fileType === "video" && (
                 <video src={active.fileUrl} controls className="w-full max-h-[50vh]" />
               )}
               {(active.fileType === "pdf" || active.fileType === "document") && (
                 <div className="flex flex-col items-center justify-center gap-4 py-12 px-4">
-                  <i className="fa-regular fa-file-lines text-3xl text-white/30" />
-                  <p className="text-[10px] text-white/50 uppercase tracking-widest text-center break-all">{active.fileName}</p>
+                  <i className={`fa-regular fa-file-lines text-3xl ${dark ? "text-white/30" : "text-gray-300"}`} />
+                  <p className={`text-[10px] uppercase tracking-widest text-center break-all ${dark ? "text-white/50" : "text-gray-500"}`}>
+                    {active.fileName}
+                  </p>
                 </div>
               )}
             </div>
@@ -121,13 +135,13 @@ export default function StaffTrainings() {
                   href={active.fileUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex-1 text-center text-[9px] uppercase tracking-widest border border-white/20 py-3 hover:bg-white hover:text-black transition"
+                  className={`flex-1 text-center text-[9px] uppercase tracking-widest border py-3 transition ${outlineBtn}`}
                 >
                   {s.openFile}
                 </a>
                 <a
                   href={toDownloadUrl(active.fileUrl)}
-                  className="flex-1 text-center text-[9px] uppercase tracking-widest border border-white/20 py-3 hover:bg-white hover:text-black transition"
+                  className={`flex-1 text-center text-[9px] uppercase tracking-widest border py-3 transition ${outlineBtn}`}
                 >
                   {s.download}
                 </a>
@@ -137,7 +151,7 @@ export default function StaffTrainings() {
             {(active.fileType === "image" || active.fileType === "video") && (
               <a
                 href={toDownloadUrl(active.fileUrl)}
-                className="block text-center text-[9px] uppercase tracking-widest border border-white/20 py-3 hover:bg-white hover:text-black transition"
+                className={`block text-center text-[9px] uppercase tracking-widest border py-3 transition ${outlineBtn}`}
               >
                 {s.download}
               </a>
@@ -150,7 +164,7 @@ export default function StaffTrainings() {
                 type="button"
                 onClick={handleComplete}
                 disabled={submitting}
-                className="w-full border border-white/20 py-4 text-[9px] uppercase tracking-[0.5em] hover:bg-white hover:text-black transition-all disabled:opacity-40"
+                className={`w-full border py-4 text-[9px] uppercase tracking-[0.5em] transition-all disabled:opacity-40 ${outlineBtn}`}
               >
                 {submitting ? s.submitting : s.markComplete}
               </button>
