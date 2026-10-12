@@ -235,12 +235,12 @@ export default function AdminTrainingPanel() {
               <p className="text-[8px] uppercase tracking-widest text-zinc-400">
                 {s.resultsCount.replace("{n}", pickableMembers.length)}
               </p>
-              <div className="max-h-32 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-1.5 pr-1">
+              <div className="max-h-48 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-2 pr-1">
                 {pickableMembers.length === 0 && (
                   <p className="text-[9px] text-zinc-400 col-span-full py-2">{s.noResults}</p>
                 )}
                 {pickableMembers.map((m) => (
-                  <label key={m.id} className={checkboxRowClass}>
+                  <label key={m.id} className="flex items-center gap-2 text-[12px] text-zinc-700 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={targetMemberIds.includes(m.id)}
