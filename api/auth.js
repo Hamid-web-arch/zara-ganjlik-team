@@ -31,6 +31,11 @@ function toProfile(member) {
     image: member.image,
     mustResetPassword: member.must_reset_password,
     permissions: member.permissions || [],
+    // Not a login credential — a free-text note so the member can look up their own INET
+    // program email/password later. Only ever returned to the member themselves (login/
+    // refresh/me all resolve the signed-in user's own row), never listed for anyone else.
+    inetEmail: member.inet_email || "",
+    inetPassword: member.inet_password || "",
   };
 }
 
@@ -200,6 +205,20 @@ export default async function handler(req, res) {
     // Invalidate existing sessions, same reasoning as a password-reset-link reset.
     await sql`update refresh_tokens set revoked = true where member_id = ${memberId}::uuid`;
     return res.status(200).json({ success: true });
+  }
+
+  if (action === "update-inet") {
+    // Self-service only — this is the member's own private note, never settable for anyone
+    // else and never exposed through the members list (see toProfile above).
+    const user = getAuthUser(req);
+    if (!user) return res.status(401).json({ error: "Giriş tələb olunur." });
+    const { inetEmail, inetPassword } = req.body || {};
+    await sql`
+      update members set inet_email = ${inetEmail || ""}, inet_password = ${inetPassword || ""}, updated_at = now()
+      where id = ${user.id}::uuid
+    `;
+    const member = await findMemberById(user.id);
+    return res.status(200).json({ profile: toProfile(member) });
   }
 
   if (action === "me") {

@@ -18,6 +18,15 @@ export const staffProfileStrings = {
     confirmPasswordPh: "YENİ ŞİFRƏNİ TƏKRARLAYIN",
     save: "Yadda saxla",
     changing: "SAXLANILIR...",
+    inet: {
+      title: "INET Hesabı",
+      desc: "INET proqramındakı email və şifrənizi burada özünüz üçün qeyd edib saxlaya bilərsiniz.",
+      emailPh: "INET EMAIL",
+      passwordPh: "INET ŞİFRƏ",
+      show: "Göstər",
+      hide: "Gizlət",
+      saving: "SAXLANILIR...",
+    },
     notify: {
       notReady: "Sistem hələ hazır deyil, bir az gözləyin...",
       imageUpdated: "Şəkil uğurla yeniləndi!",
@@ -29,6 +38,8 @@ export const staffProfileStrings = {
       mismatch: "Yeni şifrələr uyğun gəlmir.",
       passwordChanged: "Şifrəniz uğurla dəyişdirildi.",
       passwordChangeFailed: "Şifrə dəyişdirilmədi.",
+      inetSaved: "INET məlumatları yadda saxlanıldı.",
+      inetSaveFailed: "INET məlumatları saxlanılmadı.",
     },
     trainings: {
       heading: "Təlimlər",
@@ -62,6 +73,15 @@ export const staffProfileStrings = {
     confirmPasswordPh: "CONFIRM NEW PASSWORD",
     save: "Save",
     changing: "SAVING...",
+    inet: {
+      title: "INET Account",
+      desc: "Save your INET program email and password here for your own reference.",
+      emailPh: "INET EMAIL",
+      passwordPh: "INET PASSWORD",
+      show: "Show",
+      hide: "Hide",
+      saving: "SAVING...",
+    },
     notify: {
       notReady: "The system is not ready yet, please wait...",
       imageUpdated: "Photo updated successfully!",
@@ -73,6 +93,8 @@ export const staffProfileStrings = {
       mismatch: "The new passwords do not match.",
       passwordChanged: "Your password has been changed successfully.",
       passwordChangeFailed: "The password could not be changed.",
+      inetSaved: "INET details saved.",
+      inetSaveFailed: "The INET details could not be saved.",
     },
     trainings: {
       heading: "Trainings",
@@ -106,6 +128,15 @@ export const staffProfileStrings = {
     confirmPasswordPh: "ПОВТОРИТЕ НОВЫЙ ПАРОЛЬ",
     save: "Сохранить",
     changing: "СОХРАНЕНИЕ...",
+    inet: {
+      title: "Аккаунт INET",
+      desc: "Сохраните здесь email и пароль от программы INET для себя.",
+      emailPh: "INET EMAIL",
+      passwordPh: "ПАРОЛЬ INET",
+      show: "Показать",
+      hide: "Скрыть",
+      saving: "СОХРАНЕНИЕ...",
+    },
     notify: {
       notReady: "Система ещё не готова, подождите...",
       imageUpdated: "Фото успешно обновлено!",
@@ -117,6 +148,8 @@ export const staffProfileStrings = {
       mismatch: "Новые пароли не совпадают.",
       passwordChanged: "Пароль успешно изменён.",
       passwordChangeFailed: "Не удалось изменить пароль.",
+      inetSaved: "Данные INET сохранены.",
+      inetSaveFailed: "Не удалось сохранить данные INET.",
     },
     trainings: {
       heading: "Обучение",

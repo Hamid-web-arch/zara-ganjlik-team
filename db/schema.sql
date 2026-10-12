@@ -36,6 +36,12 @@ create table members (
   -- 'user'. Only the General Admin can grant these or touch another admin's account at
   -- all (see the admin-row checks in api/router.js's membersHandler).
   permissions text[] not null default '{}',
+  -- A free-text note, not a login credential: lets a member save their own INET program
+  -- email/password so they can look it up later. Plaintext by design (the member needs to
+  -- read it back) — never returned by the public/admin members list, only to the member
+  -- themselves via /api/auth (see toProfile in api/auth.js).
+  inet_email text,
+  inet_password text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

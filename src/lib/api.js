@@ -78,6 +78,9 @@ export const changePassword = (currentPassword, newPassword) =>
 /** Admin: issues a new one-time password for an existing member; they must reset it at next login. */
 export const issueTemporaryPassword = (memberId, newPassword) =>
   request("/api/auth", { method: "POST", body: { action: "admin-reset-password", memberId, newPassword } });
+/** Self-service: save the member's own note of their INET program email/password. */
+export const updateInetCredentials = (inetEmail, inetPassword) =>
+  request("/api/auth", { method: "POST", body: { action: "update-inet", inetEmail, inetPassword } });
 
 // ---------- members (staff/crew) ----------
 export const listMembers = (kind) => request(`/api/members/${kind}`);

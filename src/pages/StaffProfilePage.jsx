@@ -1,7 +1,7 @@
 import { notify } from "../lib/notify";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { updateMember, uploadToCloudinary, forgotPassword, changePassword } from "../lib/api";
+import { updateMember, uploadToCloudinary, forgotPassword, changePassword, updateInetCredentials } from "../lib/api";
 import { validateImageFile } from "../lib/fileValidation";
 import { useAuthGuard } from "../hooks/useAuthGuard";
 import { useAuth } from "../lib/authState";
@@ -25,6 +25,10 @@ export default function StaffProfilePage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
+  const [inetEmail, setInetEmail] = useState("");
+  const [inetPassword, setInetPassword] = useState("");
+  const [showInetPassword, setShowInetPassword] = useState(false);
+  const [savingInet, setSavingInet] = useState(false);
   const [dark, setDark] = useState(() => {
     try {
       return localStorage.getItem("profile-theme") === "dark";
@@ -46,6 +50,16 @@ export default function StaffProfilePage() {
   useEffect(() => {
     if (authProfile) setProfile(authProfile);
   }, [authProfile]);
+
+  // Only re-sync the INET fields when the signed-in member actually changes (not on every
+  // unrelated profile update, e.g. an avatar change), so it never clobbers an in-progress edit.
+  useEffect(() => {
+    if (authProfile) {
+      setInetEmail(authProfile.inetEmail || "");
+      setInetPassword(authProfile.inetPassword || "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authProfile?.uid]);
 
   const handleUpload = async (e) => {
     const file = e.target.files[0];
@@ -107,6 +121,21 @@ export default function StaffProfilePage() {
       notify(error.message || s.notify.passwordChangeFailed);
     } finally {
       setChangingPassword(false);
+    }
+  };
+
+  const handleSaveInet = async (e) => {
+    e.preventDefault();
+    setSavingInet(true);
+    try {
+      const { profile: updated } = await updateInetCredentials(inetEmail.trim(), inetPassword);
+      setProfile((prev) => ({ ...prev, inetEmail: updated.inetEmail, inetPassword: updated.inetPassword }));
+      notify(s.notify.inetSaved);
+    } catch (error) {
+      console.error("INET məlumatları saxlanılarkən xəta:", error);
+      notify(s.notify.inetSaveFailed);
+    } finally {
+      setSavingInet(false);
     }
   };
 
@@ -298,6 +327,59 @@ export default function StaffProfilePage() {
               </div>
             </form>
           )}
+        </div>
+
+        <div
+          className={`mt-12 p-8 border rounded-sm space-y-6 ${
+            dark ? "border-white/5 bg-white/5" : "border-gray-200 bg-gray-50"
+          }`}
+        >
+          <div>
+            <h2 className="text-[10px] uppercase tracking-[0.3em]">{s.inet.title}</h2>
+            <p className={`text-[9px] mt-2 ${dim40}`}>{s.inet.desc}</p>
+          </div>
+          <form onSubmit={handleSaveInet} className="space-y-5 max-w-sm">
+            <input
+              type="text"
+              placeholder={s.inet.emailPh}
+              value={inetEmail}
+              onChange={(e) => setInetEmail(e.target.value)}
+              className={`w-full bg-transparent border-b py-3 text-[11px] tracking-[0.2em] outline-none transition-colors ${
+                dark
+                  ? "border-white/10 focus:border-white placeholder:text-white/30"
+                  : "border-gray-300 focus:border-black placeholder:text-gray-400"
+              }`}
+            />
+            <div className="relative">
+              <input
+                type={showInetPassword ? "text" : "password"}
+                placeholder={s.inet.passwordPh}
+                value={inetPassword}
+                onChange={(e) => setInetPassword(e.target.value)}
+                className={`w-full bg-transparent border-b py-3 pr-16 text-[11px] tracking-[0.2em] outline-none transition-colors ${
+                  dark
+                    ? "border-white/10 focus:border-white placeholder:text-white/30"
+                    : "border-gray-300 focus:border-black placeholder:text-gray-400"
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowInetPassword((v) => !v)}
+                className={`absolute right-0 top-1/2 -translate-y-1/2 text-[8px] uppercase tracking-widest ${dimHover}`}
+              >
+                {showInetPassword ? s.inet.hide : s.inet.show}
+              </button>
+            </div>
+            <button
+              type="submit"
+              disabled={savingInet}
+              className={`text-[9px] uppercase tracking-[0.3em] px-6 py-3 transition disabled:opacity-40 ${
+                dark ? "bg-white text-black hover:bg-gray-200" : "bg-black text-white hover:bg-gray-800"
+              }`}
+            >
+              {savingInet ? s.inet.saving : s.save}
+            </button>
+          </form>
         </div>
       </div>
     </div>
