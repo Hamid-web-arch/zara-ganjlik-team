@@ -48,7 +48,7 @@ export default function AdminScheduleUpload() {
 
       const arrayBuffer = await file.arrayBuffer();
       const workbook = XLSX.read(arrayBuffer, { type: "array" });
-      const byEmployee = parseScheduleWorkbook(XLSX, workbook, employeeNames);
+      const { byEmployee, conflicts } = parseScheduleWorkbook(XLSX, workbook, employeeNames);
       const matchedCount = Object.keys(byEmployee).length;
 
       const undetailedCount = Object.values(byEmployee).filter((entry) =>
@@ -63,6 +63,10 @@ export default function AdminScheduleUpload() {
       let message = s.success.replace("{m}", matchedCount).replace("{t}", employeeNames.length);
       if (undetailedCount > 0) {
         message += `\n\n${s.warnUndetailed.replace("{n}", undetailedCount)}`;
+      }
+      if (conflicts.length > 0) {
+        const names = conflicts.map((c) => c.name).join(", ");
+        message += `\n\n${s.warnConflicts.replace("{n}", conflicts.length).replace("{names}", names)}`;
       }
       notify(message);
     } catch (error) {

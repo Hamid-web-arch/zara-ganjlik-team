@@ -139,6 +139,14 @@ function matchesEmployee(row, normalizedTarget) {
   return normalizeName(row[BLOCK1.col]) === normalizedTarget || normalizeName(row[BLOCK2.col]) === normalizedTarget;
 }
 
+// True when a day entry has real content worth protecting from a silent overwrite (an empty
+// placeholder — the default-fill at the end of this function — is always safe to replace).
+function hasRealContent(day) {
+  if (!day) return false;
+  if ((day.hours?.length || 0) > 0) return true;
+  return day.total !== "" && day.total != null;
+}
+
 /** Search one sheet (as array-of-arrays rows) for `employeeName`'s weekly schedule. */
 export function parseScheduleSheet(rows, employeeName) {
   const normalizedTarget = normalizeName(employeeName);
@@ -148,6 +156,11 @@ export function parseScheduleSheet(rows, employeeName) {
   const days = {};
   let found = false;
   let weeklyTotal = null;
+  // Each employee should appear in exactly one department's block per calendar day. If the same
+  // name turns up under a second block for a day that already has real data (a data-entry mistake
+  // in the source file, e.g. one person mistakenly listed in two departments), that second match
+  // would otherwise silently overwrite the first with no trace — flag it instead.
+  const conflicts = [];
 
   headerRows.forEach((headerIndex, i) => {
     const rangeEnd = (i + 1 < headerRows.length ? headerRows[i + 1] : rows.length) - 1;
@@ -170,19 +183,15 @@ export function parseScheduleSheet(rows, employeeName) {
 
       const note = extractNote(row);
       if (day1Key) {
-        days[day1Key] = {
-          hours: extractHours(row, BLOCK1.hoursStart, BLOCK1.hoursEnd),
-          total: row[BLOCK1.total] ?? "",
-          note,
-        };
+        const entry = { hours: extractHours(row, BLOCK1.hoursStart, BLOCK1.hoursEnd), total: row[BLOCK1.total] ?? "", note };
+        if (hasRealContent(days[day1Key]) && hasRealContent(entry)) conflicts.push({ day: day1Key, row: r });
+        days[day1Key] = entry;
         found = true;
       }
       if (day2Key) {
-        days[day2Key] = {
-          hours: extractHours(row, BLOCK2.hoursStart, BLOCK2.hoursEnd),
-          total: row[BLOCK2.total] ?? "",
-          note,
-        };
+        const entry = { hours: extractHours(row, BLOCK2.hoursStart, BLOCK2.hoursEnd), total: row[BLOCK2.total] ?? "", note };
+        if (hasRealContent(days[day2Key]) && hasRealContent(entry)) conflicts.push({ day: day2Key, row: r });
+        days[day2Key] = entry;
         found = true;
       }
       break;
@@ -219,15 +228,18 @@ export function parseScheduleSheet(rows, employeeName) {
     if (!days[key]) days[key] = { hours: [], total: "", note: null };
   });
 
-  return { days, weeklyTotal };
+  return { days, weeklyTotal, conflicts };
 }
 
 /**
  * employeeNames: [{ key: "normalized lowercase name", displayName: "Original Name" }]
- * Returns { [normalizedName]: { days, weeklyTotal } } for every employee found in any sheet.
+ * Returns { byEmployee, conflicts } — byEmployee maps normalizedName -> { days, weeklyTotal },
+ * conflicts lists employees whose source rows looked like they appear in two department blocks
+ * for the same day (see hasRealContent above) so the admin can double-check that specific name.
  */
 export function parseScheduleWorkbook(XLSXLib, workbook, employeeNames) {
   const byEmployee = {};
+  const conflicts = [];
 
   for (const sheetName of workbook.SheetNames) {
     const rows = XLSXLib.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: "" });
@@ -235,9 +247,13 @@ export function parseScheduleWorkbook(XLSXLib, workbook, employeeNames) {
     for (const emp of employeeNames) {
       if (byEmployee[emp.key]) continue;
       const result = parseScheduleSheet(rows, emp.displayName);
-      if (result) byEmployee[emp.key] = result;
+      if (result) {
+        const { conflicts: rowConflicts, ...rest } = result;
+        byEmployee[emp.key] = rest;
+        if (rowConflicts.length > 0) conflicts.push({ name: emp.displayName, sheet: sheetName, days: rowConflicts.map((c) => c.day) });
+      }
     }
   }
 
-  return byEmployee;
+  return { byEmployee, conflicts };
 }

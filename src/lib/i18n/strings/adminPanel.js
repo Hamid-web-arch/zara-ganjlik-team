@@ -119,6 +119,7 @@ export const adminPanelStrings = {
       noFile: "Zəhmət olmasa Excel faylı seçin.",
       success: "İş qrafiki yükləndi! {m}/{t} işçi üçün cədvəl tapıldı.",
       warnUndetailed: "Diqqət: {n} işçidə bəzi günlər üçün (adətən Bazar) yalnız cəmi saat var, saat-saat bölgü Excel-də doldurulmayıb.",
+      warnConflicts: "Diqqət: {n} işçinin adı Excel-də eyni gün üçün iki fərqli bölmədə tapıldı ({names}) — həmin günləri profildə yoxlayın.",
     },
     energy: {
       title: "\"Our Energy\" Video",
@@ -301,6 +302,7 @@ export const adminPanelStrings = {
       noFile: "Please select an Excel file.",
       success: "Work schedule uploaded! Schedules found for {m}/{t} employees.",
       warnUndetailed: "Note: for {n} employees some days (usually Sunday) only have a total, with no hourly breakdown in the Excel file.",
+      warnConflicts: "Note: {n} employee name(s) appeared under two different departments for the same day ({names}) — double-check those days on their profile.",
     },
     energy: {
       title: "\"Our Energy\" Video",
@@ -483,6 +485,7 @@ export const adminPanelStrings = {
       noFile: "Пожалуйста, выберите Excel-файл.",
       success: "График работы загружен! Расписание найдено для {m}/{t} сотрудников.",
       warnUndetailed: "Внимание: для {n} сотрудников в некоторые дни (обычно воскресенье) есть только итог без почасовой разбивки в Excel.",
+      warnConflicts: "Внимание: имя {n} сотрудника(ов) встретилось в двух разных отделах за один и тот же день ({names}) — проверьте эти дни в их профиле.",
     },
     energy: {
       title: "Видео \"Our Energy\"",
