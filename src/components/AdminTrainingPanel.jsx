@@ -34,6 +34,7 @@ export default function AdminTrainingPanel() {
   const [targetSections, setTargetSections] = useState([]);
   const [targetRoles, setTargetRoles] = useState([]);
   const [targetMemberIds, setTargetMemberIds] = useState([]);
+  const [memberSearch, setMemberSearch] = useState("");
 
   const [expandedId, setExpandedId] = useState(null);
   const [detail, setDetail] = useState(null);
@@ -41,6 +42,15 @@ export default function AdminTrainingPanel() {
   const [deletingId, setDeletingId] = useState(null);
 
   const roles = [...new Set(members.map((m) => m.role).filter(Boolean))];
+
+  // The section checkboxes above double as a filter here — picking "Woman" narrows the
+  // search/pick list to Woman-section members, it doesn't just add an independent target.
+  const searchQuery = memberSearch.trim().toLowerCase();
+  const pickableMembers = members.filter((m) => {
+    if (targetSections.length > 0 && !targetSections.includes(m.section)) return false;
+    if (searchQuery && !m.name.toLowerCase().includes(searchQuery)) return false;
+    return true;
+  });
 
   const loadAll = async () => {
     setLoading(true);
@@ -84,6 +94,7 @@ export default function AdminTrainingPanel() {
       setTargetSections([]);
       setTargetRoles([]);
       setTargetMemberIds([]);
+      setMemberSearch("");
       notify(s.success);
       await loadAll();
     } catch (error) {
@@ -205,9 +216,26 @@ export default function AdminTrainingPanel() {
 
           {members.length > 0 && (
             <div className="space-y-2">
-              <span className="text-[8px] uppercase tracking-widest text-zinc-400 block">{s.byMember}</span>
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-[8px] uppercase tracking-widest text-zinc-400 block">{s.byMember}</span>
+                {targetMemberIds.length > 0 && (
+                  <span className="text-[8px] uppercase tracking-widest text-zinc-400 shrink-0">
+                    {s.selectedCount.replace("{n}", targetMemberIds.length)}
+                  </span>
+                )}
+              </div>
+              <input
+                type="text"
+                placeholder={s.searchPh}
+                value={memberSearch}
+                onChange={(e) => setMemberSearch(e.target.value)}
+                className="w-full bg-white border border-zinc-200 py-2 px-3 text-[10px] tracking-[0.1em] outline-none focus:border-zinc-900 text-zinc-900 placeholder:text-zinc-400"
+              />
               <div className="max-h-32 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-1.5 pr-1">
-                {members.map((m) => (
+                {pickableMembers.length === 0 && (
+                  <p className="text-[9px] text-zinc-400 col-span-full py-2">{s.noResults}</p>
+                )}
+                {pickableMembers.map((m) => (
                   <label key={m.id} className={checkboxRowClass}>
                     <input
                       type="checkbox"
