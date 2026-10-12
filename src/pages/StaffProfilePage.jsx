@@ -338,12 +338,16 @@ export default function StaffProfilePage() {
             <h2 className="text-[10px] uppercase tracking-[0.3em]">{s.inet.title}</h2>
             <p className={`text-[9px] mt-2 ${dim40}`}>{s.inet.desc}</p>
           </div>
-          <form onSubmit={handleSaveInet} className="space-y-5 max-w-sm">
+          <form onSubmit={handleSaveInet} autoComplete="off" className="space-y-5 max-w-sm">
             <input
               type="text"
+              name="inet-email-note"
               placeholder={s.inet.emailPh}
               value={inetEmail}
               onChange={(e) => setInetEmail(e.target.value)}
+              autoComplete="off"
+              data-lpignore="true"
+              data-1p-ignore
               className={`w-full bg-transparent border-b py-3 text-[11px] tracking-[0.2em] outline-none transition-colors ${
                 dark
                   ? "border-white/10 focus:border-white placeholder:text-white/30"
@@ -353,9 +357,13 @@ export default function StaffProfilePage() {
             <div className="relative">
               <input
                 type={showInetPassword ? "text" : "password"}
+                name="inet-password-note"
                 placeholder={s.inet.passwordPh}
                 value={inetPassword}
                 onChange={(e) => setInetPassword(e.target.value)}
+                autoComplete="new-password"
+                data-lpignore="true"
+                data-1p-ignore
                 className={`w-full bg-transparent border-b py-3 pr-16 text-[11px] tracking-[0.2em] outline-none transition-colors ${
                   dark
                     ? "border-white/10 focus:border-white placeholder:text-white/30"
