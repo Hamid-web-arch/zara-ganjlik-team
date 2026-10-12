@@ -61,6 +61,20 @@ function dayKeyExact(text) {
   return DAY_WORD_EXACT[normKey(text)] || null;
 }
 
+// On every header row in this template, the block1/block2 cells always name the same fixed pair
+// of days (Monday+Tuesday, Wednesday+Thursday, or Friday+Saturday — Sunday has no pair, it's
+// deliberately excluded here). Real files have been seen with one of the two cells left blank by
+// mistake (e.g. a "Thursday" label missing next to a "Wednesday" one) — when that happens, recover
+// the missing day from its known pair instead of silently dropping that half of the row.
+const DAY_PAIR = {
+  monday: "tuesday",
+  tuesday: "monday",
+  wednesday: "thursday",
+  thursday: "wednesday",
+  friday: "saturday",
+  saturday: "friday",
+};
+
 // Loose prefix match — only used to locate a weekly-totals summary table, whose own header row
 // legitimately contains short tokens like "Mon"/"Tue"/"Wns"/"Thr"/"TOT" rather than full names.
 function dayKeyAbbrev(text) {
@@ -140,8 +154,12 @@ export function parseScheduleSheet(rows, employeeName) {
     const headerRow = rows[headerIndex] || [];
     // Each block's day is read straight off its own header cell — not inferred from position or
     // from a calendar date, both of which turned out to drift between departments in real files.
-    const day1Key = dayKeyExact(headerRow[BLOCK1.col]);
-    const day2Key = dayKeyExact(headerRow[BLOCK2.col]);
+    // If one cell is blank, fall back to its known pair (see DAY_PAIR) rather than losing that
+    // half of the row.
+    let day1Key = dayKeyExact(headerRow[BLOCK1.col]);
+    let day2Key = dayKeyExact(headerRow[BLOCK2.col]);
+    if (day1Key && !day2Key) day2Key = DAY_PAIR[day1Key] || null;
+    if (day2Key && !day1Key) day1Key = DAY_PAIR[day2Key] || null;
 
     // Hour-by-hour detail, tried unconditionally: harmless (comes back empty) for a department
     // that never schedules that day, and correctly picks up real hours for one that does — some
