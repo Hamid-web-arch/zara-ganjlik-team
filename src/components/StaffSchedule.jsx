@@ -88,13 +88,13 @@ export default function StaffSchedule({ employeeName }) {
           <table className="w-full text-left border-collapse min-w-[760px]">
             <thead>
               <tr className="border-b border-white/10 text-[8px] uppercase tracking-[0.2em] text-white/30">
-                <th className="pb-3 pl-2 pr-4 sticky left-0 bg-zinc-900">{s.day}</th>
+                <th className="pt-2 pb-3 pl-2 pr-4 sticky left-0 bg-zinc-900">{s.day}</th>
                 {HOURS.map((h) => (
                   <th key={h} className="pb-3 px-1 text-center font-normal">
                     {String(h).padStart(2, "0")}
                   </th>
                 ))}
-                <th className="pb-3 pl-4 text-right">{s.sum}</th>
+                <th className="pb-3 pl-4 pr-2 text-right">{s.sum}</th>
               </tr>
             </thead>
             <tbody>
@@ -144,7 +144,7 @@ export default function StaffSchedule({ employeeName }) {
                         );
                       })
                     )}
-                    <td className="py-3 pl-4 text-right text-[10px] text-white/70">
+                    <td className="py-3 pl-4 pr-2 text-right text-[10px] text-white/70">
                       {day?.total !== "" && day?.total != null ? day.total : "-"}
                     </td>
                   </tr>
