@@ -88,7 +88,7 @@ export default function StaffSchedule({ employeeName }) {
           <table className="w-full text-left border-collapse min-w-[760px]">
             <thead>
               <tr className="border-b border-white/10 text-[8px] uppercase tracking-[0.2em] text-white/30">
-                <th className="pb-3 pr-4 sticky left-0 bg-zinc-900">{s.day}</th>
+                <th className="pb-3 pl-2 pr-4 sticky left-0 bg-zinc-900">{s.day}</th>
                 {HOURS.map((h) => (
                   <th key={h} className="pb-3 px-1 text-center font-normal">
                     {String(h).padStart(2, "0")}
@@ -112,7 +112,7 @@ export default function StaffSchedule({ employeeName }) {
 
                 return (
                   <tr key={key} className={`border-b border-white/5 ${showRestRow ? "bg-white/[0.02]" : ""}`}>
-                    <td className="py-3 pr-4 text-[10px] text-white/70 whitespace-nowrap sticky left-0 bg-zinc-900">
+                    <td className="py-3 pl-2 pr-4 text-[10px] text-white/70 whitespace-nowrap sticky left-0 bg-zinc-900">
                       {s.days[key]}
                       {note && (
                         <span className={`block text-[8px] uppercase tracking-widest mt-0.5 ${note.className}`}>
