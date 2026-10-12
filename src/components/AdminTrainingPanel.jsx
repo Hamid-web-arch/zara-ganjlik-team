@@ -43,11 +43,12 @@ export default function AdminTrainingPanel() {
 
   const roles = [...new Set(members.map((m) => m.role).filter(Boolean))];
 
-  // The section checkboxes above double as a filter here — picking "Woman" narrows the
-  // search/pick list to Woman-section members, it doesn't just add an independent target.
+  // The section and role checkboxes above double as filters here — picking "Woman" or
+  // "SHO" narrows the search/pick list, they don't just add independent targets.
   const searchQuery = memberSearch.trim().toLowerCase();
   const pickableMembers = members.filter((m) => {
     if (targetSections.length > 0 && !targetSections.includes(m.section)) return false;
+    if (targetRoles.length > 0 && !targetRoles.includes(m.role)) return false;
     if (searchQuery && !m.name.toLowerCase().includes(searchQuery)) return false;
     return true;
   });
@@ -231,6 +232,9 @@ export default function AdminTrainingPanel() {
                 onChange={(e) => setMemberSearch(e.target.value)}
                 className="w-full bg-white border border-zinc-200 py-2 px-3 text-[10px] tracking-[0.1em] outline-none focus:border-zinc-900 text-zinc-900 placeholder:text-zinc-400"
               />
+              <p className="text-[8px] uppercase tracking-widest text-zinc-400">
+                {s.resultsCount.replace("{n}", pickableMembers.length)}
+              </p>
               <div className="max-h-32 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-1.5 pr-1">
                 {pickableMembers.length === 0 && (
                   <p className="text-[9px] text-zinc-400 col-span-full py-2">{s.noResults}</p>
