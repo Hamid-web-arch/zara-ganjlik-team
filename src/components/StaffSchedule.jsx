@@ -85,16 +85,16 @@ export default function StaffSchedule({ employeeName }) {
 
       {schedule && (
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[760px]">
+          <table className="w-full text-left border-collapse min-w-[1040px]">
             <thead>
-              <tr className="border-b border-white/10 text-[8px] uppercase tracking-[0.2em] text-white/30">
-                <th className="pb-3 pr-4 sticky left-0 bg-zinc-900">{s.day}</th>
+              <tr className="border-b border-white/10 text-[9px] uppercase tracking-[0.2em] text-white/30">
+                <th className="pb-4 pr-6 sticky left-0 bg-zinc-900">{s.day}</th>
                 {HOURS.map((h) => (
-                  <th key={h} className="pb-3 px-1 text-center font-normal">
+                  <th key={h} className="pb-4 px-2 min-w-[42px] text-center font-normal">
                     {String(h).padStart(2, "0")}
                   </th>
                 ))}
-                <th className="pb-3 pl-4 text-right">{s.sum}</th>
+                <th className="pb-4 pl-6 text-right">{s.sum}</th>
               </tr>
             </thead>
             <tbody>
@@ -112,27 +112,27 @@ export default function StaffSchedule({ employeeName }) {
 
                 return (
                   <tr key={key} className={`border-b border-white/5 ${showRestRow ? "bg-white/[0.02]" : ""}`}>
-                    <td className="py-3 pr-4 text-[10px] text-white/70 whitespace-nowrap sticky left-0 bg-zinc-900">
+                    <td className="py-4 pr-6 text-[11px] text-white/70 whitespace-nowrap sticky left-0 bg-zinc-900">
                       {s.days[key]}
                       {note && (
-                        <span className={`block text-[8px] uppercase tracking-widest mt-0.5 ${note.className}`}>
+                        <span className={`block text-[9px] uppercase tracking-widest mt-1 ${note.className}`}>
                           {note.label}
                         </span>
                       )}
                     </td>
                     {workedButUndetailed ? (
-                      <td colSpan={HOURS.length} className="py-3 px-2 text-center text-[8px] text-white/30 italic">
+                      <td colSpan={HOURS.length} className="py-4 px-2 text-center text-[9px] text-white/30 italic">
                         {s.noBreakdown}
                       </td>
                     ) : showRestRow ? (
-                      <td colSpan={HOURS.length} className="py-3 px-2 text-center text-[8px] text-white/20">
+                      <td colSpan={HOURS.length} className="py-4 px-2 text-center text-[9px] text-white/20">
                         {s.restDay}
                       </td>
                     ) : (
                       HOURS.map((h) => {
                         const cell = day?.hours?.find((x) => x.hour === h);
                         return (
-                          <td key={h} className="py-3 px-1 text-center text-[8px]">
+                          <td key={h} className="py-4 px-2 min-w-[42px] text-center text-[9px]">
                             {cell ? (
                               <span className={`uppercase whitespace-nowrap ${getCodeClassName(cell.code)}`}>
                                 {cell.code}
@@ -144,7 +144,7 @@ export default function StaffSchedule({ employeeName }) {
                         );
                       })
                     )}
-                    <td className="py-3 pl-4 text-right text-[10px] text-white/70">
+                    <td className="py-4 pl-6 text-right text-[11px] text-white/70">
                       {day?.total !== "" && day?.total != null ? day.total : "-"}
                     </td>
                   </tr>
