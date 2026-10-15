@@ -278,13 +278,13 @@ export default function HomePage() {
             <div className="grid grid-cols-2 gap-4 pt-6">
               <div className={`p-6 rounded-sm border ${dark ? "bg-zinc-900 border-zinc-800" : "bg-gray-50 border-gray-100"}`}>
                 <span className="block text-3xl font-bold">#1</span>
-                <span className={`text-[10px] uppercase tracking-widest font-bold ${dark ? "text-zinc-500" : "text-gray-400"}`}>
+                <span className={`text-[10px] uppercase tracking-widest font-bold ${dark ? "text-zinc-500" : "text-gray-600"}`}>
                   {t.philosophy.statTeam}
                 </span>
               </div>
               <div className={`p-6 rounded-sm border ${dark ? "bg-zinc-900 border-zinc-800" : "bg-gray-50 border-gray-100"}`}>
                 <span className="block text-3xl font-bold">24/7</span>
-                <span className={`text-[10px] uppercase tracking-widest font-bold ${dark ? "text-zinc-500" : "text-gray-400"}`}>
+                <span className={`text-[10px] uppercase tracking-widest font-bold ${dark ? "text-zinc-500" : "text-gray-600"}`}>
                   {t.philosophy.statActive}
                 </span>
               </div>
@@ -297,7 +297,7 @@ export default function HomePage() {
               src={DEFAULT_HERO_IMAGE}
               loading="lazy"
               decoding="async"
-              className="w-full h-[400px] object-cover grayscale group-hover:grayscale-0 transition duration-700 shadow-2xl"
+              className="w-full h-[400px] object-cover transition duration-700 shadow-2xl"
               alt=""
             />
           </div>
@@ -313,14 +313,14 @@ export default function HomePage() {
             }`}
           >
             <div className="max-w-2xl w-full">
-              <span className={`text-xs uppercase tracking-[0.3em] mb-2 md:mb-4 block italic ${dark ? "text-zinc-500" : "text-gray-500"}`}>
+              <span className={`text-xs uppercase tracking-[0.3em] mb-2 md:mb-4 block italic ${dark ? "text-zinc-500" : "text-gray-600"}`}>
                 {t.basics.eyebrow}
               </span>
               <h2 className="text-4xl md:text-7xl font-['Playfair_Display'] font-light tracking-tighter uppercase leading-none mb-4 md:mb-0">
                 {t.basics.title}
               </h2>
             </div>
-            <p className={`text-xs md:text-sm max-w-xs mx-auto md:mx-0 mt-2 md:mt-0 leading-relaxed uppercase ${dark ? "text-zinc-500" : "text-gray-400"}`}>
+            <p className={`text-xs md:text-sm max-w-xs mx-auto md:mx-0 mt-2 md:mt-0 leading-relaxed uppercase ${dark ? "text-zinc-500" : "text-gray-600"}`}>
               {t.basics.subtitle}
             </p>
           </div>
@@ -336,7 +336,7 @@ export default function HomePage() {
                 <div>
                   <span
                     className={`text-[10px] font-bold tracking-widest transition-colors uppercase ${
-                      dark ? "text-zinc-500 group-hover:text-zinc-500" : "text-gray-500 md:text-gray-400 group-hover:text-gray-500"
+                      dark ? "text-zinc-500 group-hover:text-zinc-500" : "text-gray-600 group-hover:text-gray-500"
                     }`}
                   >
                     {card.n}
@@ -352,7 +352,7 @@ export default function HomePage() {
                 <div className="overflow-hidden mt-4 md:mt-0">
                   <p
                     className={`text-sm leading-relaxed transform translate-y-0 md:translate-y-20 group-hover:translate-y-0 transition-all duration-500 ${
-                      dark ? "text-zinc-400 group-hover:text-zinc-700" : "text-gray-600 md:text-gray-500 group-hover:text-gray-300"
+                      dark ? "text-zinc-400 group-hover:text-zinc-700" : "text-gray-600 group-hover:text-gray-300"
                     } ${card.italic ? "italic" : ""}`}
                   >
                     {card.text}
@@ -379,7 +379,7 @@ export default function HomePage() {
               <h2 className={`text-6xl font-light tracking-tighter leading-[0.8] uppercase ${dark ? "text-white" : "text-black"}`}>
                 {t.coreValues.title}
                 <br />
-                <span className="font-serif italic lowercase text-gray-400 tracking-normal">{t.coreValues.titleAccent}</span>
+                <span className="font-serif italic lowercase text-gray-500 tracking-normal">{t.coreValues.titleAccent}</span>
               </h2>
 
               <div className="mt-12 space-y-8">
@@ -508,7 +508,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className={`flex flex-col md:flex-row justify-between items-baseline mb-16 border-b pb-10 ${dark ? "border-white/10" : "border-black/5"}`}>
             <h2 className="text-5xl font-black uppercase tracking-tighter italic font-fashion">{t.moments.title}</h2>
-            <p className={`text-[10px] uppercase tracking-[0.4em] mt-4 md:mt-0 ${dark ? "text-zinc-500" : "text-gray-400"}`}>
+            <p className={`text-[10px] uppercase tracking-[0.4em] mt-4 md:mt-0 ${dark ? "text-zinc-500" : "text-gray-600"}`}>
               {t.moments.edition}
             </p>
           </div>
@@ -519,7 +519,7 @@ export default function HomePage() {
                 src="https://images.unsplash.com/photo-1515168833906-d2a3b82b302a"
                 loading="lazy"
                 decoding="async"
-                className="w-full h-[600px] object-cover grayscale group-hover:grayscale-0 transition duration-1000 scale-100 group-hover:scale-105"
+                className="w-full h-[600px] object-cover transition duration-1000 scale-100 group-hover:scale-105"
                 alt=""
               />
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
@@ -536,7 +536,7 @@ export default function HomePage() {
                   src="https://images.unsplash.com/photo-1492724441997-5dc865305da7"
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition duration-1000"
+                  className="w-full h-full object-cover scale-100 group-hover:scale-105 transition duration-1000"
                   alt=""
                 />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
@@ -550,7 +550,7 @@ export default function HomePage() {
                   src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d"
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition duration-1000"
+                  className="w-full h-full object-cover scale-100 group-hover:scale-105 transition duration-1000"
                   alt=""
                 />
                 <div className="absolute bottom-8 right-8 text-white moment-info">
@@ -566,7 +566,7 @@ export default function HomePage() {
                 src="https://picsum.photos/id/445/1200/600"
                 loading="lazy"
                 decoding="async"
-                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition duration-[2000ms] opacity-60 group-hover:opacity-100"
+                className="w-full h-full object-cover scale-100 group-hover:scale-105 transition duration-[2000ms] opacity-60 group-hover:opacity-100"
                 alt="Store Interior"
               />
               <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-700 flex flex-col items-center justify-center text-white">
@@ -651,20 +651,20 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-16 mb-20">
             <div className="space-y-6">
-              <h4 className={`text-[10px] uppercase tracking-[0.4em] font-bold italic ${dark ? "text-zinc-500" : "text-gray-400"}`}>
+              <h4 className={`text-[10px] uppercase tracking-[0.4em] font-bold italic ${dark ? "text-zinc-500" : "text-gray-600"}`}>
                 {t.footer.identity}
               </h4>
               <div className="flex flex-col">
                 <span className="text-2xl font-black tracking-tighter uppercase leading-none">{t.footer.teamName}</span>
                 <span className="text-[10px] uppercase tracking-[0.3em] font-light mt-2">{t.footer.storeLine}</span>
               </div>
-              <p className={`text-[11px] leading-relaxed max-w-xs uppercase tracking-tighter font-medium ${dark ? "text-zinc-400" : "text-gray-500"}`}>
+              <p className={`text-[11px] leading-relaxed max-w-xs uppercase tracking-tighter font-medium ${dark ? "text-zinc-400" : "text-gray-600"}`}>
                 {t.footer.identityText}
               </p>
             </div>
 
             <div className={`space-y-6 border-l md:border-l-0 md:pl-0 pl-6 ${dark ? "border-zinc-800" : "border-gray-100"}`}>
-              <h4 className={`text-[10px] uppercase tracking-[0.4em] font-bold italic ${dark ? "text-zinc-500" : "text-gray-400"}`}>
+              <h4 className={`text-[10px] uppercase tracking-[0.4em] font-bold italic ${dark ? "text-zinc-500" : "text-gray-600"}`}>
                 {t.footer.engineering}
               </h4>
               <ul className="space-y-3">
@@ -681,7 +681,7 @@ export default function HomePage() {
             </div>
 
             <div className="space-y-6">
-              <h4 className={`text-[10px] uppercase tracking-[0.4em] font-bold italic ${dark ? "text-zinc-500" : "text-gray-400"}`}>
+              <h4 className={`text-[10px] uppercase tracking-[0.4em] font-bold italic ${dark ? "text-zinc-500" : "text-gray-600"}`}>
                 {t.footer.navigation}
               </h4>
               <div className="flex flex-col gap-4">
@@ -722,7 +722,7 @@ export default function HomePage() {
           </div>
 
           <div className={`flex flex-col md:flex-row justify-between items-center pt-10 border-t gap-6 ${dark ? "border-zinc-800" : "border-gray-100"}`}>
-            <div className={`text-[9px] uppercase tracking-[0.5em] font-light ${dark ? "text-zinc-500" : "text-gray-400"}`}>
+            <div className={`text-[9px] uppercase tracking-[0.5em] font-light ${dark ? "text-zinc-500" : "text-gray-600"}`}>
               © 2026 <span className={`font-bold ${dark ? "text-white" : "text-black"}`}>Həmid Ağabəyov</span>. {t.footer.rights}
             </div>
 

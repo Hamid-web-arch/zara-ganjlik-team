@@ -55,7 +55,7 @@ export default function TeamSwiper({ collectionName, section, swiperClass, prevC
                 alt={member.name || ""}
                 loading="lazy"
                 decoding="async"
-                className="w-full h-full object-cover transition-all duration-[1000ms] ease-out grayscale-0 scale-105 md:grayscale md:scale-100 md:group-hover:grayscale-0 md:group-hover:scale-105"
+                className="w-full h-full object-cover transition-all duration-[1000ms] ease-out scale-105 md:scale-100 md:group-hover:scale-105"
               />
             </div>
             <div className="space-y-1 transition-transform duration-300 w-full -translate-y-1 md:translate-y-0 md:group-hover:-translate-y-1 flex flex-col items-center justify-center">
