@@ -87,7 +87,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="scroll-smooth">
+    <div>
       <header
         className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 border-b border-solid px-6 md:px-12 ${
           scrolled
