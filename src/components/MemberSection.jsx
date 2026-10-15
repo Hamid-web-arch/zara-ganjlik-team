@@ -28,6 +28,7 @@ export default function MemberSection({ collectionName, heading, entityName }) {
   // Owner accounts aren't sales staff, so the Woman/Men/Kids department doesn't apply.
   const needsSection = collectionName !== "owner";
   const [members, setMembers] = useState([]);
+  const [search, setSearch] = useState("");
   const [form, setForm] = useState(EMPTY_FORM);
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -43,6 +44,7 @@ export default function MemberSection({ collectionName, heading, entityName }) {
 
   useEffect(() => {
     loadMembers();
+    setSearch("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collectionName]);
 
@@ -173,6 +175,13 @@ export default function MemberSection({ collectionName, heading, entityName }) {
   // the buttons from being there to click in the first place.
   const canManageRow = (m) => isGeneralAdmin || m.accessLevel !== "admin";
 
+  const searchQuery = search.trim().toLowerCase();
+  const filteredMembers = searchQuery
+    ? members.filter((m) =>
+        [m.name, m.role, m.idCode, m.email].some((field) => (field || "").toLowerCase().includes(searchQuery))
+      )
+    : members;
+
   return (
     <section className="bg-white border border-zinc-200 p-4 md:p-8 rounded-sm">
       <h2 className="font-sync text-xl font-bold tracking-tighter mb-8 text-zinc-900">{heading}</h2>
@@ -261,10 +270,29 @@ export default function MemberSection({ collectionName, heading, entityName }) {
         </button>
       </form>
 
+      <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
+        <input
+          type="text"
+          placeholder={s.searchPh}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 min-w-[220px] bg-transparent border-b border-zinc-200 py-3 text-[10px] tracking-[0.2em] outline-none focus:border-zinc-900 text-zinc-900 placeholder:text-zinc-400"
+        />
+        {searchQuery && (
+          <span className="text-[9px] uppercase tracking-widest text-zinc-400 whitespace-nowrap">
+            {s.resultsCount.replace("{n}", filteredMembers.length)}
+          </span>
+        )}
+      </div>
+
+      {searchQuery && filteredMembers.length === 0 && (
+        <p className="text-[10px] text-zinc-400 uppercase tracking-widest mb-4">{s.noResults}</p>
+      )}
+
       {/* Mobile: stacked cards — a fixed-layout table can't shrink to a narrow screen without
           truncating every column, so below md this renders as cards instead. */}
       <div className="md:hidden space-y-3 max-h-[400px] overflow-y-auto">
-        {members.map((m) => (
+        {filteredMembers.map((m) => (
           <div key={m.id} className="border border-zinc-200 rounded-sm p-4 space-y-3">
             <div className="flex items-center gap-3">
               <img src={m.image || DEFAULT_AVATAR} className="w-10 h-10 object-cover rounded-full shrink-0" alt="" />
@@ -326,7 +354,7 @@ export default function MemberSection({ collectionName, heading, entityName }) {
             </tr>
           </thead>
           <tbody>
-            {members.map((m) => (
+            {filteredMembers.map((m) => (
               <tr key={m.id} className="group border-b border-zinc-100 hover:bg-zinc-50">
                 <td className="py-4 flex items-center gap-3">
                   <img src={m.image || DEFAULT_AVATAR} className="w-10 h-10 object-cover rounded-full" alt="" />
