@@ -582,66 +582,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* In-Store Digitalization */}
-      <section className="py-32 bg-[#050505] text-white px-6 md:px-20 overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-20 items-center">
-            <div className="space-y-8">
-              <span className="text-[10px] uppercase tracking-[0.5em] text-blue-500 font-bold">{t.digital.eyebrow}</span>
-              <h2 className="text-5xl md:text-6xl font-black uppercase tracking-tighter leading-none">
-                {t.digital.title} <br /> <span className="text-outline font-fashion italic lowercase font-light">{t.digital.titleAccent}</span>
-              </h2>
-              <p className="text-gray-400 font-light leading-relaxed max-w-md">
-                {t.digital.text}
-              </p>
-
-              <div className="space-y-4 pt-6">
-                <div className="flex items-center gap-4 group cursor-help">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full group-hover:scale-150 transition-transform" />
-                  <span className="text-xs uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-opacity">
-                    {t.digital.point1}
-                  </span>
-                </div>
-                <div className="flex items-center gap-4 group cursor-help">
-                  <div className="w-2 h-2 bg-white rounded-full group-hover:scale-150 transition-transform" />
-                  <span className="text-xs uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-opacity">
-                    {t.digital.point2}
-                  </span>
-                </div>
-                <div className="flex items-center gap-4 group cursor-help">
-                  <div className="w-2 h-2 bg-white rounded-full group-hover:scale-150 transition-transform" />
-                  <span className="text-xs uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-opacity">
-                    {t.digital.point3}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative px-10 py-20 glass-card rounded-lg overflow-hidden group">
-              <div className="absolute -top-20 -right-20 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] group-hover:bg-blue-500/20 transition-all duration-700" />
-
-              <div className="relative z-10 space-y-6">
-                <div className="h-1 w-20 bg-blue-500" />
-                <p className="text-sm font-light italic text-gray-300 leading-relaxed">
-                  {t.digital.quote}
-                </p>
-                <div className="pt-4">
-                  <span className="text-[9px] uppercase tracking-[0.4em] text-gray-500">{t.digital.proposedBy}</span>
-                  <p className="text-lg font-bold tracking-tight uppercase">Həmid Ağabəyov</p>
-                </div>
-              </div>
-
-              <div className="absolute bottom-4 right-4 opacity-10 font-mono text-[10px] text-blue-400 select-none">
-                const store = "Zara Genclik"; <br />
-                if (hamid.isCoding) {"{"} <br />
-                &nbsp;&nbsp;efficiency.increase(); <br />
-                {"}"}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* FOOTER */}
       <footer
         className={`pt-24 pb-12 px-6 md:px-20 border-t ${
@@ -649,35 +589,12 @@ export default function HomePage() {
         }`}
       >
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16 mb-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 mb-20">
             <div className="space-y-6">
-              <h4 className={`text-[10px] uppercase tracking-[0.4em] font-bold italic ${dark ? "text-zinc-500" : "text-gray-600"}`}>
-                {t.footer.identity}
-              </h4>
               <div className="flex flex-col">
                 <span className="text-2xl font-black tracking-tighter uppercase leading-none">{t.footer.teamName}</span>
                 <span className="text-[10px] uppercase tracking-[0.3em] font-light mt-2">{t.footer.storeLine}</span>
               </div>
-              <p className={`text-[11px] leading-relaxed max-w-xs uppercase tracking-tighter font-medium ${dark ? "text-zinc-400" : "text-gray-600"}`}>
-                {t.footer.identityText}
-              </p>
-            </div>
-
-            <div className={`space-y-6 border-l md:border-l-0 md:pl-0 pl-6 ${dark ? "border-zinc-800" : "border-gray-100"}`}>
-              <h4 className={`text-[10px] uppercase tracking-[0.4em] font-bold italic ${dark ? "text-zinc-500" : "text-gray-600"}`}>
-                {t.footer.engineering}
-              </h4>
-              <ul className="space-y-3">
-                <li className="text-[10px] uppercase tracking-widest font-bold hover:translate-x-2 transition-transform cursor-default">
-                  {t.footer.builtWith}
-                </li>
-                <li className="text-[10px] uppercase tracking-widest font-bold hover:translate-x-2 transition-transform cursor-default text-blue-500">
-                  {t.footer.reactFirebase}
-                </li>
-                <li className="text-[10px] uppercase tracking-widest font-bold hover:translate-x-2 transition-transform cursor-default">
-                  {t.footer.responsive}
-                </li>
-              </ul>
             </div>
 
             <div className="space-y-6">
@@ -723,7 +640,7 @@ export default function HomePage() {
 
           <div className={`flex flex-col md:flex-row justify-between items-center pt-10 border-t gap-6 ${dark ? "border-zinc-800" : "border-gray-100"}`}>
             <div className={`text-[9px] uppercase tracking-[0.5em] font-light ${dark ? "text-zinc-500" : "text-gray-600"}`}>
-              © 2026 <span className={`font-bold ${dark ? "text-white" : "text-black"}`}>Həmid Ağabəyov</span>. {t.footer.rights}
+              {t.footer.poweredBy} <span className={`font-bold ${dark ? "text-white" : "text-black"}`}>Həmid Ağabəyov</span>
             </div>
 
             <div className="flex flex-col items-end opacity-20 hover:opacity-100 transition duration-1000">
