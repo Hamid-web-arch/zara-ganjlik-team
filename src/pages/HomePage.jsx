@@ -611,29 +611,6 @@ export default function HomePage() {
                 <a href="#moments" className="text-[10px] uppercase tracking-[0.3em] font-medium hover:opacity-50 transition">
                   {t.footer.archive}
                 </a>
-                <div className="pt-4 flex gap-6">
-                  <span
-                    className={`text-[9px] font-black border px-2 py-1 cursor-pointer transition ${
-                      dark ? "border-white hover:bg-white hover:text-black" : "border-black hover:bg-black hover:text-white"
-                    }`}
-                  >
-                    IG
-                  </span>
-                  <span
-                    className={`text-[9px] font-black border px-2 py-1 cursor-pointer transition ${
-                      dark ? "border-white hover:bg-white hover:text-black" : "border-black hover:bg-black hover:text-white"
-                    }`}
-                  >
-                    LN
-                  </span>
-                  <span
-                    className={`text-[9px] font-black border px-2 py-1 cursor-pointer transition ${
-                      dark ? "border-white hover:bg-white hover:text-black" : "border-black hover:bg-black hover:text-white"
-                    }`}
-                  >
-                    GH
-                  </span>
-                </div>
               </div>
             </div>
           </div>
