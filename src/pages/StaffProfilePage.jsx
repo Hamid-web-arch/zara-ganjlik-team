@@ -160,7 +160,7 @@ export default function StaffProfilePage() {
       <div className="max-w-4xl mx-auto p-8 pt-20">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-12">
           <h1 className="font-fashion text-4xl tracking-tighter">{s.myProfile}</h1>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center flex-wrap gap-3">
             <button
               type="button"
               onClick={() => setDark((v) => !v)}
