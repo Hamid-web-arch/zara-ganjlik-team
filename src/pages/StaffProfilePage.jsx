@@ -1,4 +1,4 @@
-import { notify } from "../lib/notify";
+import { notify, confirmAsync } from "../lib/notify";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { updateMember, uploadToCloudinary, forgotPassword, changePassword, updateInetCredentials } from "../lib/api";
@@ -92,6 +92,26 @@ export default function StaffProfilePage() {
     } catch (error) {
       console.error("Xəta detalları:", error);
       notify(s.notify.imageFailed);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    if (!collectionName || !profile) {
+      notify(s.notify.notReady);
+      return;
+    }
+    if (!(await confirmAsync(s.removePhotoConfirm))) return;
+
+    setUploading(true);
+    try {
+      await updateMember(collectionName, profile.uid, { image: null });
+      setProfile((prev) => ({ ...prev, image: null }));
+      notify(s.notify.imageRemoved);
+    } catch (error) {
+      console.error("Xəta detalları:", error);
+      notify(s.notify.imageRemoveFailed);
     } finally {
       setUploading(false);
     }
@@ -216,6 +236,21 @@ export default function StaffProfilePage() {
               <input type="file" onChange={handleUpload} disabled={uploading} className="hidden" />
               <span className="text-[8px] font-bold">{s.edit}</span>
             </label>
+            {profile?.image && (
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                disabled={uploading}
+                title={s.removePhoto}
+                className={`absolute top-0 right-0 p-2 rounded-full cursor-pointer opacity-100 md:opacity-0 md:group-hover:opacity-100 transition disabled:opacity-40 ${
+                  dark ? "bg-white/10 text-white hover:bg-red-500" : "bg-black/10 text-black hover:bg-red-500 hover:text-white"
+                }`}
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
 
           <div className="flex-1 w-full space-y-8">
