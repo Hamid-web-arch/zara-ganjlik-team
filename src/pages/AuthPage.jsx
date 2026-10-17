@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { login, forgotPassword, logout as apiLogout } from "../lib/api";
 import { useAuth } from "../lib/authState";
 import { useLanguage } from "../lib/i18n/languageContext";
+import EyeToggleButton from "../components/EyeToggleButton";
 
 // Colour is not language-specific, so it stays out of the translation tables.
 const ROLE_PULSE = {
@@ -27,6 +28,7 @@ export default function AuthPage() {
   const [role, setRole] = useState(null); // null | "admin" | "staff"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [resetOpen, setResetOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
@@ -196,14 +198,21 @@ export default function AuthPage() {
                     className="w-full bg-transparent border-b border-white/10 py-4 text-[10px] md:text-[11px] tracking-[0.3em] outline-none focus:border-white transition-all placeholder:text-white/20"
                   />
 
-                  <input
-                    type="password"
-                    placeholder={s.password}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-transparent border-b border-white/10 py-4 text-[10px] md:text-[11px] tracking-[0.3em] outline-none focus:border-white transition-all placeholder:text-white/20"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder={s.password}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full bg-transparent border-b border-white/10 py-4 pr-7 text-[10px] md:text-[11px] tracking-[0.3em] outline-none focus:border-white transition-all placeholder:text-white/20"
+                    />
+                    <EyeToggleButton
+                      visible={showPassword}
+                      onToggle={() => setShowPassword((v) => !v)}
+                      className="text-white/30 hover:text-white"
+                    />
+                  </div>
 
                   <label className="flex items-center gap-2.5 text-[9px] uppercase tracking-[0.3em] text-white/40 cursor-pointer select-none">
                     <input

@@ -8,6 +8,7 @@ import { useAuth } from "../lib/authState";
 import StaffSchedule from "../components/StaffSchedule";
 import StaffTrainings from "../components/StaffTrainings";
 import { useLanguage } from "../lib/i18n/languageContext";
+import EyeToggleButton from "../components/EyeToggleButton";
 
 const DEFAULT_AVATAR =
   "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
@@ -24,6 +25,9 @@ export default function StaffProfilePage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
   const [inetEmail, setInetEmail] = useState("");
   const [inetPassword, setInetPassword] = useState("");
@@ -271,42 +275,63 @@ export default function StaffProfilePage() {
             </div>
           ) : (
             <form onSubmit={handleChangePassword} className="space-y-5 max-w-sm">
-              <input
-                type="password"
-                placeholder={s.currentPasswordPh}
-                required
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                className={`w-full bg-transparent border-b py-3 text-[11px] tracking-[0.2em] outline-none transition-colors ${
-                  dark
-                    ? "border-white/10 focus:border-white placeholder:text-white/30"
-                    : "border-gray-300 focus:border-black placeholder:text-gray-400"
-                }`}
-              />
-              <input
-                type="password"
-                placeholder={s.newPasswordPh}
-                required
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className={`w-full bg-transparent border-b py-3 text-[11px] tracking-[0.2em] outline-none transition-colors ${
-                  dark
-                    ? "border-white/10 focus:border-white placeholder:text-white/30"
-                    : "border-gray-300 focus:border-black placeholder:text-gray-400"
-                }`}
-              />
-              <input
-                type="password"
-                placeholder={s.confirmPasswordPh}
-                required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className={`w-full bg-transparent border-b py-3 text-[11px] tracking-[0.2em] outline-none transition-colors ${
-                  dark
-                    ? "border-white/10 focus:border-white placeholder:text-white/30"
-                    : "border-gray-300 focus:border-black placeholder:text-gray-400"
-                }`}
-              />
+              <div className="relative">
+                <input
+                  type={showCurrentPassword ? "text" : "password"}
+                  placeholder={s.currentPasswordPh}
+                  required
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className={`w-full bg-transparent border-b py-3 pr-7 text-[11px] tracking-[0.2em] outline-none transition-colors ${
+                    dark
+                      ? "border-white/10 focus:border-white placeholder:text-white/30"
+                      : "border-gray-300 focus:border-black placeholder:text-gray-400"
+                  }`}
+                />
+                <EyeToggleButton
+                  visible={showCurrentPassword}
+                  onToggle={() => setShowCurrentPassword((v) => !v)}
+                  className={dimHover}
+                />
+              </div>
+              <div className="relative">
+                <input
+                  type={showNewPassword ? "text" : "password"}
+                  placeholder={s.newPasswordPh}
+                  required
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className={`w-full bg-transparent border-b py-3 pr-7 text-[11px] tracking-[0.2em] outline-none transition-colors ${
+                    dark
+                      ? "border-white/10 focus:border-white placeholder:text-white/30"
+                      : "border-gray-300 focus:border-black placeholder:text-gray-400"
+                  }`}
+                />
+                <EyeToggleButton
+                  visible={showNewPassword}
+                  onToggle={() => setShowNewPassword((v) => !v)}
+                  className={dimHover}
+                />
+              </div>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder={s.confirmPasswordPh}
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className={`w-full bg-transparent border-b py-3 pr-7 text-[11px] tracking-[0.2em] outline-none transition-colors ${
+                    dark
+                      ? "border-white/10 focus:border-white placeholder:text-white/30"
+                      : "border-gray-300 focus:border-black placeholder:text-gray-400"
+                  }`}
+                />
+                <EyeToggleButton
+                  visible={showConfirmPassword}
+                  onToggle={() => setShowConfirmPassword((v) => !v)}
+                  className={dimHover}
+                />
+              </div>
               <div className="flex gap-3">
                 <button
                   type="submit"
@@ -364,19 +389,17 @@ export default function StaffProfilePage() {
                 autoComplete="new-password"
                 data-lpignore="true"
                 data-1p-ignore
-                className={`w-full bg-transparent border-b py-3 pr-16 text-[11px] tracking-[0.2em] outline-none transition-colors ${
+                className={`w-full bg-transparent border-b py-3 pr-7 text-[11px] tracking-[0.2em] outline-none transition-colors ${
                   dark
                     ? "border-white/10 focus:border-white placeholder:text-white/30"
                     : "border-gray-300 focus:border-black placeholder:text-gray-400"
                 }`}
               />
-              <button
-                type="button"
-                onClick={() => setShowInetPassword((v) => !v)}
-                className={`absolute right-0 top-1/2 -translate-y-1/2 text-[8px] uppercase tracking-widest ${dimHover}`}
-              >
-                {showInetPassword ? s.inet.hide : s.inet.show}
-              </button>
+              <EyeToggleButton
+                visible={showInetPassword}
+                onToggle={() => setShowInetPassword((v) => !v)}
+                className={dimHover}
+              />
             </div>
             <button
               type="submit"

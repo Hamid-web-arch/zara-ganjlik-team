@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { notify } from "../lib/notify";
 import { resetPassword } from "../lib/api";
 import { useLanguage } from "../lib/i18n/languageContext";
+import EyeToggleButton from "../components/EyeToggleButton";
 
 export default function ResetPasswordPage() {
   const [params] = useSearchParams();
@@ -11,6 +12,8 @@ export default function ResetPasswordPage() {
   const s = t.authPage.resetPasswordPage;
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -51,22 +54,36 @@ export default function ResetPasswordPage() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
-            <input
-              type="password"
-              placeholder={s.newPasswordPh}
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-transparent border-b border-white/10 py-4 text-[11px] tracking-[0.3em] outline-none focus:border-white transition-all placeholder:text-white/20"
-            />
-            <input
-              type="password"
-              placeholder={s.confirmPh}
-              required
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              className="w-full bg-transparent border-b border-white/10 py-4 text-[11px] tracking-[0.3em] outline-none focus:border-white transition-all placeholder:text-white/20"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder={s.newPasswordPh}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-transparent border-b border-white/10 py-4 pr-7 text-[11px] tracking-[0.3em] outline-none focus:border-white transition-all placeholder:text-white/20"
+              />
+              <EyeToggleButton
+                visible={showPassword}
+                onToggle={() => setShowPassword((v) => !v)}
+                className="text-white/30 hover:text-white"
+              />
+            </div>
+            <div className="relative">
+              <input
+                type={showConfirm ? "text" : "password"}
+                placeholder={s.confirmPh}
+                required
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                className="w-full bg-transparent border-b border-white/10 py-4 pr-7 text-[11px] tracking-[0.3em] outline-none focus:border-white transition-all placeholder:text-white/20"
+              />
+              <EyeToggleButton
+                visible={showConfirm}
+                onToggle={() => setShowConfirm((v) => !v)}
+                className="text-white/30 hover:text-white"
+              />
+            </div>
             <button
               type="submit"
               disabled={submitting}

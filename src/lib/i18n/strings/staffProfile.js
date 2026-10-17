@@ -23,8 +23,6 @@ export const staffProfileStrings = {
       desc: "INET proqramındakı email və şifrənizi burada özünüz üçün qeyd edib saxlaya bilərsiniz.",
       emailPh: "INET EMAIL",
       passwordPh: "INET ŞİFRƏ",
-      show: "Göstər",
-      hide: "Gizlət",
       saving: "SAXLANILIR...",
     },
     notify: {
@@ -78,8 +76,6 @@ export const staffProfileStrings = {
       desc: "Save your INET program email and password here for your own reference.",
       emailPh: "INET EMAIL",
       passwordPh: "INET PASSWORD",
-      show: "Show",
-      hide: "Hide",
       saving: "SAVING...",
     },
     notify: {
@@ -133,8 +129,6 @@ export const staffProfileStrings = {
       desc: "Сохраните здесь email и пароль от программы INET для себя.",
       emailPh: "INET EMAIL",
       passwordPh: "ПАРОЛЬ INET",
-      show: "Показать",
-      hide: "Скрыть",
       saving: "СОХРАНЕНИЕ...",
     },
     notify: {

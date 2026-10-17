@@ -9,6 +9,7 @@ import {
 } from "../lib/api";
 import { useAuth } from "../lib/authState";
 import { useLanguage } from "../lib/i18n/languageContext";
+import EyeToggleButton from "./EyeToggleButton";
 
 const DEFAULT_AVATAR =
   "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
@@ -32,6 +33,7 @@ export default function MemberSection({ collectionName, heading, entityName }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [permEditing, setPermEditing] = useState(null); // the admin-level member being configured
   const [permDraft, setPermDraft] = useState([]);
   const [permSaving, setPermSaving] = useState(false);
@@ -204,15 +206,22 @@ export default function MemberSection({ collectionName, heading, entityName }) {
           onChange={handleChange("email")}
           className={`${inputClass} disabled:opacity-40 disabled:cursor-not-allowed`}
         />
-        <input
-          type="password"
-          placeholder={editId ? s.passwordLocked : s.password}
-          disabled={!!editId}
-          title={editId ? s.passwordTitle : undefined}
-          value={form.password}
-          onChange={handleChange("password")}
-          className="bg-transparent border-b border-zinc-200 py-3 text-[10px] tracking-[0.2em] outline-none focus:border-zinc-900 text-zinc-900 placeholder:text-zinc-400 disabled:opacity-40 disabled:cursor-not-allowed"
-        />
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder={editId ? s.passwordLocked : s.password}
+            disabled={!!editId}
+            title={editId ? s.passwordTitle : undefined}
+            value={form.password}
+            onChange={handleChange("password")}
+            className="w-full bg-transparent border-b border-zinc-200 py-3 pr-7 text-[10px] tracking-[0.2em] outline-none focus:border-zinc-900 text-zinc-900 placeholder:text-zinc-400 disabled:opacity-40 disabled:cursor-not-allowed"
+          />
+          <EyeToggleButton
+            visible={showPassword}
+            onToggle={() => setShowPassword((v) => !v)}
+            className="text-zinc-400 hover:text-zinc-900"
+          />
+        </div>
         <div className="relative border-b border-zinc-200 focus-within:border-zinc-900">
           <select
             required
