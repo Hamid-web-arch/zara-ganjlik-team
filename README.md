@@ -1,16 +1,26 @@
-# React + Vite
+# Zara Ganjlik — Staff Portal
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Internal staff portal for Zara Ganjlik Mall: schedules, trainings, briefings,
+moments feed, and admin tools for managing crew/staff/owner accounts.
 
-Currently, two official plugins are available:
+- **Frontend:** `frontend/` — React + Vite + Tailwind v4 (see `index.html` for the entry point)
+- **Backend:** `backend/` — Vercel serverless functions + Postgres (Neon). `api/` only holds
+  thin re-export shims required by Vercel's routing — edit `backend/` for actual logic.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+See [`PROGRESS.md`](PROGRESS.md) for the backend architecture and setup steps.
 
-## React Compiler
+## Local development
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```
+npm install
+npx vercel dev
+```
 
-## Expanding the Oxlint configuration
+`npm run dev` only starts Vite — the `/api` functions won't respond. Use `vercel dev`
+for full-stack local development.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Build
+
+```
+npm run build
+```
