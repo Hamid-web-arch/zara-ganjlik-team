@@ -85,7 +85,10 @@ export default function StaffProfilePage() {
     setUploading(true);
 
     try {
-      const imageUrl = await uploadToCloudinary(file, "avatar");
+      const rawUrl = await uploadToCloudinary(file, "avatar");
+      // Phone cameras often save photos as HEIC, which Chrome/Firefox can't render in
+      // an <img> tag — f_auto lets Cloudinary serve a format the viewer's browser supports.
+      const imageUrl = rawUrl.replace("/upload/", "/upload/f_auto,q_auto/");
       await updateMember(collectionName, profile.uid, { image: imageUrl });
       setProfile((prev) => ({ ...prev, image: imageUrl }));
       notify(s.notify.imageUpdated);
@@ -233,7 +236,13 @@ export default function StaffProfilePage() {
                 dark ? "bg-white text-black" : "bg-black text-white"
               }`}
             >
-              <input type="file" onChange={handleUpload} disabled={uploading} className="hidden" />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleUpload}
+                disabled={uploading}
+                className="hidden"
+              />
               <span className="text-[8px] font-bold">{s.edit}</span>
             </label>
             {profile?.image && (
