@@ -90,82 +90,137 @@ export default function StaffSchedule({ employeeName, dark = true }) {
 
       {schedule === null && <p className={`text-[10px] uppercase tracking-widest ${dim30}`}>{s.notUploaded}</p>}
 
-      {schedule && (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[760px]">
-            <thead>
-              <tr className={`border-b text-[8px] uppercase tracking-[0.2em] ${dark ? "border-white/10" : "border-gray-200"} ${dim30}`}>
-                <th className={`pt-2 pb-3 pl-2 pr-4 sticky left-0 ${stickyBg}`}>{s.day}</th>
-                {HOURS.map((h) => (
-                  <th key={h} className="pb-3 px-1 text-center font-normal">
-                    {String(h).padStart(2, "0")}
-                  </th>
-                ))}
-                <th className="pb-3 pl-4 pr-2 text-right">{s.sum}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {DAY_KEYS.map((key) => {
-                const day = schedule.days?.[key];
-                const hasHours = (day?.hours?.length || 0) > 0;
-                const totalNum = Number(day?.total);
-                const workedButUndetailed = !hasHours && totalNum > 0;
-                const showRestRow = !hasHours && !workedButUndetailed;
-                const note = day?.note
-                  ? getNoteInfo(day.note, s.notes, dark)
-                  : showRestRow
-                  ? { label: s.notes.off, className: dim40 }
-                  : null;
+      {schedule &&
+        (() => {
+          // Computed once per day and shared by both the desktop table and the mobile
+          // card list below, so the two views can never disagree on what a day shows.
+          const rows = DAY_KEYS.map((key) => {
+            const day = schedule.days?.[key];
+            const hasHours = (day?.hours?.length || 0) > 0;
+            const totalNum = Number(day?.total);
+            const workedButUndetailed = !hasHours && totalNum > 0;
+            const showRestRow = !hasHours && !workedButUndetailed;
+            const note = day?.note
+              ? getNoteInfo(day.note, s.notes, dark)
+              : showRestRow
+              ? { label: s.notes.off, className: dim40 }
+              : null;
+            return { key, day, hasHours, workedButUndetailed, showRestRow, note };
+          });
 
-                return (
-                  <tr
+          return (
+            <>
+              {/* Tablet and up: the full hour-by-hour grid, scrollable if it's narrower than 760px. */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[760px]">
+                  <thead>
+                    <tr className={`border-b text-[8px] uppercase tracking-[0.2em] ${dark ? "border-white/10" : "border-gray-200"} ${dim30}`}>
+                      <th className={`pt-2 pb-3 pl-2 pr-4 sticky left-0 ${stickyBg}`}>{s.day}</th>
+                      {HOURS.map((h) => (
+                        <th key={h} className="pb-3 px-1 text-center font-normal">
+                          {String(h).padStart(2, "0")}
+                        </th>
+                      ))}
+                      <th className="pb-3 pl-4 pr-2 text-right">{s.sum}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map(({ key, day, workedButUndetailed, showRestRow, note }) => (
+                      <tr
+                        key={key}
+                        className={`border-b ${dark ? "border-white/5" : "border-gray-200/70"} ${
+                          showRestRow ? (dark ? "bg-white/[0.02]" : "bg-black/[0.02]") : ""
+                        }`}
+                      >
+                        <td className={`py-3 pl-2 pr-4 text-[10px] whitespace-nowrap sticky left-0 ${dim70} ${stickyBg}`}>
+                          {s.days[key]}
+                          {note && (
+                            <span className={`block text-[8px] uppercase tracking-widest mt-0.5 ${note.className}`}>
+                              {note.label}
+                            </span>
+                          )}
+                        </td>
+                        {workedButUndetailed ? (
+                          <td colSpan={HOURS.length} className={`py-3 px-2 text-center text-[8px] italic ${dim30}`}>
+                            {s.noBreakdown}
+                          </td>
+                        ) : showRestRow ? (
+                          <td colSpan={HOURS.length} className={`py-3 px-2 text-center text-[8px] ${dark ? "text-white/20" : "text-gray-300"}`}>
+                            {s.restDay}
+                          </td>
+                        ) : (
+                          HOURS.map((h) => {
+                            const cell = day?.hours?.find((x) => x.hour === h);
+                            return (
+                              <td key={h} className="py-3 px-1 text-center text-[8px]">
+                                {cell ? (
+                                  <span className={`uppercase whitespace-nowrap ${getCodeClassName(cell.code, dark)}`}>
+                                    {cell.code}
+                                  </span>
+                                ) : (
+                                  <span className={dark ? "text-white/10" : "text-gray-200"}>–</span>
+                                )}
+                              </td>
+                            );
+                          })
+                        )}
+                        <td className={`py-3 pl-4 pr-2 text-right text-[10px] ${dim70}`}>
+                          {day?.total !== "" && day?.total != null ? day.total : "-"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Below tablet: a 16-column grid doesn't fit a phone screen, so each day
+                  becomes its own card listing only the hours it actually has. */}
+              <div className="md:hidden space-y-2">
+                {rows.map(({ key, day, hasHours, workedButUndetailed, showRestRow, note }) => (
+                  <div
                     key={key}
-                    className={`border-b ${dark ? "border-white/5" : "border-gray-200/70"} ${
+                    className={`p-3 rounded-sm border ${dark ? "border-white/5" : "border-gray-200/70"} ${
                       showRestRow ? (dark ? "bg-white/[0.02]" : "bg-black/[0.02]") : ""
                     }`}
                   >
-                    <td className={`py-3 pl-2 pr-4 text-[10px] whitespace-nowrap sticky left-0 ${dim70} ${stickyBg}`}>
-                      {s.days[key]}
-                      {note && (
-                        <span className={`block text-[8px] uppercase tracking-widest mt-0.5 ${note.className}`}>
-                          {note.label}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`text-[10px] ${dim70}`}>{s.days[key]}</span>
+                      {day?.total !== "" && day?.total != null && (
+                        <span className={`text-[9px] uppercase tracking-widest ${dim40}`}>
+                          {s.sum}: {day.total}
                         </span>
                       )}
-                    </td>
-                    {workedButUndetailed ? (
-                      <td colSpan={HOURS.length} className={`py-3 px-2 text-center text-[8px] italic ${dim30}`}>
-                        {s.noBreakdown}
-                      </td>
-                    ) : showRestRow ? (
-                      <td colSpan={HOURS.length} className={`py-3 px-2 text-center text-[8px] ${dark ? "text-white/20" : "text-gray-300"}`}>
-                        {s.restDay}
-                      </td>
-                    ) : (
-                      HOURS.map((h) => {
-                        const cell = day?.hours?.find((x) => x.hour === h);
-                        return (
-                          <td key={h} className="py-3 px-1 text-center text-[8px]">
-                            {cell ? (
-                              <span className={`uppercase whitespace-nowrap ${getCodeClassName(cell.code, dark)}`}>
-                                {cell.code}
-                              </span>
-                            ) : (
-                              <span className={dark ? "text-white/10" : "text-gray-200"}>–</span>
-                            )}
-                          </td>
-                        );
-                      })
+                    </div>
+                    {note && (
+                      <span className={`block text-[8px] uppercase tracking-widest mt-1 ${note.className}`}>
+                        {note.label}
+                      </span>
                     )}
-                    <td className={`py-3 pl-4 pr-2 text-right text-[10px] ${dim70}`}>
-                      {day?.total !== "" && day?.total != null ? day.total : "-"}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+                    {workedButUndetailed && <p className={`text-[8px] italic mt-2 ${dim30}`}>{s.noBreakdown}</p>}
+                    {showRestRow && (
+                      <p className={`text-[8px] mt-2 ${dark ? "text-white/20" : "text-gray-300"}`}>{s.restDay}</p>
+                    )}
+                    {hasHours && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {day.hours.map((cell) => (
+                          <span
+                            key={cell.hour}
+                            className={`text-[9px] px-1.5 py-0.5 rounded-sm border whitespace-nowrap ${
+                              dark ? "border-white/10" : "border-gray-200"
+                            }`}
+                          >
+                            <span className={dim40}>{String(cell.hour).padStart(2, "0")}:00</span>{" "}
+                            <span className={`uppercase ${getCodeClassName(cell.code, dark)}`}>{cell.code}</span>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
+          );
+        })()}
     </div>
   );
 }
