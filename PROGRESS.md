@@ -6,17 +6,21 @@ yükləmələri əvvəlki kimi birbaşa Cloudinary-ə gedir (dəyişməyib).
 
 ## Memarlıq
 
+- **Qovluq quruluşu:** frontend və backend ayrı qovluqlardadır —
+  - `frontend/` — bütün React kodu (əvvəlki `src/`)
+  - `backend/` — bütün server kodu: `_db.js`/`_auth.js` ortaq köməkçilər, `auth.js`,
+    `router.js`, `cloudinary-signature.js`, `schema.sql`, `scripts/`
+  - `api/` — yalnız 3 nazik fayl (`auth.js`, `router.js`, `cloudinary-signature.js`), hər
+    biri `backend/`-dəki əsl kodu `export { default } from "../backend/..."` ilə yenidən
+    ixrac edir. Bu qovluq görünməz qalmır, çünki **Vercel yalnız kök qovluqdakı `/api/`
+    içindəki faylları Serverless Function kimi tanıyır** — başqa yerə köçürülsə, endpoint-lər
+    işləməyi dayandırar. Əsl məntiqi dəyişmək üçün həmişə `backend/`-dəki faylı redaktə edin.
 - **Verilənlər bazası:** Postgres, Neon (`@neondatabase/serverless` — HTTP əsaslı, Vercel-in
-  qısa ömürlü funksiyaları üçün uyğun). Sxem: [`db/schema.sql`](db/schema.sql).
-- **Backend:** `api/` qovluğunda yığcam fayllar (hər endpoint üçün ayrı fayl yox):
-  - `api/_db.js`, `api/_auth.js` — ortaq köməkçilər
-  - `api/auth.js` — login/refresh/logout/forgot-password/reset-password/me
-  - `api/[...route].js` — members, moments, comments, briefings, settings, schedule
-  - `api/cloudinary-signature.js` — media yükləmə üçün imza
+  qısa ömürlü funksiyaları üçün uyğun). Sxem: [`backend/schema.sql`](backend/schema.sql).
 - **Autentifikasiya:** qısa ömürlü JWT access token (yaddaşda saxlanılır) + httpOnly
   cookie-də refresh token (30 gün, hər istifadədə yenilənir/rotasiya olunur). Şifrələr
   `bcryptjs` ilə hash-lənir.
-- **Frontend:** `src/lib/api.js` (Firebase SDK-nı əvəz edir) + `src/lib/authContext.jsx` /
+- **Frontend:** `frontend/lib/api.js` (Firebase SDK-nı əvəz edir) + `frontend/lib/authContext.jsx` /
   `authState.js` (React context). `useAuthGuard` hook-u köhnə formasını saxlayır, ona görə
   əksər səhifə kodu dəyişmədi.
 - **Real-time → polling:** Firestore-un canlı yenilənməsi (onSnapshot) sorğu-əsaslı
@@ -27,8 +31,8 @@ yükləmələri əvvəlki kimi birbaşa Cloudinary-ə gedir (dəyişməyib).
 1. **Neon bazası yaradın:** Vercel → layihə → **Storage** tab → **Create Database** →
    **Neon**. `DATABASE_URL` avtomatik əlavə olunacaq.
 2. **Sxemi tətbiq edin:** Vercel Storage-dəki Neon panelindən **SQL Editor**-u açın (və ya
-   `psql "$DATABASE_URL" -f db/schema.sql`) və [`db/schema.sql`](db/schema.sql) faylının
-   tam məzmununu işlədin.
+   `psql "$DATABASE_URL" -f backend/schema.sql`) və [`backend/schema.sql`](backend/schema.sql)
+   faylının tam məzmununu işlədin.
 3. **Env dəyişənləri əlavə edin** (Vercel → Settings → Environment Variables):
    - `JWT_SECRET` — təsadüfi uzun sətir: `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`
    - `RESEND_API_KEY`, `EMAIL_FROM` — [resend.com](https://resend.com) (parol bərpası
@@ -40,7 +44,7 @@ yükləmələri əvvəlki kimi birbaşa Cloudinary-ə gedir (dəyişməyib).
    qrafik): lokal olaraq
    ```
    npm install --no-save firebase-admin
-   node scripts/migrate-from-firestore.mjs
+   node backend/scripts/migrate-from-firestore.mjs
    ```
    Firebase service account açarı (`FIREBASE_PROJECT_ID`/`CLIENT_EMAIL`/`PRIVATE_KEY`) və
    yeni `DATABASE_URL` `.env.local`-da olmalıdır. Script sonda hər köçürülmüş hesab üçün
