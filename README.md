@@ -1,15 +1,22 @@
+<div align="center">
+
 # Zara Ganjlik — Staff Portal
 
 Internal staff portal for **Zara Ganjlik Mall** — schedules, trainings, briefings, a team
 moments feed, and admin tools for managing crew, staff, and owner accounts.
 
-**Live:** [zara-react.vercel.app](https://zara-react.vercel.app)
+[**Live Site →**](https://zara-react.vercel.app)
 
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-Serverless-000000?logo=vercel&logoColor=white)
 ![Postgres](https://img.shields.io/badge/Postgres-Neon-4169E1?logo=postgresql&logoColor=white)
+![JWT](https://img.shields.io/badge/Auth-JWT-000000?logo=jsonwebtokens&logoColor=white)
+
+</div>
+
+---
 
 ## Features
 
@@ -19,6 +26,8 @@ moments feed, and admin tools for managing crew, staff, and owner accounts.
 - Admin panel for managing crew, staff, and owner accounts, with per-section permissions
 - Email-based password reset, forced password change for new accounts
 - Multi-language UI (Azerbaijani, English, Russian), light/dark theme
+
+---
 
 ## Project structure
 
@@ -30,6 +39,8 @@ moments feed, and admin tools for managing crew, staff, and owner accounts.
   satisfy that requirement — edit `backend/` for actual logic.
 
 See [`PROGRESS.md`](PROGRESS.md) for the backend architecture and database setup steps.
+
+---
 
 ## Local development
 
